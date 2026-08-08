@@ -1,0 +1,29 @@
+{
+  "name": "backend-solid",
+  "version": "1.0.0",
+  "description": "el backend con una arquitectura mejor",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Proyecto-Equipo-6/backend-solid.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Proyecto-Equipo-6/backend-solid/issues"
+  },
+  "homepage": "https://github.com/Proyecto-Equipo-6/backend-solid#readme",
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "jest": "^30.4.2",
+    "supertest": "^7.2.2"
+  }
+}
