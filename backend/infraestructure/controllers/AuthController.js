@@ -1,0 +1,30 @@
+/**
+ * Adaptador de Infraestructura: AuthController
+ * Maneja las peticiones HTTP de autenticación y las delega al Caso de Uso.
+ */
+class AuthController {
+  constructor(loginUseCase) {
+    this.loginUseCase = loginUseCase;
+  }
+
+  async login(req, res) {
+    try {
+      const { token, usuario } = await this.loginUseCase.execute(req.body);
+
+      const duracionMinutos = Number(process.env.JWT_EXPIRES_IN_MIN) || 30;
+      res.cookie('token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: duracionMinutos * 60 * 1000,
+      });
+
+      return res.status(200).json({ usuario });
+    } catch (error) {
+      const status = error.status || 401;
+      return res.status(status).json({ error: error.message });
+    }
+  }
+}
+
+module.exports = AuthController;

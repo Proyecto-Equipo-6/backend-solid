@@ -10,6 +10,9 @@ const MySQLRolesRepository = require('./backend/infraestructure/repositories/mys
 const UpdateRolUseCase = require('./backend/application/UpdateRolUseCase');
 const AdminUpdateRolController = require('./backend/infraestructure/controllers/AdminUpdateRolController');
 const createRolRouter = require('./backend/infraestructure/routes/rolRoutes');
+const LoginUseCase = require('./backend/application/LoginUseCase');
+const AuthController = require('./backend/infraestructure/controllers/AuthController');
+const createAuthRouter = require('./backend/infraestructure/routes/authRoutes');
 
 const app = express();
 app.disable('x-powered-by');
@@ -32,9 +35,18 @@ const rolesRepository = new MySQLRolesRepository();
 const updateRolUseCase = new UpdateRolUseCase(rolesRepository);
 const adminUpdateRolController = new AdminUpdateRolController(updateRolUseCase);
 
+// --- Inyección de Dependencias para Autenticación (DIP) ---
+const loginUseCase = new LoginUseCase(
+  userRepository,
+  process.env.JWT_SECRET,
+  process.env.JWT_EXPIRES_IN
+);
+const authController = new AuthController(loginUseCase);
+
 // --- Rutas (Cargadas como Middleware) ---
 app.use('/api/v1/users', createUserRouter(userController));
 app.use('/api/v1/roles', createRolRouter(adminUpdateRolController));
+app.use('/api/v1/auth', createAuthRouter(authController));
 
 // --- 404 ---
 app.use((req, res) => {
