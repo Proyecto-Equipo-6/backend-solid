@@ -4,6 +4,10 @@ class Rol {
     this.name = name;
     this.description = description;
   }
+
+  isValid() {
+    return Boolean(this.id && this.name && this.name.length <= 30);
+  }
 }
 
 module.exports = Rol;

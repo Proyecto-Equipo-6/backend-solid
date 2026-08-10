@@ -9,11 +9,11 @@ class UserController {
 
   async create(req, res) {
     try {
-      const { id, name, email } = req.body;
-      const user = await this.createUserUseCase.execute({ id, name, email });
+      const user = await this.createUserUseCase.execute(req.body);
       return res.status(201).json(user);
     } catch (error) {
-      return res.status(400).json({ error: error.message });
+      const status = error.status || 400;
+      return res.status(status).json({ error: error.message });
     }
   }
 }

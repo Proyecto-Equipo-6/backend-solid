@@ -11,6 +11,10 @@ class UserRepository {
   async findByEmail(email) {
     throw new Error("Método 'findByEmail' no implementado");
   }
+
+  async findByNumeroDocumento(numeroDocumento) {
+    throw new Error("Método 'findByNumeroDocumento' no implementado");
+  }
 }
 
 module.exports = UserRepository;

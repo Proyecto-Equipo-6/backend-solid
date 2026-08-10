@@ -1,18 +1,16 @@
-const UserRepository = require('../../domain/ports/UserRepository');
-const db = require('../database/db'); // Tu conexión
+require('dotenv').config();
+const mysql = require('mysql2/promise');
 
-class MySQLUserRepository extends UserRepository {
-    async save(user) {
-        // Aquí metes tu SQL / consulta
-        const query = 'INSERT INTO users (name, email, password) VALUES (?, ?, ?)';
-        await db.execute(query, [user.name, user.email, user.password]);
-    }
+const pool = mysql.createPool({
+  host: process.env.DB_HOST || '127.0.0.1',
+  port: Number(process.env.DB_PORT) || 3306,
+  user: process.env.DB_USER || 'root',
+  password: process.env.DB_PASSWORD || '',
+  database: process.env.DB_NAME || 'sistema_comercial',
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0,
+  charset: 'utf8mb4_unicode_ci'
+});
 
-    async findByEmail(email) {
-        const query = 'SELECT * FROM users WHERE email = ? LIMIT 1';
-        const [rows] = await db.execute(query, [email]);
-        return rows[0] || null;
-    }
-}
-
-module.exports = MySQLUserRepository;
+module.exports = pool;

@@ -1,4 +1,4 @@
-const RolesRepository = require("../../domain/ports/RolesRepository");
+const RolesRepository = require("../../../domain/ports/RolesRepository");
 
 class InMemoryRolesRepository extends RolesRepository {
     constructor() {

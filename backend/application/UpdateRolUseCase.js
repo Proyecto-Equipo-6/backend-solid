@@ -12,6 +12,9 @@ class UpdateRolUseCase {
 
     async execute({ id, name, description }) {
         const rol = new Rol(id, name, description);
+        if (!rol.isValid()) {
+            throw new Error('Datos de rol inválidos.');
+        }
         return await this.rolesRepository.update(rol);
     }
 }

@@ -37,7 +37,6 @@ ORDER BY p.fecha_pedido DESC;
 
 -- =====================================================
 -- 2. REPORTE DE INVENTARIO Y DISPONIBILIDAD
--- (Alineado con sku, razon_social y stock actual)
 -- =====================================================
 SELECT 
     p.id_producto                                           AS ID,
@@ -64,7 +63,6 @@ ORDER BY p.stock ASC, p.nombre ASC;
 
 -- =====================================================
 -- 3. SEGURIDAD, USUARIOS Y ROLES
--- (Alineado con id_rol y nombre_apellido)
 -- =====================================================
 SELECT 
     u.id_usuario                                            AS ID_Usuario,
@@ -83,8 +81,7 @@ ORDER BY r.nombre ASC, u.nombre_apellido ASC;
 
 
 -- =====================================================
--- 4. ESTADO ACTUAL DE CARRITOS DE COMPRA (ABANDONADOS/ACTIVOS)
--- (Actualizado con la estructura carrito + carrito_detalles)
+-- 4. ESTADO ACTUAL DE CARRITOS DE COMPRA
 -- =====================================================
 SELECT 
     c.id_carrito                                            AS ID_Carrito,
@@ -110,8 +107,7 @@ ORDER BY c.fecha_actualizacion DESC;
 
 
 -- =====================================================
--- 5. LOGS Y AUDITORÍA DE MOVIMIENTOS DE INVENTARIO (NUEVA)
--- (Permite rastrear qué administrador modificó el stock)
+-- 5. LOGS Y AUDITORÍA DE MOVIMIENTOS DE INVENTARIO
 -- =====================================================
 SELECT 
     h.id_historial                                          AS ID_Log,
@@ -130,8 +126,7 @@ ORDER BY h.fecha_registro DESC;
 
 
 -- =====================================================
--- 6. AUDITORÍA DE SEGURIDAD: TOKENS DE RECUPERACIÓN (NUEVA)
--- (Monitorea intentos de restablecimiento de contraseña)
+-- 6. AUDITORÍA DE SEGURIDAD: TOKENS DE RECUPERACIÓN
 -- =====================================================
 SELECT 
     t.id_token                                              AS ID_Token,
@@ -150,8 +145,7 @@ ORDER BY t.fecha_creacion DESC;
 
 
 -- =====================================================
--- 7. RESUMEN EJECUTIVO / METRICAS DE VENTAS POR CATEGORÍA (NUEVA)
--- (Consolidado de ventas e ingresos acumulados)
+-- 7. RESUMEN EJECUTIVO / METRICAS DE VENTAS POR CATEGORÍA
 -- =====================================================
 SELECT 
     c.nombre                                                AS Categoria,

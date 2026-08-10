@@ -1,4 +1,4 @@
-const UserRepository = require('../../domain/ports/UserRepository');
+const UserRepository = require('../../../domain/ports/UserRepository');
 
 /**
  * Adaptador de Infraestructura: InMemoryUserRepository
@@ -18,6 +18,10 @@ class InMemoryUserRepository extends UserRepository {
 
   async findByEmail(email) {
     return this.users.find(user => user.email === email) || null;
+  }
+
+  async findByNumeroDocumento(numeroDocumento) {
+    return this.users.find(user => user.numero_documento === numeroDocumento) || null;
   }
 }
 
