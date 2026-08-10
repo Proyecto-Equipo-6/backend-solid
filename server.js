@@ -13,10 +13,19 @@ const createRolRouter = require('./backend/infraestructure/routes/rolRoutes');
 const LoginUseCase = require('./backend/application/LoginUseCase');
 const AuthController = require('./backend/infraestructure/controllers/AuthController');
 const createAuthRouter = require('./backend/infraestructure/routes/authRoutes');
+const SolicitarRecuperacionUseCase = require('./backend/application/SolicitarRecuperacionUseCase');
+const RestablecerContrasenaUseCase = require('./backend/application/RestablecerContrasenaUseCase');
+const MySQLTokensRecuperacionRepository = require('./backend/infraestructure/repositories/mysql/MySQLTokensRecuperacionRepository');
+const SmtpEmailSender = require('./backend/infraestructure/services/SmtpEmailSender');
 
 const app = express();
 app.disable('x-powered-by');
-app.use(cors());
+app.use(
+  cors({
+    origin: process.env.CORS_ORIGIN || true,
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use(cookieParser());
 
@@ -41,7 +50,25 @@ const loginUseCase = new LoginUseCase(
   process.env.JWT_SECRET,
   process.env.JWT_EXPIRES_IN
 );
-const authController = new AuthController(loginUseCase);
+
+// --- Inyección de Dependencias para Recuperación de Contraseña (DIP) ---
+const tokensRecuperacionRepository = new MySQLTokensRecuperacionRepository();
+const emailSender = new SmtpEmailSender();
+const solicitarRecuperacionUseCase = new SolicitarRecuperacionUseCase(
+  userRepository,
+  tokensRecuperacionRepository,
+  emailSender
+);
+const restablecerContrasenaUseCase = new RestablecerContrasenaUseCase(
+  userRepository,
+  tokensRecuperacionRepository
+);
+
+const authController = new AuthController(
+  loginUseCase,
+  solicitarRecuperacionUseCase,
+  restablecerContrasenaUseCase
+);
 
 // --- Rutas (Cargadas como Middleware) ---
 app.use('/api/v1/users', createUserRouter(userController));

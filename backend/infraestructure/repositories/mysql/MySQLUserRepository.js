@@ -32,6 +32,18 @@ class MySQLUserRepository extends UserRepository {
     const [rows] = await pool.execute(query, [numeroDocumento]);
     return rows[0] || null;
   }
+
+  async findById(id) {
+    const query = 'SELECT * FROM usuarios WHERE id_usuario = ? LIMIT 1';
+    const [rows] = await pool.execute(query, [id]);
+    return rows[0] || null;
+  }
+
+  async updatePassword(id, passwordHash) {
+    const query = 'UPDATE usuarios SET password = ? WHERE id_usuario = ?';
+    const [result] = await pool.execute(query, [passwordHash, id]);
+    return result.affectedRows > 0;
+  }
 }
 
 module.exports = MySQLUserRepository;

@@ -23,6 +23,17 @@ class InMemoryUserRepository extends UserRepository {
   async findByNumeroDocumento(numeroDocumento) {
     return this.users.find(user => user.numero_documento === numeroDocumento) || null;
   }
+
+  async findById(id) {
+    return this.users.find(user => (user.id_usuario ?? user.id) === id) || null;
+  }
+
+  async updatePassword(id, passwordHash) {
+    const user = await this.findById(id);
+    if (!user) return false;
+    user.password = passwordHash;
+    return true;
+  }
 }
 
 module.exports = InMemoryUserRepository;
