@@ -23,6 +23,10 @@ class UserRepository {
   async updatePassword(id, passwordHash) {
     throw new Error("Método 'updatePassword' no implementado");
   }
+
+  async updatePerfil(id, datos) {
+    throw new Error("Método 'updatePerfil' no implementado");
+  }
 }
 
 module.exports = UserRepository;

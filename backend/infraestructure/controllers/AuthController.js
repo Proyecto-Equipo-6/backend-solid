@@ -33,6 +33,7 @@ class AuthController {
       res.clearCookie('token');
       return res.status(200).json({ mensaje: 'Sesión cerrada correctamente' });
     } catch (error) {
+      console.error('Error al cerrar la sesión:', error);
       return res.status(500).json({ error: 'Error al cerrar la sesión' });
     }
   }

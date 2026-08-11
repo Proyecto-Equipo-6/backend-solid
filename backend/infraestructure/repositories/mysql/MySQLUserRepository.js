@@ -44,6 +44,22 @@ class MySQLUserRepository extends UserRepository {
     const [result] = await pool.execute(query, [passwordHash, id]);
     return result.affectedRows > 0;
   }
+
+  async updatePerfil(id, { nombre_apellido, email, telefono, direccion }) {
+    const query = `
+      UPDATE usuarios
+      SET nombre_apellido = ?, email = ?, telefono = ?, direccion = ?
+      WHERE id_usuario = ?
+    `;
+    const [result] = await pool.execute(query, [
+      nombre_apellido,
+      email,
+      telefono,
+      direccion,
+      id,
+    ]);
+    return result.affectedRows > 0;
+  }
 }
 
 module.exports = MySQLUserRepository;

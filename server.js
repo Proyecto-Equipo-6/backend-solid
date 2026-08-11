@@ -17,6 +17,18 @@ const SolicitarRecuperacionUseCase = require('./backend/application/SolicitarRec
 const RestablecerContrasenaUseCase = require('./backend/application/RestablecerContrasenaUseCase');
 const MySQLTokensRecuperacionRepository = require('./backend/infraestructure/repositories/mysql/MySQLTokensRecuperacionRepository');
 const SmtpEmailSender = require('./backend/infraestructure/services/SmtpEmailSender');
+const MySQLProductoRepository = require('./backend/infraestructure/repositories/mysql/MySQLProductoRepository');
+const ListarProductosPublicosUseCase = require('./backend/application/ListarProductosPublicosUseCase');
+const ObtenerProductoPublicoUseCase = require('./backend/application/ObtenerProductoPublicoUseCase');
+const ProductoController = require('./backend/infraestructure/controllers/ProductoController');
+const createProductoRouter = require('./backend/infraestructure/routes/productoRoutes');
+const MySQLCategoriaRepository = require('./backend/infraestructure/repositories/mysql/MySQLCategoriaRepository');
+const ListarCategoriasUseCase = require('./backend/application/ListarCategoriasUseCase');
+const CategoriaController = require('./backend/infraestructure/controllers/CategoriaController');
+const createCategoriaRouter = require('./backend/infraestructure/routes/categoriaRoutes');
+const ObtenerPerfilUseCase = require('./backend/application/ObtenerPerfilUseCase');
+const ActualizarPerfilUseCase = require('./backend/application/ActualizarPerfilUseCase');
+const crearAutenticador = require('./backend/infraestructure/middlewares/autenticacion');
 
 const app = express();
 app.disable('x-powered-by');
@@ -36,8 +48,17 @@ const userRepository = new MySQLUserRepository();
 // 2. Inicializamos el caso de uso inyectándole su dependencia (el Repositorio)
 const createUserUseCase = new CreateUserUseCase(userRepository);
 
+// --- Inyección de Dependencias para el Perfil (CU-004/CU-005, DIP) ---
+const obtenerPerfilUseCase = new ObtenerPerfilUseCase(userRepository);
+const actualizarPerfilUseCase = new ActualizarPerfilUseCase(userRepository);
+const autenticar = crearAutenticador(process.env.JWT_SECRET);
+
 // 3. Inicializamos el controlador inyectándole el caso de uso
-const userController = new UserController(createUserUseCase);
+const userController = new UserController(
+  createUserUseCase,
+  obtenerPerfilUseCase,
+  actualizarPerfilUseCase
+);
 
 // --- Inyección de Dependencias para Roles (DIP) ---
 const rolesRepository = new MySQLRolesRepository();
@@ -70,10 +91,26 @@ const authController = new AuthController(
   restablecerContrasenaUseCase
 );
 
+// --- Inyección de Dependencias para el Catálogo de Productos (DIP) ---
+const productoRepository = new MySQLProductoRepository();
+const listarProductosUseCase = new ListarProductosPublicosUseCase(productoRepository);
+const obtenerProductoUseCase = new ObtenerProductoPublicoUseCase(productoRepository);
+const productoController = new ProductoController(
+  listarProductosUseCase,
+  obtenerProductoUseCase
+);
+
+// --- Inyección de Dependencias para Categorías (DIP) ---
+const categoriaRepository = new MySQLCategoriaRepository();
+const listarCategoriasUseCase = new ListarCategoriasUseCase(categoriaRepository);
+const categoriaController = new CategoriaController(listarCategoriasUseCase);
+
 // --- Rutas (Cargadas como Middleware) ---
-app.use('/api/v1/users', createUserRouter(userController));
+app.use('/api/v1/users', createUserRouter(userController, autenticar));
 app.use('/api/v1/roles', createRolRouter(adminUpdateRolController));
 app.use('/api/v1/auth', createAuthRouter(authController));
+app.use('/api/v1/productos', createProductoRouter(productoController));
+app.use('/api/v1/categorias', createCategoriaRouter(categoriaController));
 
 // --- 404 ---
 app.use((req, res) => {

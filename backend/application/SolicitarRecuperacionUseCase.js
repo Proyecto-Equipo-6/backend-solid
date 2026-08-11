@@ -1,4 +1,4 @@
-const crypto = require('crypto');
+const crypto = require('node:crypto');
 
 const MENSAJE_GENERICO = 'Recibirá un enlace de recuperación a su correo electrónico';
 const MINUTOS_VALIDEZ_TOKEN = Number(process.env.TOKEN_RECUPERACION_MINUTOS) || 15;

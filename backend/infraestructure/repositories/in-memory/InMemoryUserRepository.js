@@ -34,6 +34,16 @@ class InMemoryUserRepository extends UserRepository {
     user.password = passwordHash;
     return true;
   }
+
+  async updatePerfil(id, { nombre_apellido, email, telefono, direccion }) {
+    const user = await this.findById(id);
+    if (!user) return false;
+    user.nombre_apellido = nombre_apellido;
+    user.email = email;
+    user.telefono = telefono;
+    user.direccion = direccion;
+    return true;
+  }
 }
 
 module.exports = InMemoryUserRepository;
