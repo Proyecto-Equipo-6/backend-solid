@@ -1,5 +1,4 @@
 const { Builder, By, until } = require('selenium-webdriver');
-
 const BASE_URL = 'http://localhost:5173';
 const CORREO = `selenium_${Date.now()}@test.com`;
 const PASSWORD = '123456';
@@ -67,6 +66,75 @@ async function esperarCargaInicial(driver) {
     await botonVerProducto.click();
     await driver.wait(until.urlMatches(/\/articulo\/\d+/), 8000);
     console.log(`6. Ver producto OK (${await driver.getCurrentUrl()})`);
+
+    // 7. Intentar agregar el producto al carrito
+    const botonAgregar = await driver.findElement(By.css('.detalle .boton'));
+    await botonAgregar.click();
+
+    let agregadoOk = false;
+    try {
+      await driver.wait(until.elementLocated(By.css('.alerta--error')), 8000);
+    } catch {
+      try {
+        await driver.wait(until.elementLocated(By.css('.alerta--exito')), 3000);
+        agregadoOk = true;
+      } catch {
+        // Sin alerta: el botón estaba deshabilitado (producto agotado)
+      }
+    }
+    if (agregadoOk) {
+      console.log('7. Producto agregado al carrito');
+    } else {
+      console.log('7. No se pudo agregar el producto al carrito');
+    }
+
+    // 8. Ir a "Mi perfil"
+    await driver.findElement(By.linkText('Mi perfil')).click();
+    await driver.wait(until.urlContains('/perfil'), 8000);
+    console.log('8. Mi perfil abierto');
+
+    // 9. Entrar a editar el perfil
+    await driver
+      .findElement(By.xpath("//button[contains(text(),'Editar perfil')]"))
+      .click();
+    await driver.wait(until.urlContains('/perfil/editar'), 8000);
+    console.log('9. Formulario de edición abierto');
+
+    // 10. Cambiar los datos del perfil
+    const nuevoNombre = 'Usuario Selenium Editado';
+    const nuevoEmail = `selenium_edit_${Date.now()}@test.com`;
+    const nuevoTelefono = '3119876543';
+    const nuevaDireccion = 'Carrera 42 # 20-10, Bogotá';
+
+    const campoNombre = await driver.findElement(By.id('nombre_apellido'));
+    await campoNombre.clear();
+    await campoNombre.sendKeys(nuevoNombre);
+
+    const campoEmail = await driver.findElement(By.id('email'));
+    await campoEmail.clear();
+    await campoEmail.sendKeys(nuevoEmail);
+
+    const campoTelefono = await driver.findElement(By.id('telefono'));
+    await campoTelefono.clear();
+    await campoTelefono.sendKeys(nuevoTelefono);
+
+    const campoDireccion = await driver.findElement(By.id('direccion'));
+    await campoDireccion.clear();
+    await campoDireccion.sendKeys(nuevaDireccion);
+
+    await driver.findElement(By.id('password')).sendKeys(PASSWORD);
+
+    await driver.findElement(By.css('button[type="submit"]')).click();
+    await driver.wait(until.elementLocated(By.css('.alerta--exito')), 8000);
+    await driver.wait(until.urlContains('/perfil'), 8000);
+    console.log('10. Datos del perfil actualizados y guardados');
+
+    // 11. Cerrar sesión
+    await driver
+      .findElement(By.xpath("//button[contains(text(),'Cerrar sesión')]"))
+      .click();
+    await driver.wait(until.elementLocated(By.css('.barra__boton--texto')), 8000);
+    console.log('11. Sesión cerrada correctamente');
   } catch (err) {
     console.error('Falló el flujo:', err.message);
     process.exitCode = 1;
