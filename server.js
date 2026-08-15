@@ -29,7 +29,6 @@ const createCategoriaRouter = require('./backend/infraestructure/routes/categori
 const ObtenerPerfilUseCase = require('./backend/application/ObtenerPerfilUseCase');
 const ActualizarPerfilUseCase = require('./backend/application/ActualizarPerfilUseCase');
 const crearAutenticador = require('./backend/infraestructure/middlewares/autenticacion');
-const pedidosRepartidorRouter = require('./backend/infraestructure/routes/pedidosRepartidorRoutes');
 
 const app = express();
 app.disable('x-powered-by');
@@ -134,11 +133,4 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);
-});
-
-app.use('/api/v1/repartidor', pedidosRepartidorRouter);
-
-// --- 404 ---
-app.use((req, res) => {
-  res.status(404).json({ error: 'Ruta no encontrada' });
 });
