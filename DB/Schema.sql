@@ -160,9 +160,8 @@ CREATE TABLE pedidos (
     total DECIMAL(10, 2) NOT NULL,
     estado ENUM(
         'PENDIENTE', 
-        'PENDIENTE_VERIFICACION', 
-        'PAGO_APROBADO', 
-        'EN_RUTA', 
+        'ASIGNADO', 
+        'EN_CAMINO', 
         'ENTREGADO', 
         'NO_ENTREGADO',
         'CANCELADO'

@@ -14,6 +14,23 @@ const LoginUseCase = require('./backend/application/LoginUseCase');
 const AuthController = require('./backend/infraestructure/controllers/AuthController');
 const createAuthRouter = require('./backend/infraestructure/routes/authRoutes');
 
+// --- Módulos de Catálogo (Fase 2) ---
+const MySQLProductoRepository = require('./backend/infraestructure/repositories/mysql/MySQLProductoRepository');
+const ListarProductosUseCase = require('./backend/application/ListarProductosUseCase');
+const BuscarProductosUseCase = require('./backend/application/BuscarProductosUseCase');
+const VerProductoDetalleUseCase = require('./backend/application/VerProductoDetalleUseCase');
+const ProductoController = require('./backend/infraestructure/controllers/ProductoController');
+const createProductoRouter = require('./backend/infraestructure/routes/productoRoutes');
+
+// --- Módulos de Carrito (Fase 3) ---
+const MySQLCarritoRepository = require('./backend/infraestructure/repositories/mysql/MySQLCarritoRepository');
+const VerCarritoUseCase = require('./backend/application/VerCarritoUseCase');
+const AgregarAlCarritoUseCase = require('./backend/application/AgregarAlCarritoUseCase');
+const ActualizarCarritoUseCase = require('./backend/application/ActualizarCarritoUseCase');
+const EliminarDelCarritoUseCase = require('./backend/application/EliminarDelCarritoUseCase');
+const CarritoController = require('./backend/infraestructure/controllers/CarritoController');
+const createCarritoRouter = require('./backend/infraestructure/routes/carritoRoutes');
+
 const app = express();
 app.disable('x-powered-by');
 app.use(cors());
@@ -43,10 +60,36 @@ const loginUseCase = new LoginUseCase(
 );
 const authController = new AuthController(loginUseCase);
 
+// --- Inyección de Dependencias para Catálogo (DIP) ---
+const productoRepository = new MySQLProductoRepository();
+const listarProductosUseCase = new ListarProductosUseCase(productoRepository);
+const buscarProductosUseCase = new BuscarProductosUseCase(productoRepository);
+const verProductoDetalleUseCase = new VerProductoDetalleUseCase(productoRepository);
+const productoController = new ProductoController(
+  listarProductosUseCase,
+  buscarProductosUseCase,
+  verProductoDetalleUseCase
+);
+
+// --- Inyección de Dependencias para Carrito (DIP) ---
+const carritoRepository = new MySQLCarritoRepository();
+const verCarritoUseCase = new VerCarritoUseCase(carritoRepository);
+const agregarAlCarritoUseCase = new AgregarAlCarritoUseCase(carritoRepository, productoRepository);
+const actualizarCarritoUseCase = new ActualizarCarritoUseCase(carritoRepository, productoRepository);
+const eliminarDelCarritoUseCase = new EliminarDelCarritoUseCase(carritoRepository);
+const carritoController = new CarritoController({
+  verCarritoUseCase,
+  agregarAlCarritoUseCase,
+  actualizarCarritoUseCase,
+  eliminarDelCarritoUseCase,
+});
+
 // --- Rutas (Cargadas como Middleware) ---
 app.use('/api/v1/users', createUserRouter(userController));
 app.use('/api/v1/roles', createRolRouter(adminUpdateRolController));
 app.use('/api/v1/auth', createAuthRouter(authController));
+app.use('/api/v1/productos', createProductoRouter(productoController));
+app.use('/api/v1/carrito', createCarritoRouter(carritoController));
 
 // --- 404 ---
 app.use((req, res) => {
