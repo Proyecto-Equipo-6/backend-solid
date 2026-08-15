@@ -10,6 +10,7 @@ function createPedidoRouter(pedidoController, autenticar, requerirCliente) {
 
   router.use(autenticar, requerirCliente);
 
+  router.get('/', (req, res) => pedidoController.ver(req, res));
   router.post('/', (req, res) => pedidoController.crear(req, res));
 
   return router;
