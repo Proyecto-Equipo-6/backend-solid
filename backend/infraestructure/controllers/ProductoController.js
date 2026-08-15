@@ -1,40 +1,28 @@
 /**
  * Adaptador de Infraestructura: ProductoController
- * Maneja las peticiones HTTP del catálogo público y las delega a los casos de uso.
+ * Maneja las peticiones HTTP del catálogo y las delega al Caso de Uso correspondiente.
  */
 class ProductoController {
-  constructor(listarProductosUseCase, buscarProductosUseCase, verProductoDetalleUseCase) {
+  constructor(listarProductosUseCase, obtenerProductoUseCase) {
     this.listarProductosUseCase = listarProductosUseCase;
-    this.buscarProductosUseCase = buscarProductosUseCase;
-    this.verProductoDetalleUseCase = verProductoDetalleUseCase;
+    this.obtenerProductoUseCase = obtenerProductoUseCase;
   }
 
-  async listar(req, res) {
+  async listarPublicos(req, res) {
     try {
-      const resultado = await this.listarProductosUseCase.execute(req.query);
-      return res.status(200).json(resultado);
+      const productos = await this.listarProductosUseCase.execute();
+      return res.status(200).json(productos);
     } catch (error) {
       const status = error.status || 500;
       return res.status(status).json({ error: error.message });
     }
   }
 
-  async buscar(req, res) {
+  async obtenerPorId(req, res) {
     try {
-      const resultado = await this.buscarProductosUseCase.execute({
-        termino: req.query.termino,
-        filtros: req.query,
+      const producto = await this.obtenerProductoUseCase.execute({
+        id: Number(req.params.id),
       });
-      return res.status(200).json(resultado);
-    } catch (error) {
-      const status = error.status || 500;
-      return res.status(status).json({ error: error.message });
-    }
-  }
-
-  async detalle(req, res) {
-    try {
-      const producto = await this.verProductoDetalleUseCase.execute(req.params.id);
       return res.status(200).json(producto);
     } catch (error) {
       const status = error.status || 500;

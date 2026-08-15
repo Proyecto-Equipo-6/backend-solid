@@ -3,8 +3,10 @@
  * Maneja las peticiones HTTP de autenticación y las delega al Caso de Uso.
  */
 class AuthController {
-  constructor(loginUseCase) {
+  constructor(loginUseCase, solicitarRecuperacionUseCase, restablecerContrasenaUseCase) {
     this.loginUseCase = loginUseCase;
+    this.solicitarRecuperacionUseCase = solicitarRecuperacionUseCase;
+    this.restablecerContrasenaUseCase = restablecerContrasenaUseCase;
   }
 
   async login(req, res) {
@@ -31,7 +33,28 @@ class AuthController {
       res.clearCookie('token');
       return res.status(200).json({ mensaje: 'Sesión cerrada correctamente' });
     } catch (error) {
+      console.error('Error al cerrar la sesión:', error);
       return res.status(500).json({ error: 'Error al cerrar la sesión' });
+    }
+  }
+
+  async recuperar(req, res) {
+    try {
+      const resultado = await this.solicitarRecuperacionUseCase.execute(req.body);
+      return res.status(200).json(resultado);
+    } catch (error) {
+      const status = error.status || 500;
+      return res.status(status).json({ error: error.message });
+    }
+  }
+
+  async restablecer(req, res) {
+    try {
+      const resultado = await this.restablecerContrasenaUseCase.execute(req.body);
+      return res.status(200).json(resultado);
+    } catch (error) {
+      const status = error.status || 400;
+      return res.status(status).json({ error: error.message });
     }
   }
 }

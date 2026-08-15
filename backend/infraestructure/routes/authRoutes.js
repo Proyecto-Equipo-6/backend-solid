@@ -9,6 +9,8 @@ function createAuthRouter(authController) {
 
   router.post('/login', (req, res) => authController.login(req, res));
   router.post('/logout', (req, res) => authController.logout(req, res));
+  router.post('/recuperar', (req, res) => authController.recuperar(req, res));
+  router.post('/restablecer', (req, res) => authController.restablecer(req, res));
 
   return router;
 }

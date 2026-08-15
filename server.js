@@ -13,14 +13,22 @@ const createRolRouter = require('./backend/infraestructure/routes/rolRoutes');
 const LoginUseCase = require('./backend/application/LoginUseCase');
 const AuthController = require('./backend/infraestructure/controllers/AuthController');
 const createAuthRouter = require('./backend/infraestructure/routes/authRoutes');
-
-// --- Módulos de Catálogo (Fase 2) ---
+const SolicitarRecuperacionUseCase = require('./backend/application/SolicitarRecuperacionUseCase');
+const RestablecerContrasenaUseCase = require('./backend/application/RestablecerContrasenaUseCase');
+const MySQLTokensRecuperacionRepository = require('./backend/infraestructure/repositories/mysql/MySQLTokensRecuperacionRepository');
+const SmtpEmailSender = require('./backend/infraestructure/services/SmtpEmailSender');
 const MySQLProductoRepository = require('./backend/infraestructure/repositories/mysql/MySQLProductoRepository');
-const ListarProductosUseCase = require('./backend/application/ListarProductosUseCase');
-const BuscarProductosUseCase = require('./backend/application/BuscarProductosUseCase');
-const VerProductoDetalleUseCase = require('./backend/application/VerProductoDetalleUseCase');
+const ListarProductosPublicosUseCase = require('./backend/application/ListarProductosPublicosUseCase');
+const ObtenerProductoPublicoUseCase = require('./backend/application/ObtenerProductoPublicoUseCase');
 const ProductoController = require('./backend/infraestructure/controllers/ProductoController');
 const createProductoRouter = require('./backend/infraestructure/routes/productoRoutes');
+const MySQLCategoriaRepository = require('./backend/infraestructure/repositories/mysql/MySQLCategoriaRepository');
+const ListarCategoriasUseCase = require('./backend/application/ListarCategoriasUseCase');
+const CategoriaController = require('./backend/infraestructure/controllers/CategoriaController');
+const createCategoriaRouter = require('./backend/infraestructure/routes/categoriaRoutes');
+const ObtenerPerfilUseCase = require('./backend/application/ObtenerPerfilUseCase');
+const ActualizarPerfilUseCase = require('./backend/application/ActualizarPerfilUseCase');
+const crearAutenticador = require('./backend/infraestructure/middlewares/autenticacion');
 
 // --- Módulos de Carrito (Fase 3) ---
 const MySQLCarritoRepository = require('./backend/infraestructure/repositories/mysql/MySQLCarritoRepository');
@@ -33,7 +41,12 @@ const createCarritoRouter = require('./backend/infraestructure/routes/carritoRou
 
 const app = express();
 app.disable('x-powered-by');
-app.use(cors());
+app.use(
+  cors({
+    origin: process.env.CORS_ORIGIN || true,
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use(cookieParser());
 
@@ -44,8 +57,17 @@ const userRepository = new MySQLUserRepository();
 // 2. Inicializamos el caso de uso inyectándole su dependencia (el Repositorio)
 const createUserUseCase = new CreateUserUseCase(userRepository);
 
+// --- Inyección de Dependencias para el Perfil (CU-004/CU-005, DIP) ---
+const obtenerPerfilUseCase = new ObtenerPerfilUseCase(userRepository);
+const actualizarPerfilUseCase = new ActualizarPerfilUseCase(userRepository);
+const autenticar = crearAutenticador(process.env.JWT_SECRET);
+
 // 3. Inicializamos el controlador inyectándole el caso de uso
-const userController = new UserController(createUserUseCase);
+const userController = new UserController(
+  createUserUseCase,
+  obtenerPerfilUseCase,
+  actualizarPerfilUseCase
+);
 
 // --- Inyección de Dependencias para Roles (DIP) ---
 const rolesRepository = new MySQLRolesRepository();
@@ -58,18 +80,39 @@ const loginUseCase = new LoginUseCase(
   process.env.JWT_SECRET,
   process.env.JWT_EXPIRES_IN
 );
-const authController = new AuthController(loginUseCase);
 
-// --- Inyección de Dependencias para Catálogo (DIP) ---
+// --- Inyección de Dependencias para Recuperación de Contraseña (DIP) ---
+const tokensRecuperacionRepository = new MySQLTokensRecuperacionRepository();
+const emailSender = new SmtpEmailSender();
+const solicitarRecuperacionUseCase = new SolicitarRecuperacionUseCase(
+  userRepository,
+  tokensRecuperacionRepository,
+  emailSender
+);
+const restablecerContrasenaUseCase = new RestablecerContrasenaUseCase(
+  userRepository,
+  tokensRecuperacionRepository
+);
+
+const authController = new AuthController(
+  loginUseCase,
+  solicitarRecuperacionUseCase,
+  restablecerContrasenaUseCase
+);
+
+// --- Inyección de Dependencias para el Catálogo de Productos (DIP) ---
 const productoRepository = new MySQLProductoRepository();
-const listarProductosUseCase = new ListarProductosUseCase(productoRepository);
-const buscarProductosUseCase = new BuscarProductosUseCase(productoRepository);
-const verProductoDetalleUseCase = new VerProductoDetalleUseCase(productoRepository);
+const listarProductosUseCase = new ListarProductosPublicosUseCase(productoRepository);
+const obtenerProductoUseCase = new ObtenerProductoPublicoUseCase(productoRepository);
 const productoController = new ProductoController(
   listarProductosUseCase,
-  buscarProductosUseCase,
-  verProductoDetalleUseCase
+  obtenerProductoUseCase
 );
+
+// --- Inyección de Dependencias para Categorías (DIP) ---
+const categoriaRepository = new MySQLCategoriaRepository();
+const listarCategoriasUseCase = new ListarCategoriasUseCase(categoriaRepository);
+const categoriaController = new CategoriaController(listarCategoriasUseCase);
 
 // --- Inyección de Dependencias para Carrito (DIP) ---
 const carritoRepository = new MySQLCarritoRepository();
@@ -85,10 +128,11 @@ const carritoController = new CarritoController({
 });
 
 // --- Rutas (Cargadas como Middleware) ---
-app.use('/api/v1/users', createUserRouter(userController));
+app.use('/api/v1/users', createUserRouter(userController, autenticar));
 app.use('/api/v1/roles', createRolRouter(adminUpdateRolController));
 app.use('/api/v1/auth', createAuthRouter(authController));
 app.use('/api/v1/productos', createProductoRouter(productoController));
+app.use('/api/v1/categorias', createCategoriaRouter(categoriaController));
 app.use('/api/v1/carrito', createCarritoRouter(carritoController));
 
 // --- 404 ---

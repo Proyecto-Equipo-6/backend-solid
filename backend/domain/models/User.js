@@ -32,7 +32,7 @@ class User {
       this.nombre_apellido &&
       this.tipo_documento && tiposValidos.includes(this.tipo_documento) &&
       this.numero_documento &&
-      this.email && this.email.includes('@') &&
+      this.email?.includes('@') &&
       passwordValida &&
       telefonoValido &&
       this.direccion

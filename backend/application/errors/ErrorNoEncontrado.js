@@ -1,6 +1,6 @@
 /**
  * Error de Aplicación: ErrorNoEncontrado
- * Representa un recurso inexistente (producto, item de carrito, etc.).
+ * Representa un recurso que no existe o no es visible públicamente.
  * Se traduce a HTTP 404.
  */
 class ErrorNoEncontrado extends Error {

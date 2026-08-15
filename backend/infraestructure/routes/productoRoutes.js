@@ -1,15 +1,14 @@
 const express = require('express');
 
 /**
- * Función que configura las rutas del catálogo público.
+ * Función que configura las rutas públicas de productos (catálogo).
  * Recibe el controlador ya instanciado (con todas sus dependencias inyectadas).
  */
 function createProductoRouter(productoController) {
   const router = express.Router();
 
-  router.get('/publico', (req, res) => productoController.listar(req, res));
-  router.get('/buscar', (req, res) => productoController.buscar(req, res));
-  router.get('/:id', (req, res) => productoController.detalle(req, res));
+  router.get('/publico', (req, res) => productoController.listarPublicos(req, res));
+  router.get('/:id', (req, res) => productoController.obtenerPorId(req, res));
 
   return router;
 }

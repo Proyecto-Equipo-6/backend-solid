@@ -1,51 +1,37 @@
 /**
- * Entidad de Dominio: Producto
- * Representa un producto del catálogo público.
- * RN-009: Solo se listan productos activos de categorías activas.
- * RN-010: Stock 0 se muestra como "Agotado" y deshabilita compra rápida.
+ * Modelo de Dominio: Producto
+ * Representa un producto del catálogo junto con los datos de su ficha técnica
+ * (categoría y proveedor provienen de las tablas relacionadas).
  */
 class Producto {
   constructor({
-    id = null,
-    titulo,
+    id_producto = null,
+    sku,
+    nombre,
     descripcion,
-    categoria,
     precio,
-    stock = 0,
-    garantia = 'Sin garantía',
-    imagen = null,
-    proveedor = null,
-    destacado = false
+    stock,
+    garantia,
+    imagen_url,
+    estado,
+    categoria,
+    proveedor,
   } = {}) {
-    this.id = id;
-    this.titulo = titulo;
+    this.id_producto = id_producto;
+    this.sku = sku;
+    this.nombre = nombre;
     this.descripcion = descripcion;
-    this.categoria = categoria;
     this.precio = precio;
     this.stock = stock;
     this.garantia = garantia;
-    this.imagen = imagen;
+    this.imagen_url = imagen_url;
+    this.estado = estado;
+    this.categoria = categoria;
     this.proveedor = proveedor;
-    this.destacado = destacado;
   }
 
-  get agotado() {
-    return this.stock === 0;
-  }
-
-  get disponible() {
-    return this.stock > 0;
-  }
-
-  isValid() {
-    return Boolean(
-      this.titulo &&
-      this.categoria &&
-      typeof this.precio === 'number' &&
-      this.precio > 0 &&
-      Number.isInteger(this.stock) &&
-      this.stock >= 0
-    );
+  esVisiblePublicamente() {
+    return this.estado === 1;
   }
 }
 
