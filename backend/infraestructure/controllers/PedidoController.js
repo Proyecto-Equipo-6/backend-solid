@@ -4,9 +4,10 @@
  * El usuario autenticado ya viene adjuntado por el middleware (req.usuario).
  */
 class PedidoController {
-  constructor({ crearPedidoUseCase, verPedidosUseCase }) {
+  constructor({ crearPedidoUseCase, verPedidosUseCase, cancelarPedidoUseCase }) {
     this.crearPedidoUseCase = crearPedidoUseCase;
     this.verPedidosUseCase = verPedidosUseCase;
+    this.cancelarPedidoUseCase = cancelarPedidoUseCase;
   }
 
   async crear(req, res) {
@@ -23,6 +24,19 @@ class PedidoController {
     try {
       const resultado = await this.verPedidosUseCase.execute(req.usuario, {
         estado: req.query.estado || null,
+      });
+      return res.status(200).json(resultado);
+    } catch (error) {
+      const status = error.status || 500;
+      return res.status(status).json({ error: error.message });
+    }
+  }
+
+  async cancelar(req, res) {
+    try {
+      const resultado = await this.cancelarPedidoUseCase.execute(req.usuario, {
+        idPedido: Number(req.params.id),
+        motivo: req.body.motivo,
       });
       return res.status(200).json(resultado);
     } catch (error) {
