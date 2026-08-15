@@ -59,12 +59,11 @@ class ListarProductosUseCase {
     return limite;
   }
 
-  _normalizarOrden(valor) {
-    const orden = valor ?? 'nombre';
-    if (!ORDENES_VALIDOS.has(orden)) {
+  _normalizarOrden(valor = 'nombre') {
+    if (!ORDENES_VALIDOS.has(valor)) {
       throw new ErrorValidacion('Criterio de ordenamiento no válido');
     }
-    return orden;
+    return valor;
   }
 }
 
