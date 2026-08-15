@@ -60,7 +60,7 @@ class ListarProductosUseCase {
   }
 
   _normalizarOrden(valor) {
-    const orden = valor || 'nombre';
+    const orden = valor ?? 'nombre';
     if (!ORDENES_VALIDOS.has(orden)) {
       throw new ErrorValidacion('Criterio de ordenamiento no válido');
     }

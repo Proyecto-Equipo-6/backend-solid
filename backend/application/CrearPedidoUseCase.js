@@ -22,7 +22,7 @@ class CrearPedidoUseCase {
   }
 
   async execute(usuario, { direccionEntrega, observaciones = null } = {}) {
-    if (!usuario || !usuario.id_usuario) {
+    if (!usuario?.id_usuario) {
       throw new ErrorValidacion('Debes iniciar sesión para generar un pedido');
     }
 
@@ -32,7 +32,7 @@ class CrearPedidoUseCase {
 
     // RN-047: el pedido se genera a partir del carrito completo (no parcial)
     const carrito = await this.carritoRepository.obtenerCarrito(usuario.id_usuario);
-    if (!carrito || !carrito.items || carrito.items.length === 0) {
+    if (!carrito?.items?.length) {
       throw new ErrorValidacion('Tu carrito está vacío');
     }
 
