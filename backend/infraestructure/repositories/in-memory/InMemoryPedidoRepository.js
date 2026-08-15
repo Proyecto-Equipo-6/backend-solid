@@ -40,9 +40,9 @@ class InMemoryPedidoRepository extends PedidoRepository {
     return this.pedidos.find((pedido) => pedido.id_pedido === idPedido) || null;
   }
 
-  async cancelarPedido(idPedido, motivo) {
+  async cancelarPedido(idPedido, idUsuario, motivo) {
     const pedido = this.pedidos.find((p) => p.id_pedido === idPedido);
-    if (!pedido || !['PENDIENTE', 'ASIGNADO'].includes(pedido.estado)) return false;
+    if (!pedido || pedido.id_usuario !== idUsuario || pedido.estado !== 'PENDIENTE') return false;
     pedido.estado = 'CANCELADO';
     pedido.motivo_cancelacion = motivo;
     return true;

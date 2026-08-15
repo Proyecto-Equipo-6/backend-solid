@@ -44,6 +44,7 @@ const createCarritoRouter = require('./backend/infraestructure/routes/carritoRou
 const MySQLPedidoRepository = require('./backend/infraestructure/repositories/mysql/MySQLPedidoRepository');
 const CrearPedidoUseCase = require('./backend/application/CrearPedidoUseCase');
 const VerPedidosUseCase = require('./backend/application/VerPedidosUseCase');
+const CancelarPedidoUseCase = require('./backend/application/CancelarPedidoUseCase');
 const PedidoController = require('./backend/infraestructure/controllers/PedidoController');
 const createPedidoRouter = require('./backend/infraestructure/routes/pedidoRoutes');
 
@@ -139,7 +140,8 @@ const carritoController = new CarritoController({
 const pedidoRepository = new MySQLPedidoRepository();
 const crearPedidoUseCase = new CrearPedidoUseCase(carritoRepository, pedidoRepository);
 const verPedidosUseCase = new VerPedidosUseCase(pedidoRepository);
-const pedidoController = new PedidoController({ crearPedidoUseCase, verPedidosUseCase });
+const cancelarPedidoUseCase = new CancelarPedidoUseCase(pedidoRepository);
+const pedidoController = new PedidoController({ crearPedidoUseCase, verPedidosUseCase, cancelarPedidoUseCase });
 
 // --- Middlewares de autorización (DIP) ---
 const requerirCliente = crearRequerirCliente(2);

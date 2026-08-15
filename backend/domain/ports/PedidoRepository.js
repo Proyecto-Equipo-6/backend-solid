@@ -16,7 +16,7 @@ class PedidoRepository {
     throw new Error("Método 'obtenerPedidoPorId' no implementado");
   }
 
-  async cancelarPedido(idPedido, motivo) {
+  async cancelarPedido(idPedido, idUsuario, motivo) {
     throw new Error("Método 'cancelarPedido' no implementado");
   }
 }

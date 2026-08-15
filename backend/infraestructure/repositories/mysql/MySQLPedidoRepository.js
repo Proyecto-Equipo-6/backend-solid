@@ -84,12 +84,12 @@ class MySQLPedidoRepository extends PedidoRepository {
     return filas[0] || null;
   }
 
-  async cancelarPedido(idPedido, motivo) {
+  async cancelarPedido(idPedido, idUsuario, motivo) {
     const [resultado] = await pool.execute(
       `UPDATE pedidos
        SET estado = 'CANCELADO', motivo_cancelacion = ?
-       WHERE id_pedido = ? AND estado IN ('PENDIENTE', 'ASIGNADO')`,
-      [motivo, idPedido]
+       WHERE id_pedido = ? AND id_usuario = ? AND estado = 'PENDIENTE'`,
+      [motivo, idPedido, idUsuario]
     );
     return resultado.affectedRows > 0;
   }

@@ -12,6 +12,7 @@ function createPedidoRouter(pedidoController, autenticar, requerirCliente) {
 
   router.get('/', (req, res) => pedidoController.ver(req, res));
   router.post('/', (req, res) => pedidoController.crear(req, res));
+  router.delete('/:id', (req, res) => pedidoController.cancelar(req, res));
 
   return router;
 }
