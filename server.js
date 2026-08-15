@@ -29,6 +29,7 @@ const createCategoriaRouter = require('./backend/infraestructure/routes/categori
 const ObtenerPerfilUseCase = require('./backend/application/ObtenerPerfilUseCase');
 const ActualizarPerfilUseCase = require('./backend/application/ActualizarPerfilUseCase');
 const crearAutenticador = require('./backend/infraestructure/middlewares/autenticacion');
+const { crearRequerirCliente } = require('./backend/infraestructure/middlewares/autenticacion');
 
 // --- Módulos de Carrito (Fase 3) ---
 const MySQLCarritoRepository = require('./backend/infraestructure/repositories/mysql/MySQLCarritoRepository');
@@ -38,6 +39,12 @@ const ActualizarCarritoUseCase = require('./backend/application/ActualizarCarrit
 const EliminarDelCarritoUseCase = require('./backend/application/EliminarDelCarritoUseCase');
 const CarritoController = require('./backend/infraestructure/controllers/CarritoController');
 const createCarritoRouter = require('./backend/infraestructure/routes/carritoRoutes');
+
+// --- Módulos de Pedidos (Fase 4) ---
+const MySQLPedidoRepository = require('./backend/infraestructure/repositories/mysql/MySQLPedidoRepository');
+const CrearPedidoUseCase = require('./backend/application/CrearPedidoUseCase');
+const PedidoController = require('./backend/infraestructure/controllers/PedidoController');
+const createPedidoRouter = require('./backend/infraestructure/routes/pedidoRoutes');
 
 const app = express();
 app.disable('x-powered-by');
@@ -127,13 +134,22 @@ const carritoController = new CarritoController({
   eliminarDelCarritoUseCase,
 });
 
+// --- Inyección de Dependencias para Pedidos (DIP) ---
+const pedidoRepository = new MySQLPedidoRepository();
+const crearPedidoUseCase = new CrearPedidoUseCase(carritoRepository, pedidoRepository);
+const pedidoController = new PedidoController({ crearPedidoUseCase });
+
+// --- Middlewares de autorización (DIP) ---
+const requerirCliente = crearRequerirCliente(2);
+
 // --- Rutas (Cargadas como Middleware) ---
 app.use('/api/v1/users', createUserRouter(userController, autenticar));
 app.use('/api/v1/roles', createRolRouter(adminUpdateRolController));
 app.use('/api/v1/auth', createAuthRouter(authController));
 app.use('/api/v1/productos', createProductoRouter(productoController));
 app.use('/api/v1/categorias', createCategoriaRouter(categoriaController));
-app.use('/api/v1/carrito', createCarritoRouter(carritoController));
+app.use('/api/v1/carrito', createCarritoRouter(carritoController, autenticar, requerirCliente));
+app.use('/api/v1/pedidos', createPedidoRouter(pedidoController, autenticar, requerirCliente));
 
 // --- 404 ---
 app.use((req, res) => {
