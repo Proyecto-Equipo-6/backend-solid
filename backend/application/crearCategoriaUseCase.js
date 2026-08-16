@@ -19,7 +19,13 @@ class CrearCategoriaUseCase {
       throw new Error('Ya existe una categoría con ese nombre');
     }
 
-    const estadoNumerico = estado === 'Activo' ? 1 : estado === 'Inactivo' ? 0 : estado;
+    function convertirEstado(estado) {
+    if (estado === 'Activo') return 1;
+    if (estado === 'Inactivo') return 0;
+    return estado;
+    }
+
+    const estadoNumerico = convertirEstado(estado);
 
     return await this.categoriaRepo.guardar({
       nombre: nombre.trim(),

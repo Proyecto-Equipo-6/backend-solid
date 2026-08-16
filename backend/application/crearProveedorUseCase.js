@@ -9,7 +9,7 @@ class CrearProveedorUseCase {
     }
 
     // Validación de NIT: 9 dígitos - 1 dígito
-    const regexNIT = /^\d{9}-\d{1}$/;
+    const regexNIT = /^\d{9}-\d$/; 
     if (!regexNIT.test(nit_proveedor.trim())) {
       throw new Error('El NIT debe tener el formato 900123456-7');
     }
@@ -27,7 +27,7 @@ class CrearProveedorUseCase {
     }
 
     // Validación de email
-    const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const regexEmail = /^[\w.-]+@[\w.-]+\.\w{2,}$/;
     if (!regexEmail.test(email.trim())) {
       throw new Error('El correo electrónico no tiene un formato válido');
     }
