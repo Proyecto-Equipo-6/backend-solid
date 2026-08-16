@@ -125,9 +125,9 @@ class InMemoryPedidoRepartidorRepository extends PedidoRepartidorRepository {
   // CU-018 · Historial de pedidos finalizados
 
   async obtenerHistorialPedidos(repartidorId, filtros = {}) {
-    const estadosFinales = ['ENTREGADO', 'NO_ENTREGADO', 'CANCELADO'];
+    const estadosFinales = new Set(['ENTREGADO', 'NO_ENTREGADO', 'CANCELADO']);
     let pedidos = this.pedidos.filter(p =>
-      p.id_repartidor === repartidorId && estadosFinales.includes(p.estado)
+      p.id_repartidor === repartidorId && estadosFinales.has(p.estado)
     );
 
     if (filtros.filtroEstado) {
@@ -143,7 +143,7 @@ class InMemoryPedidoRepartidorRepository extends PedidoRepartidorRepository {
   }
 
   async contarPedidosDelPeriodo(repartidorId) {
-    const estadosFinales = ['ENTREGADO', 'NO_ENTREGADO', 'CANCELADO'];
+    const estadosFinales = new Set(['ENTREGADO', 'NO_ENTREGADO', 'CANCELADO']);
     const ahora = new Date();
     const inicioMes = new Date(ahora.getFullYear(), ahora.getMonth(), 1);
     // Semana calendario con inicio en lunes (ISO), consistente con
@@ -153,7 +153,7 @@ class InMemoryPedidoRepartidorRepository extends PedidoRepartidorRepository {
     const inicioSemana = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate() - diasDesdeLunes);
 
     const finalizados = this.pedidos.filter(p =>
-      p.id_repartidor === repartidorId && estadosFinales.includes(p.estado)
+      p.id_repartidor === repartidorId && estadosFinales.has(p.estado)
     );
 
     const totalMes = finalizados.filter(p => {

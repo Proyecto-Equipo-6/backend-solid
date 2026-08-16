@@ -1,3 +1,10 @@
+// Convierte el estado textual a su valor numérico (1=Activo, 0=Inactivo).
+function convertirEstado(estado) {
+  if (estado === 'Activo') return 1;
+  if (estado === 'Inactivo') return 0;
+  return estado;
+}
+
 class CrearCategoriaUseCase {
   constructor(categoriaRepo) {
     this.categoriaRepo = categoriaRepo;
@@ -17,12 +24,6 @@ class CrearCategoriaUseCase {
     const existente = await this.categoriaRepo.buscarPorNombre(nombre.trim());
     if (existente) {
       throw new Error('Ya existe una categoría con ese nombre');
-    }
-
-    function convertirEstado(estado) {
-    if (estado === 'Activo') return 1;
-    if (estado === 'Inactivo') return 0;
-    return estado;
     }
 
     const estadoNumerico = convertirEstado(estado);
