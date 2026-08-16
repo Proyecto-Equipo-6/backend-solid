@@ -37,6 +37,24 @@ const ObtenerResumenAnaliticaUseCase = require('./backend/application/ObtenerRes
 const AnaliticaController = require('./backend/infraestructure/controllers/AnaliticaController');
 const createAnaliticaRouter = require('./backend/infraestructure/routes/analiticaRoutes');
 const crearAutenticador = require('./backend/infraestructure/middlewares/autenticacion');
+const { crearRequerirCliente } = require('./backend/infraestructure/middlewares/autenticacion');
+
+// --- Módulos de Carrito (Fase 3) ---
+const MySQLCarritoRepository = require('./backend/infraestructure/repositories/mysql/MySQLCarritoRepository');
+const VerCarritoUseCase = require('./backend/application/VerCarritoUseCase');
+const AgregarAlCarritoUseCase = require('./backend/application/AgregarAlCarritoUseCase');
+const ActualizarCarritoUseCase = require('./backend/application/ActualizarCarritoUseCase');
+const EliminarDelCarritoUseCase = require('./backend/application/EliminarDelCarritoUseCase');
+const CarritoController = require('./backend/infraestructure/controllers/CarritoController');
+const createCarritoRouter = require('./backend/infraestructure/routes/carritoRoutes');
+
+// --- Módulos de Pedidos (Fase 4) ---
+const MySQLPedidoRepository = require('./backend/infraestructure/repositories/mysql/MySQLPedidoRepository');
+const CrearPedidoUseCase = require('./backend/application/CrearPedidoUseCase');
+const VerPedidosUseCase = require('./backend/application/VerPedidosUseCase');
+const CancelarPedidoUseCase = require('./backend/application/CancelarPedidoUseCase');
+const PedidoController = require('./backend/infraestructure/controllers/PedidoController');
+const createPedidoRouter = require('./backend/infraestructure/routes/pedidoRoutes');
 
 const app = express();
 app.disable('x-powered-by');
@@ -123,6 +141,29 @@ const analiticaRepository = new MySQLAnaliticaRepository();
 const obtenerResumenAnaliticaUseCase = new ObtenerResumenAnaliticaUseCase(analiticaRepository);
 const analiticaController = new AnaliticaController(obtenerResumenAnaliticaUseCase);
 
+// --- Inyección de Dependencias para Carrito (DIP) ---
+const carritoRepository = new MySQLCarritoRepository();
+const verCarritoUseCase = new VerCarritoUseCase(carritoRepository);
+const agregarAlCarritoUseCase = new AgregarAlCarritoUseCase(carritoRepository, productoRepository);
+const actualizarCarritoUseCase = new ActualizarCarritoUseCase(carritoRepository, productoRepository);
+const eliminarDelCarritoUseCase = new EliminarDelCarritoUseCase(carritoRepository);
+const carritoController = new CarritoController({
+  verCarritoUseCase,
+  agregarAlCarritoUseCase,
+  actualizarCarritoUseCase,
+  eliminarDelCarritoUseCase,
+});
+
+// --- Inyección de Dependencias para Pedidos (DIP) ---
+const pedidoRepository = new MySQLPedidoRepository();
+const crearPedidoUseCase = new CrearPedidoUseCase(carritoRepository, pedidoRepository);
+const verPedidosUseCase = new VerPedidosUseCase(pedidoRepository);
+const cancelarPedidoUseCase = new CancelarPedidoUseCase(pedidoRepository);
+const pedidoController = new PedidoController({ crearPedidoUseCase, verPedidosUseCase, cancelarPedidoUseCase });
+
+// --- Middlewares de autorización (DIP) ---
+const requerirCliente = crearRequerirCliente(2);
+
 // --- Rutas (Cargadas como Middleware) ---
 app.use('/api/v1/users', createUserRouter(userController, autenticar));
 app.use('/api/v1/roles', createRolRouter(adminUpdateRolController));
@@ -131,6 +172,8 @@ app.use('/api/v1/productos', createProductoRouter(productoController));
 app.use('/api/v1/categorias', createCategoriaRouter(categoriaController));
 app.use('/api/v1/bancos', createBancoRouter(bancoController));
 app.use('/api/v1/analitica', createAnaliticaRouter(analiticaController));
+app.use('/api/v1/carrito', createCarritoRouter(carritoController, autenticar, requerirCliente));
+app.use('/api/v1/pedidos', createPedidoRouter(pedidoController, autenticar, requerirCliente));
 
 // --- 404 ---
 app.use((req, res) => {

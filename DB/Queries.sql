@@ -156,6 +156,6 @@ FROM categorias c
 INNER JOIN productos p       ON c.id_categoria = p.id_categoria
 INNER JOIN pedido_detalles pd ON p.id_producto = pd.id_producto
 INNER JOIN pedidos ped       ON pd.id_pedido = ped.id_pedido
-WHERE ped.estado IN ('ENTREGADO', 'PAGO_APROBADO', 'EN_RUTA')
+WHERE ped.estado IN ('ENTREGADO', 'ASIGNADO', 'EN_CAMINO')
 GROUP BY c.id_categoria, c.nombre
 ORDER BY Ingresos_Totales_COP DESC;

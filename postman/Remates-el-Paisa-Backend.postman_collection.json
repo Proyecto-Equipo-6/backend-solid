@@ -1,0 +1,254 @@
+{
+  "info": {
+    "name": "Remates el Paisa - Backend API",
+    "description": "Colección para probar el backend de Remates el Paisa (backend-solid). Flujo: autenticación → catálogo → carrito → pedidos. Requiere variables de entorno: baseUrl, email, password.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "email",
+      "value": "juan@email.com",
+      "type": "string"
+    },
+    {
+      "key": "password",
+      "value": "1234",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Autenticación",
+      "item": [
+        {
+          "name": "Login (obtiene cookie de sesión)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "auth", "logout"]
+            }
+          }
+        },
+        {
+          "name": "Registrar usuario (cliente)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre_apellido\": \"Nuevo Cliente\",\n  \"tipo_documento\": \"CC\",\n  \"numero_documento\": \"123456789\",\n  \"email\": \"nuevo@email.com\",\n  \"password\": \"1234\",\n  \"telefono\": \"3000000000\",\n  \"direccion\": \"Calle 1 # 2-3, Medellín\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "users"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Catálogo",
+      "item": [
+        {
+          "name": "Listar productos públicos",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/productos/publico",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "productos", "publico"]
+            }
+          }
+        },
+        {
+          "name": "Detalle de producto",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/productos/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "productos", "1"]
+            }
+          }
+        },
+        {
+          "name": "Listar categorías",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/categorias",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "categorias"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Carrito (requiere sesión Cliente)",
+      "item": [
+        {
+          "name": "Ver carrito",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/carrito",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "carrito"]
+            }
+          }
+        },
+        {
+          "name": "Agregar producto al carrito",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productoId\": 1,\n  \"cantidad\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/carrito",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "carrito"]
+            }
+          }
+        },
+        {
+          "name": "Actualizar cantidad",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cantidad\": 2\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/carrito/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "carrito", "1"]
+            }
+          }
+        },
+        {
+          "name": "Eliminar producto del carrito",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/carrito/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "carrito", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Pedidos (requiere sesión Cliente)",
+      "item": [
+        {
+          "name": "Generar pedido (CU-012)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"direccionEntrega\": \"Calle 10 # 5-20, Medellín\",\n  \"observaciones\": \"Entregar en horario laboral\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/pedidos",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "pedidos"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Perfil (requiere sesión)",
+      "item": [
+        {
+          "name": "Ver perfil",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/perfil",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "users", "perfil"]
+            }
+          }
+        },
+        {
+          "name": "Actualizar perfil",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"telefono\": \"3002000002\",\n  \"direccion\": \"Calle 10 # 5-20, Medellín\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/perfil",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "users", "perfil"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
