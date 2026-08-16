@@ -5,6 +5,7 @@ class ActualizarEstadoPedidoUseCase {
 
   async ejecutar(pedidoId, nuevoEstado, estadoAnterior, datosAdicionales = {}) {
     const pedido = await this.pedidoRepo.obtenerDetallePedido(pedidoId);
+
     if (!pedido) {
       throw new Error('Pedido no encontrado');
     }

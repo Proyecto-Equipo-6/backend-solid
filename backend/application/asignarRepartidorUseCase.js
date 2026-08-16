@@ -5,7 +5,7 @@ class AsignarRepartidorUseCase {
   }
 
   async ejecutar(id_pedido, id_usuario_repartidor) {
-    const pedido = await this.pedidoRepo.obtenerDetallePedido(id_pedido);
+    const pedido = await this.pedidoRepo.obtenerPedidoPorId(id_pedido);
     if (!pedido) throw new Error('Pedido no encontrado');
 
     // CU-019: Solo pedidos CONFIRMADO pueden asignarse

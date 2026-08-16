@@ -9,7 +9,9 @@ const REGEX_TELEFONO = /^\d{10}$/;
 /**
  * Caso de Uso: ActualizarPerfilUseCase
  * Actualiza los datos editables del perfil del usuario autenticado (CU-005).
- * Verifica la identidad mediante la contraseña actual (FP-003, RN-019).
+ * Soporta actualización parcial: solo se modifican los campos presentes en `datos`.
+ * La contraseña actual solo se exige al modificar campos sensibles
+ * (nombre, correo o teléfono); la dirección se actualiza sin contraseña.
  * El documento de identidad no es modificable (RN-018).
  * El correo debe ser único (RN-016 / RN-017).
  * Nunca expone la contraseña (RN-015).
@@ -25,16 +27,20 @@ class ActualizarPerfilUseCase {
       throw new ErrorSesionExpirada();
     }
 
-    if (!password) {
-      throw new ErrorNoAutorizado('La contraseña actual es obligatoria');
+    const datosNuevos = this.normalizar(usuario, datos);
+    const camposSensibles = this.camposSensiblesCambiados(datos, usuario);
+
+    if (camposSensibles.length > 0) {
+      if (!password) {
+        throw new ErrorNoAutorizado('La contraseña actual es obligatoria');
+      }
+
+      const coincide = await bcrypt.compare(password, usuario.password);
+      if (!coincide) {
+        throw new ErrorNoAutorizado('La contraseña actual no es correcta');
+      }
     }
 
-    const coincide = await bcrypt.compare(password, usuario.password);
-    if (!coincide) {
-      throw new ErrorNoAutorizado('La contraseña actual no es correcta');
-    }
-
-    const datosNuevos = this.normalizar(datos);
     this.validar(datosNuevos);
 
     if (this.sinCambios(usuario, datosNuevos)) {
@@ -63,13 +69,27 @@ class ActualizarPerfilUseCase {
     };
   }
 
-  normalizar(datos) {
-    return {
-      nombre_apellido: String(datos.nombre_apellido || '').trim(),
-      email: String(datos.email || '').trim(),
-      telefono: String(datos.telefono || '').trim(),
-      direccion: String(datos.direccion || '').trim(),
+  camposSensiblesCambiados(datos, usuario) {
+    return ['nombre_apellido', 'email', 'telefono'].filter((campo) => {
+      if (!Object.prototype.hasOwnProperty.call(datos, campo)) return false;
+      return String(datos[campo] ?? '').trim() !== String(usuario[campo] ?? '').trim();
+    });
+  }
+
+  normalizar(usuario, datos) {
+    const base = {
+      nombre_apellido: usuario.nombre_apellido || '',
+      email: usuario.email || '',
+      telefono: usuario.telefono || '',
+      direccion: usuario.direccion || '',
     };
+
+    return Object.keys(base).reduce((resultado, campo) => {
+      const valor = datos[campo];
+      resultado[campo] =
+        valor !== undefined ? String(valor).trim() : base[campo];
+      return resultado;
+    }, {});
   }
 
   validar(datos) {

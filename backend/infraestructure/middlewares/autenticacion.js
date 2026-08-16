@@ -26,4 +26,36 @@ function crearAutenticador(jwtSecret) {
   };
 }
 
+/**
+ * Adaptador de Infraestructura: crearRequerirCliente
+ * Factory que crea un middleware que restringe el acceso a usuarios con
+ * rol Cliente (RN-039). Se inyecta el id del rol Cliente para no acoplarse
+ * a un valor fijo.
+ */
+function crearRequerirCliente(idRolCliente = 2) {
+  return function requerirCliente(req, res, next) {
+    if (!req.usuario || Number(req.usuario.id_rol) !== Number(idRolCliente)) {
+      return res.status(403).json({ error: 'Debes iniciar sesión como Cliente' });
+    }
+    return next();
+  };
+}
+
+/**
+ * Adaptador de Infraestructura: crearRequerirRepartidor
+ * Factory que crea un middleware que restringe el acceso a usuarios con
+ * rol Repartidor (RN-058). Se inyecta el id del rol Repartidor para no
+ * acoplarse a un valor fijo (id_rol = 3 en Seed.sql).
+ */
+function crearRequerirRepartidor(idRolRepartidor = 3) {
+  return function requerirRepartidor(req, res, next) {
+    if (!req.usuario || Number(req.usuario.id_rol) !== Number(idRolRepartidor)) {
+      return res.status(403).json({ error: 'Debes iniciar sesión como Repartidor' });
+    }
+    return next();
+  };
+}
+
 module.exports = crearAutenticador;
+module.exports.crearRequerirCliente = crearRequerirCliente;
+module.exports.crearRequerirRepartidor = crearRequerirRepartidor;

@@ -1,4 +1,10 @@
 const ActualizarEstadoPedidoUseCase = require('../../application/actualizarEstadoPedidoUseCase');
+const {
+  PedidoNoEncontradoError,
+  TransicionEstadoInvalidaError,
+  EvidenciaFotograficaRequeridaError,
+  ObservacionRequeridaError,
+} = require('../../domain/errors/pedidoErrors');
 
 function crearActualizarEstadoPedidoController(pedidoRepo) {
   return async function actualizarEstadoPedidoController(req, res) {
@@ -23,12 +29,13 @@ function crearActualizarEstadoPedidoController(pedidoRepo) {
 
       res.json(pedidoActualizado);
     } catch (error) {
-      if (error.message === 'Pedido no encontrado') {
+      if (error instanceof PedidoNoEncontradoError) {
         return res.status(404).json({ message: error.message });
       }
       if (
-        error.message.includes('Transición inválida') ||
-        error.message.includes('obligatoria') ||
+        error instanceof TransicionEstadoInvalidaError ||
+        error instanceof EvidenciaFotograficaRequeridaError ||
+        error instanceof ObservacionRequeridaError ||
         error.message.includes('actualizado por otro proceso')
       ) {
         return res.status(400).json({ message: error.message });

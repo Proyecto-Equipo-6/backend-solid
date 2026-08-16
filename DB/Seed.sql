@@ -8,6 +8,14 @@ INSERT INTO metodos_pago (id_metodo_pago, nombre, descripcion, requiere_comproba
 (2, 'Transferencia / Nequi / Daviplata', 'Pago mediante transferencia bancaria o monedero virtual', 1, 1);
 
 -- =====================================================
+-- BANCOS (asociados al método de pago de transferencia)
+-- =====================================================
+INSERT INTO bancos (id_banco, id_metodo_pago, nombre, descripcion, numero_cuenta) VALUES
+(1, 2, 'Nequi',       'Monedero virtual',            '3001234567'),
+(2, 2, 'Daviplata',   'Monedero virtual (llave)',    '3001234567'),
+(3, 2, 'Bancolombia', 'Cuenta de ahorros',           '123456789');
+
+-- =====================================================
 -- 1. ROLES
 -- =====================================================
 INSERT INTO roles (id_rol, nombre, descripcion) VALUES
@@ -74,8 +82,8 @@ INSERT INTO carrito_detalles (id_carrito, id_producto, cantidad) VALUES
 -- =====================================================
 INSERT INTO pedidos (id_pedido, id_usuario, id_metodo_pago, direccion_entrega, total, estado, observaciones) VALUES
 (1, 2, 1, 'Calle 10 # 5-20, Medellín',        250000.00, 'ENTREGADO',              'Entregado en portería'),
-(2, 3, 2, 'Carrera 45 # 12-10, Medellín',     350000.00, 'PENDIENTE_VERIFICACION', 'Comprobante de Nequi adjunto'),
-(3, 4, 1, 'Av. El Poblado # 3-15, Medellín',   450000.00, 'EN_RUTA',                'Llamar antes de entregar'),
+(2, 3, 2, 'Carrera 45 # 12-10, Medellín',     350000.00, 'ASIGNADO',               'Pedido asignado a repartidor'),
+(3, 4, 1, 'Av. El Poblado # 3-15, Medellín',   450000.00, 'EN_CAMINO',              'Llamar antes de entregar'),
 (4, 3, 2, 'Calle 80 # 23-45, Medellín',       220000.00, 'CANCELADO',              'Cancelado a solicitud del cliente'),
 (5, 2, 1, 'Calle 10 # 5-20, Medellín',        210000.00, 'NO_ENTREGADO',           'Cliente no se encontraba en el domicilio');
 

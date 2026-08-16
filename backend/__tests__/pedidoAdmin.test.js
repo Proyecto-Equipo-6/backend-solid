@@ -197,12 +197,14 @@ describe('Módulo administración de pedidos (CU-019, CU-020, CU-027)', () => {
   test('CP-HU008.4-01: Cancelación exitosa con reversión atómica de stock', async () => {
     const pedido = crearPedido(1, 'CONFIRMADO', 100);
     const producto = crearProducto(1, 10);
+
     const repoPedidos = new InMemoryPedidoRepartidorRepository(
       [pedido],
       [crearDetallePedido(1, 1, 3)]
     );
     const repoProductos = new InMemoryProductoRepository([producto]);
     const repoRepartidores = crearRepoRepartidores();
+
     const useCase = new CancelarPedidoAdminUseCase(repoPedidos, repoProductos, repoRepartidores);
 
     const cancelado = await useCase.ejecutar(1, 'Cliente solicitó anulación');
@@ -215,10 +217,10 @@ describe('Módulo administración de pedidos (CU-019, CU-020, CU-027)', () => {
   });
 
   test('CP-HU008.4-02: Bloqueo por inmutabilidad de pedido en estado terminal ENTREGADO', async () => {
-    const pedido = crearPedido(1, 'ENTREGADO', 100, 10);
-    const repoPedidos = new InMemoryPedidoRepartidorRepository([pedido]);
+    const repoPedidos = new InMemoryPedidoRepartidorRepository([crearPedido(1, 'ENTREGADO', 100, 10)]);
     const repoProductos = new InMemoryProductoRepository([crearProducto(1, 10)]);
     const repoRepartidores = crearRepoRepartidores();
+
     const useCase = new CancelarPedidoAdminUseCase(repoPedidos, repoProductos, repoRepartidores);
 
     await expect(
@@ -229,12 +231,14 @@ describe('Módulo administración de pedidos (CU-019, CU-020, CU-027)', () => {
   test('CP-HU008.4-03: Cancelación sin devolución de stock en caso de mermas', async () => {
     const pedido = crearPedido(1, 'CONFIRMADO', 100);
     const producto = crearProducto(1, 10);
+
     const repoPedidos = new InMemoryPedidoRepartidorRepository(
       [pedido],
       [crearDetallePedido(1, 1, 3)]
     );
     const repoProductos = new InMemoryProductoRepository([producto]);
     const repoRepartidores = crearRepoRepartidores();
+
     const useCase = new CancelarPedidoAdminUseCase(repoPedidos, repoProductos, repoRepartidores);
 
     const cancelado = await useCase.ejecutar(1, 'Producto dañado en bodega', { reintegrar_stock: false });
@@ -255,6 +259,7 @@ describe('Módulo administración de pedidos (CU-019, CU-020, CU-027)', () => {
     const repoRepartidores = new InMemoryRepartidorRepository([
       { id_usuario: 10, estado: 'OCUPADO' }
     ]);
+
     const useCase = new CancelarPedidoAdminUseCase(repoPedidos, repoProductos, repoRepartidores);
 
     const cancelado = await useCase.ejecutar(1, 'Cliente solicitó anulación', { reintegrar_stock: true });

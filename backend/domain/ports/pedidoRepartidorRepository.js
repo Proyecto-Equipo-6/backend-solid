@@ -5,8 +5,8 @@ class PedidoRepartidorRepository {
    * @param {number} repartidorId
    * @returns {Promise<Pedido[]>}
    */
-  async obtenerPedidosDelDia(repartidorId) {
-    throw new Error('Método obtenerPedidosDelDia no implementado');
+  async obtenerPedidosAsignadosDelDia(repartidorId) {
+    throw new Error('Método obtenerPedidosAsignadosDelDia no implementado');
   }
 
   /**
@@ -15,19 +15,40 @@ class PedidoRepartidorRepository {
    * @param {number} pedidoId
    * @returns {Promise<Pedido|null>}
    */
-  async obtenerDetallePedido(pedidoId) {
-    throw new Error('Método obtenerDetallePedido no implementado');
+  async obtenerPedidoPorId(pedidoId) {
+    throw new Error('Método obtenerPedidoPorId no implementado');
   }
 
   /**
    * Actualiza el estado de un pedido siguiendo la máquina de estados.
    * @param {number} pedidoId
    * @param {string} nuevoEstado
+   * @param {string} estadoAnterior - estado esperado para validar concurrencia
    * @param {object} datosAdicionales - { foto, observacion }
    * @returns {Promise<Pedido>}
    */
-  async actualizarEstado(pedidoId, nuevoEstado, datosAdicionales = {}) {
-    throw new Error('Método actualizarEstado no implementado');
+  async actualizarEstadoPedido(pedidoId, nuevoEstado, estadoAnterior, datosAdicionales = {}) {
+    throw new Error('Método actualizarEstadoPedido no implementado');
+  }
+
+  /**
+   * CU-018 · Obtiene el historial de pedidos finalizados del repartidor.
+   * Solo estados ENTREGADO, NO_ENTREGADO o CANCELADO (RN-071/RN-072/RN-075).
+   * @param {number} repartidorId
+   * @param {object} filtros - { filtroEstado }
+   * @returns {Promise<Array<{ id_pedido, fechaEntregaReal, estado, direccion_entrega }>>}
+   */
+  async obtenerHistorialPedidos(repartidorId, filtros = {}) {
+    throw new Error('Método obtenerHistorialPedidos no implementado');
+  }
+
+  /**
+   * CU-018 · Cuenta los pedidos finalizados del repartidor en el mes y la semana actuales.
+   * @param {number} repartidorId
+   * @returns {Promise<{ totalMes: number, totalSemana: number }>}
+   */
+  async contarPedidosDelPeriodo(repartidorId) {
+    throw new Error('Método contarPedidosDelPeriodo no implementado');
   }
 }
 

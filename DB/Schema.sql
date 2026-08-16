@@ -86,7 +86,21 @@ CREATE TABLE metodos_pago (
 ) ENGINE=InnoDB;
 
 -- =============================================================================
--- 7. TABLA: PRODUCTOS
+-- 7. TABLA: BANCOS
+-- =============================================================================
+CREATE TABLE bancos (
+    id_banco INT AUTO_INCREMENT PRIMARY KEY,
+    id_metodo_pago INT NOT NULL,
+    nombre VARCHAR(50) NOT NULL UNIQUE,
+    descripcion VARCHAR(255) NULL,
+    numero_cuenta VARCHAR(30) NULL,
+    activo TINYINT(1) NOT NULL DEFAULT 1,
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_bancos_metodos_pago FOREIGN KEY (id_metodo_pago) REFERENCES metodos_pago(id_metodo_pago) ON DELETE RESTRICT
+) ENGINE=InnoDB;
+
+-- =============================================================================
+-- 8. TABLA: PRODUCTOS
 -- =============================================================================
 CREATE TABLE productos (
     id_producto INT AUTO_INCREMENT PRIMARY KEY,
@@ -109,7 +123,7 @@ CREATE TABLE productos (
 ) ENGINE=InnoDB;
 
 -- =============================================================================
--- 8. TABLA: HISTORIAL_STOCK
+-- 9. TABLA: HISTORIAL_STOCK
 -- =============================================================================
 CREATE TABLE historial_stock (
     id_historial INT AUTO_INCREMENT PRIMARY KEY,
@@ -124,7 +138,7 @@ CREATE TABLE historial_stock (
 ) ENGINE=InnoDB;
 
 -- =============================================================================
--- 9. TABLA: CARRITO
+-- 10. TABLA: CARRITO
 -- =============================================================================
 CREATE TABLE carrito (
     id_carrito INT AUTO_INCREMENT PRIMARY KEY,
@@ -135,7 +149,7 @@ CREATE TABLE carrito (
 ) ENGINE=InnoDB;
 
 -- =============================================================================
--- 10. TABLA: CARRITO_DETALLES
+-- 11. TABLA: CARRITO_DETALLES
 -- =============================================================================
 CREATE TABLE carrito_detalles (
     id_detalle_carrito INT AUTO_INCREMENT PRIMARY KEY,
@@ -150,7 +164,7 @@ CREATE TABLE carrito_detalles (
 ) ENGINE=InnoDB;
 
 -- =============================================================================
--- 11. TABLA: PEDIDOS (Incluye el estado NO_ENTREGADO)
+-- 12. TABLA: PEDIDOS (Incluye el estado NO_ENTREGADO)
 -- =============================================================================
 CREATE TABLE pedidos (
     id_pedido INT AUTO_INCREMENT PRIMARY KEY,
@@ -160,9 +174,8 @@ CREATE TABLE pedidos (
     total DECIMAL(10, 2) NOT NULL,
     estado ENUM(
         'PENDIENTE', 
-        'PENDIENTE_VERIFICACION', 
-        'PAGO_APROBADO', 
-        'EN_RUTA', 
+        'ASIGNADO', 
+        'EN_CAMINO', 
         'ENTREGADO', 
         'NO_ENTREGADO',
         'CANCELADO'
@@ -178,7 +191,7 @@ CREATE TABLE pedidos (
 ) ENGINE=InnoDB;
 
 -- =============================================================================
--- 12. TABLA: PEDIDO_DETALLES
+-- 13. TABLA: PEDIDO_DETALLES
 -- =============================================================================
 CREATE TABLE pedido_detalles (
     id_detalle_pedido INT AUTO_INCREMENT PRIMARY KEY,

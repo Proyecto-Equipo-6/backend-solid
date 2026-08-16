@@ -26,9 +26,40 @@ const MySQLCategoriaRepository = require('./backend/infraestructure/repositories
 const ListarCategoriasUseCase = require('./backend/application/ListarCategoriasUseCase');
 const CategoriaController = require('./backend/infraestructure/controllers/CategoriaController');
 const createCategoriaRouter = require('./backend/infraestructure/routes/categoriaRoutes');
+const MySQLBancoRepository = require('./backend/infraestructure/repositories/mysql/MySQLBancoRepository');
+const ListarBancosUseCase = require('./backend/application/ListarBancosUseCase');
+const BancoController = require('./backend/infraestructure/controllers/BancoController');
+const createBancoRouter = require('./backend/infraestructure/routes/bancoRoutes');
 const ObtenerPerfilUseCase = require('./backend/application/ObtenerPerfilUseCase');
 const ActualizarPerfilUseCase = require('./backend/application/ActualizarPerfilUseCase');
+const MySQLAnaliticaRepository = require('./backend/infraestructure/repositories/mysql/MySQLAnaliticaRepository');
+const ObtenerResumenAnaliticaUseCase = require('./backend/application/ObtenerResumenAnaliticaUseCase');
+const AnaliticaController = require('./backend/infraestructure/controllers/AnaliticaController');
+const createAnaliticaRouter = require('./backend/infraestructure/routes/analiticaRoutes');
 const crearAutenticador = require('./backend/infraestructure/middlewares/autenticacion');
+const { crearRequerirCliente } = require('./backend/infraestructure/middlewares/autenticacion');
+const { crearRequerirRepartidor } = require('./backend/infraestructure/middlewares/autenticacion');
+
+// --- Módulos de Carrito (Fase 3) ---
+const MySQLCarritoRepository = require('./backend/infraestructure/repositories/mysql/MySQLCarritoRepository');
+const VerCarritoUseCase = require('./backend/application/VerCarritoUseCase');
+const AgregarAlCarritoUseCase = require('./backend/application/AgregarAlCarritoUseCase');
+const ActualizarCarritoUseCase = require('./backend/application/ActualizarCarritoUseCase');
+const EliminarDelCarritoUseCase = require('./backend/application/EliminarDelCarritoUseCase');
+const CarritoController = require('./backend/infraestructure/controllers/CarritoController');
+const createCarritoRouter = require('./backend/infraestructure/routes/carritoRoutes');
+
+// --- Módulos de Pedidos (Fase 4) ---
+const MySQLPedidoRepository = require('./backend/infraestructure/repositories/mysql/MySQLPedidoRepository');
+const CrearPedidoUseCase = require('./backend/application/CrearPedidoUseCase');
+const VerPedidosUseCase = require('./backend/application/VerPedidosUseCase');
+const CancelarPedidoUseCase = require('./backend/application/CancelarPedidoUseCase');
+const PedidoController = require('./backend/infraestructure/controllers/PedidoController');
+const createPedidoRouter = require('./backend/infraestructure/routes/pedidoRoutes');
+
+// --- Módulos de Repartidor (CU-015 a CU-018) ---
+const MySQLPedidoRepartidorRepository = require('./backend/infraestructure/repositories/mysql/MySQLPedidoRepartidorRepository');
+const createPedidosRepartidorRouter = require('./backend/infraestructure/routes/pedidosRepartidorRoutes');
 
 const app = express();
 app.disable('x-powered-by');
@@ -105,12 +136,54 @@ const categoriaRepository = new MySQLCategoriaRepository();
 const listarCategoriasUseCase = new ListarCategoriasUseCase(categoriaRepository);
 const categoriaController = new CategoriaController(listarCategoriasUseCase);
 
+// --- Inyección de Dependencias para Bancos (DIP) ---
+const bancoRepository = new MySQLBancoRepository();
+const listarBancosUseCase = new ListarBancosUseCase(bancoRepository);
+const bancoController = new BancoController(listarBancosUseCase);
+
+// --- Inyección de Dependencias para Reportes del Panel (DIP) ---
+const analiticaRepository = new MySQLAnaliticaRepository();
+const obtenerResumenAnaliticaUseCase = new ObtenerResumenAnaliticaUseCase(analiticaRepository);
+const analiticaController = new AnaliticaController(obtenerResumenAnaliticaUseCase);
+
+// --- Inyección de Dependencias para Carrito (DIP) ---
+const carritoRepository = new MySQLCarritoRepository();
+const verCarritoUseCase = new VerCarritoUseCase(carritoRepository);
+const agregarAlCarritoUseCase = new AgregarAlCarritoUseCase(carritoRepository, productoRepository);
+const actualizarCarritoUseCase = new ActualizarCarritoUseCase(carritoRepository, productoRepository);
+const eliminarDelCarritoUseCase = new EliminarDelCarritoUseCase(carritoRepository);
+const carritoController = new CarritoController({
+  verCarritoUseCase,
+  agregarAlCarritoUseCase,
+  actualizarCarritoUseCase,
+  eliminarDelCarritoUseCase,
+});
+
+// --- Inyección de Dependencias para Pedidos (DIP) ---
+const pedidoRepository = new MySQLPedidoRepository();
+const crearPedidoUseCase = new CrearPedidoUseCase(carritoRepository, pedidoRepository);
+const verPedidosUseCase = new VerPedidosUseCase(pedidoRepository);
+const cancelarPedidoUseCase = new CancelarPedidoUseCase(pedidoRepository);
+const pedidoController = new PedidoController({ crearPedidoUseCase, verPedidosUseCase, cancelarPedidoUseCase });
+
+// --- Middlewares de autorización (DIP) ---
+const requerirCliente = crearRequerirCliente(2);
+const requerirRepartidor = crearRequerirRepartidor(3);
+
+// --- Inyección de Dependencias para Repartidor (DIP) ---
+const pedidoRepartidorRepository = new MySQLPedidoRepartidorRepository();
+
 // --- Rutas (Cargadas como Middleware) ---
 app.use('/api/v1/users', createUserRouter(userController, autenticar));
 app.use('/api/v1/roles', createRolRouter(adminUpdateRolController));
 app.use('/api/v1/auth', createAuthRouter(authController));
 app.use('/api/v1/productos', createProductoRouter(productoController));
 app.use('/api/v1/categorias', createCategoriaRouter(categoriaController));
+app.use('/api/v1/bancos', createBancoRouter(bancoController));
+app.use('/api/v1/analitica', createAnaliticaRouter(analiticaController));
+app.use('/api/v1/carrito', createCarritoRouter(carritoController, autenticar, requerirCliente));
+app.use('/api/v1/pedidos', createPedidoRouter(pedidoController, autenticar, requerirCliente));
+app.use('/api/v1/repartidor', createPedidosRepartidorRouter(pedidoRepartidorRepository, autenticar, requerirRepartidor));
 
 // --- 404 ---
 app.use((req, res) => {
