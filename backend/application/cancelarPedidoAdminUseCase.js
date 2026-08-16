@@ -4,7 +4,7 @@ class CancelarPedidoAdminUseCase {
   }
 
   async ejecutar(id_pedido, motivo_cancelacion, observaciones = '') {
-    const pedido = await this.pedidoRepo.obtenerDetallePedido(id_pedido);
+    const pedido = await this.pedidoRepo.obtenerPedidoPorId(id_pedido);
     if (!pedido) throw new Error('Pedido no encontrado');
 
     // CU-020: Bloquear cancelación en estados EN_CAMINO o ENTREGADO

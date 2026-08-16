@@ -7,7 +7,7 @@ class VerDashboardPedidosUseCase {
 
   async ejecutar(repartidorId) {
     // repartidorId es el id_usuario del repartidor
-    const pedidos = await this.pedidoRepo.obtenerPedidosDelDia(repartidorId);
+    const pedidos = await this.pedidoRepo.obtenerPedidosAsignadosDelDia(repartidorId);
 
     if (pedidos.length === 0) {
       return {

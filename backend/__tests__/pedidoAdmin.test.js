@@ -136,7 +136,7 @@ test('CP-CU-020-04: Mantener pedido activo no modifica el estado', async () => {
     crearPedido(1, 'NO_ENTREGADO', 100, 10)
   ]);
 
-  const pedido = await repo.obtenerDetallePedido(1);
+  const pedido = await repo.obtenerPedidoPorId(1);
   expect(pedido.estado).toBe('NO_ENTREGADO');
   // Al no llamar al caso de uso, el pedido permanece igual
 });

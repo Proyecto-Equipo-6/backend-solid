@@ -1,10 +1,11 @@
 const VerDetallePedidoUseCase = require('../../application/verDetallePedidoUseCase');
+const { PedidoNoEncontradoError } = require('../../domain/errors/pedidoErrors');
 
 function crearDetallePedidoController(pedidoRepo) {
   return async function detallePedidoController(req, res) {
     try {
       const pedidoId = Number(req.params.pedidoId);
-      const repartidorId = Number(req.user?.id || req.user?.userId);
+      const repartidorId = Number(req.user?.id_usuario || req.user?.id || req.user?.userId);
 
       if (!repartidorId) {
         return res.status(401).json({ message: 'Usuario no autenticado' });
@@ -15,7 +16,7 @@ function crearDetallePedidoController(pedidoRepo) {
 
       res.json(detalle);
     } catch (error) {
-      if (error.message === 'Pedido no encontrado') {
+      if (error instanceof PedidoNoEncontradoError) {
         return res.status(404).json({ message: error.message });
       }
       if (error.message.startsWith('Acceso denegado')) {

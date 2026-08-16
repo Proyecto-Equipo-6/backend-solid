@@ -38,6 +38,7 @@ const AnaliticaController = require('./backend/infraestructure/controllers/Anali
 const createAnaliticaRouter = require('./backend/infraestructure/routes/analiticaRoutes');
 const crearAutenticador = require('./backend/infraestructure/middlewares/autenticacion');
 const { crearRequerirCliente } = require('./backend/infraestructure/middlewares/autenticacion');
+const { crearRequerirRepartidor } = require('./backend/infraestructure/middlewares/autenticacion');
 
 // --- Módulos de Carrito (Fase 3) ---
 const MySQLCarritoRepository = require('./backend/infraestructure/repositories/mysql/MySQLCarritoRepository');
@@ -55,6 +56,10 @@ const VerPedidosUseCase = require('./backend/application/VerPedidosUseCase');
 const CancelarPedidoUseCase = require('./backend/application/CancelarPedidoUseCase');
 const PedidoController = require('./backend/infraestructure/controllers/PedidoController');
 const createPedidoRouter = require('./backend/infraestructure/routes/pedidoRoutes');
+
+// --- Módulos de Repartidor (CU-015 a CU-018) ---
+const MySQLPedidoRepartidorRepository = require('./backend/infraestructure/repositories/mysql/MySQLPedidoRepartidorRepository');
+const createPedidosRepartidorRouter = require('./backend/infraestructure/routes/pedidosRepartidorRoutes');
 
 const app = express();
 app.disable('x-powered-by');
@@ -163,6 +168,10 @@ const pedidoController = new PedidoController({ crearPedidoUseCase, verPedidosUs
 
 // --- Middlewares de autorización (DIP) ---
 const requerirCliente = crearRequerirCliente(2);
+const requerirRepartidor = crearRequerirRepartidor(3);
+
+// --- Inyección de Dependencias para Repartidor (DIP) ---
+const pedidoRepartidorRepository = new MySQLPedidoRepartidorRepository();
 
 // --- Rutas (Cargadas como Middleware) ---
 app.use('/api/v1/users', createUserRouter(userController, autenticar));
@@ -174,6 +183,7 @@ app.use('/api/v1/bancos', createBancoRouter(bancoController));
 app.use('/api/v1/analitica', createAnaliticaRouter(analiticaController));
 app.use('/api/v1/carrito', createCarritoRouter(carritoController, autenticar, requerirCliente));
 app.use('/api/v1/pedidos', createPedidoRouter(pedidoController, autenticar, requerirCliente));
+app.use('/api/v1/repartidor', createPedidosRepartidorRouter(pedidoRepartidorRepository, autenticar, requerirRepartidor));
 
 // --- 404 ---
 app.use((req, res) => {
