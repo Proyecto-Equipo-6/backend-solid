@@ -5,30 +5,74 @@
  * RN-044: monto mínimo de $200.000.
  * RN-045: el pedido se crea con estado PENDIENTE.
  * RN-047: no se puede dividir el carrito ni hacer pedidos parciales.
+ * Incluye campos extendidos clienteNombre, clienteTelefono y caracteristicasLogistica
+ * para el flujo de repartidor (Aleja).
+ * Incluye la máquina de estados del flujo de repartidor (RN-065 a RN-070).
  */
+const { TransicionEstadoInvalidaError } = require('../errors/pedidoErrors');
+
+// Estados relevantes para el flujo del repartidor (RN-058 a RN-076).
+const ESTADOS_PEDIDO = Object.freeze({
+  PENDIENTE: 'PENDIENTE',
+  CONFIRMADO: 'CONFIRMADO',
+  ASIGNADO: 'ASIGNADO',
+  EN_CAMINO: 'EN_CAMINO',
+  ENTREGADO: 'ENTREGADO',
+  NO_ENTREGADO: 'NO_ENTREGADO',
+  CANCELADO: 'CANCELADO',
+});
+
+// RN-065: los estados siguen el orden Asignado -> En camino -> Entregado, sin saltos.
+// RN-067: desde "En camino" también se puede caer a "No entregado" (excepción de entrega).
+const TRANSICIONES_VALIDAS = Object.freeze({
+  [ESTADOS_PEDIDO.ASIGNADO]: [ESTADOS_PEDIDO.EN_CAMINO],
+  [ESTADOS_PEDIDO.EN_CAMINO]: [ESTADOS_PEDIDO.ENTREGADO, ESTADOS_PEDIDO.NO_ENTREGADO],
+  // RN-070: una vez "Entregado" o "No entregado", el repartidor ya no puede tocar el estado.
+  [ESTADOS_PEDIDO.ENTREGADO]: [],
+  [ESTADOS_PEDIDO.NO_ENTREGADO]: [],
+  [ESTADOS_PEDIDO.CANCELADO]: [],
+});
+
+// RN-064: orden fijo del diagrama de seguimiento mostrado en el detalle (CU-016).
+const DIAGRAMA_SEGUIMIENTO = Object.freeze([
+  ESTADOS_PEDIDO.ASIGNADO,
+  ESTADOS_PEDIDO.EN_CAMINO,
+  ESTADOS_PEDIDO.ENTREGADO,
+]);
+
 class Pedido {
   constructor({
     id_pedido = null,
-    id_usuario,
-    id_metodo_pago,
-    direccion_entrega,
-    total,
+    id_usuario = null,
+    id_repartidor = null,
+    id_metodo_pago = null,
+    direccion_entrega = '',
+    total = 0,
     estado = 'PENDIENTE',
+    comprobante_url = null,
     observaciones = null,
     motivo_cancelacion = null,
-    fecha_pedido = null,
+    fecha_pedido = new Date().toISOString(),
     fecha_actualizacion = null,
+    clienteNombre = '',
+    clienteTelefono = '',
+    caracteristicasLogistica = 'Ninguna'
   } = {}) {
     this.id_pedido = id_pedido;
     this.id_usuario = id_usuario;
+    this.id_repartidor = id_repartidor;
     this.id_metodo_pago = id_metodo_pago;
     this.direccion_entrega = direccion_entrega;
     this.total = total;
     this.estado = estado;
+    this.comprobante_url = comprobante_url;
     this.observaciones = observaciones;
     this.motivo_cancelacion = motivo_cancelacion;
     this.fecha_pedido = fecha_pedido;
     this.fecha_actualizacion = fecha_actualizacion;
+    this.clienteNombre = clienteNombre;
+    this.clienteTelefono = clienteTelefono;
+    this.caracteristicasLogistica = caracteristicasLogistica;
   }
 
   // RN-044: monto mínimo para generar el pedido
@@ -50,6 +94,44 @@ class Pedido {
       this.cumpleMontoMinimo()
     );
   }
+
+  esAsignado() {
+    return this.estado === 'ASIGNADO';
+  }
+
+  puedeActualizar() {
+    return ['ASIGNADO', 'EN_CAMINO'].includes(this.estado);
+  }
+
+  esFinalizado() {
+    return ['ENTREGADO', 'NO_ENTREGADO', 'CANCELADO'].includes(this.estado);
+  }
+
+  // RN-058/RN-059: solo pertenece al dashboard si el admin lo asignó a este repartidor.
+  perteneceA(repartidorId) {
+    return this.id_repartidor === repartidorId;
+  }
+
+  // FP-004/RN-060: dentro de los pedidos activos, el más antiguo es el "pedido activo".
+  esElActivo(pedidosOrdenados) {
+    return pedidosOrdenados[0]?.id_pedido === this.id_pedido;
+  }
+
+  /**
+   * Valida (sin persistir) si el pedido puede pasar de su estado actual a `estadoNuevo`.
+   * Lanza TransicionEstadoInvalidaError si la transición no está permitida (RN-065/RN-070).
+   */
+  validarTransicionA(estadoNuevo) {
+    const permitidos = TRANSICIONES_VALIDAS[this.estado] || [];
+    if (!permitidos.includes(estadoNuevo)) {
+      throw new TransicionEstadoInvalidaError(
+        `Transición inválida de "${this.estado}" a "${estadoNuevo}".`
+      );
+    }
+  }
 }
 
 module.exports = Pedido;
+module.exports.ESTADOS_PEDIDO = ESTADOS_PEDIDO;
+module.exports.TRANSICIONES_VALIDAS = TRANSICIONES_VALIDAS;
+module.exports.DIAGRAMA_SEGUIMIENTO = DIAGRAMA_SEGUIMIENTO;

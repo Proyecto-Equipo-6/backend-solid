@@ -1,3 +1,4 @@
+const Categoria = require('../../../domain/models/Categoria');
 const CategoriaRepository = require('../../../domain/ports/CategoriaRepository');
 
 /**
@@ -9,10 +10,66 @@ class InMemoryCategoriaRepository extends CategoriaRepository {
   constructor() {
     super();
     this.categorias = [];
+    this.contadorId = 0;
+    this.productosAsociados = new Map(); // id_categoria -> cantidad de productos
   }
 
   async findActivos() {
     return this.categorias.filter((categoria) => categoria.estado === 1);
+  }
+
+  async guardar(categoriaData) {
+    const nuevoId = this.contadorId + 1;
+    const nuevaCategoria = new Categoria({
+      ...categoriaData,
+      id_categoria: nuevoId,
+      estado: categoriaData.estado ?? 1,
+      fecha_creacion: new Date().toISOString()
+    });
+
+    this.categorias.push(nuevaCategoria);
+    this.contadorId = nuevoId;
+    return new Categoria({ ...nuevaCategoria });
+  }
+
+  async buscarPorNombre(nombre) {
+    return this.categorias.find(
+      (c) => c.nombre.toLowerCase() === nombre.toLowerCase()
+    ) || null;
+  }
+
+  async buscarPorId(id_categoria) {
+    return this.categorias.find((c) => c.id_categoria === id_categoria) || null;
+  }
+
+  async actualizar(id_categoria, datos) {
+    const index = this.categorias.findIndex((c) => c.id_categoria === id_categoria);
+    if (index === -1) throw new Error('Categoría no encontrada');
+
+    const actualizada = new Categoria({
+      ...this.categorias[index],
+      ...datos,
+      id_categoria,
+      fecha_creacion: this.categorias[index].fecha_creacion // no se modifica
+    });
+
+    this.categorias[index] = actualizada;
+    return new Categoria({ ...actualizada });
+  }
+
+  async eliminar(id_categoria) {
+    const index = this.categorias.findIndex((c) => c.id_categoria === id_categoria);
+    if (index === -1) throw new Error('Categoría no encontrada');
+    this.categorias.splice(index, 1);
+    return true;
+  }
+
+  async contarProductosAsociados(id_categoria) {
+    return this.productosAsociados.get(id_categoria) || 0;
+  }
+
+  setProductosAsociados(id_categoria, cantidad) {
+    this.productosAsociados.set(id_categoria, cantidad);
   }
 }
 
