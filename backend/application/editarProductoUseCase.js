@@ -10,10 +10,13 @@ class EditarProductoUseCase {
       throw new Error('Producto no encontrado');
     }
 
-    if (!nombre || !precio === undefined || stock === undefined || !id_categoria) {
-      throw new Error('Complete los campos obligatorios');
+    if (!nombre || nombre.trim() === '' ||
+    precio === undefined || precio === null ||
+    stock === undefined || stock === null ||
+    id_categoria === undefined || id_categoria === null) {
+    throw new Error('Complete los campos obligatorios');
     }
-
+    
     if (precio < 0 || stock < 0) {
       throw new Error('El precio y el stock no pueden ser negativos');
     }
