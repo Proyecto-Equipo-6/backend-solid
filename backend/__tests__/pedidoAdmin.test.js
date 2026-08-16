@@ -2,6 +2,7 @@ import InMemoryPedidoRepartidorRepository from '../infraestructure/repositories/
 import ObtenerTodosPedidosUseCase from '../application/obtenerTodosPedidosUseCase.js';
 import AsignarRepartidorUseCase from '../application/asignarRepartidorUseCase.js';
 import CancelarPedidoAdminUseCase from '../application/cancelarPedidoAdminUseCase.js';
+import ActualizarEstadoPedidoAdminUseCase from '../application/actualizarEstadoPedidoAdminUseCase.js';
 import Pedido from '../domain/models/Pedido.js';
 
 const crearPedido = (
@@ -45,35 +46,46 @@ describe('Módulo administración de pedidos (CU-019, CU-020, CU-027)', () => {
     expect(porFecha).toHaveLength(2);
   });
 
-  test('Asignación exitosa de un pedido PENDIENTE - CP-CU-019-01', async () => {
-    const repo = new InMemoryPedidoRepartidorRepository([
-      crearPedido(1, 'PENDIENTE', 100)
-    ]);
-    const useCase = new AsignarRepartidorUseCase(repo);
+  test('Asignación exitosa de un pedido CONFIRMADO - CP-CU-019-01', async () => {
+  const repo = new InMemoryPedidoRepartidorRepository([
+    crearPedido(1, 'CONFIRMADO', 100)
+  ]);
+  const useCase = new AsignarRepartidorUseCase(repo);
 
-    const pedidoAsignado = await useCase.ejecutar(1, 10);
-    expect(pedidoAsignado.estado).toBe('ASIGNADO');
-    expect(pedidoAsignado.id_repartidor).toBe(10);
+  const pedidoAsignado = await useCase.ejecutar(1, 10);
+  expect(pedidoAsignado.estado).toBe('ASIGNADO');
+  expect(pedidoAsignado.id_repartidor).toBe(10);
 
-    const cantidad = await repo.contarPedidosDelDia(10);
-    expect(cantidad).toBe(1);
-  });
+  const cantidad = await repo.contarPedidosDelDia(10);
+  expect(cantidad).toBe(1);
+});
+
+test('CP-CU-019-03: Bloqueo si el pedido ya fue asignado', async () => {
+  const repo = new InMemoryPedidoRepartidorRepository([
+    crearPedido(1, 'CONFIRMADO', 100, 10) // ya tiene repartidor 10
+  ]);
+  const useCase = new AsignarRepartidorUseCase(repo);
+
+  await expect(
+    useCase.ejecutar(1, 20)
+  ).rejects.toThrow('El pedido ya fue asignado');
+});
 
   test('Bloqueo si el repartidor alcanzó 3 pedidos diarios - CP-CU-019-05', async () => {
-    const repo = new InMemoryPedidoRepartidorRepository([
-      crearPedido(1, 'PENDIENTE', 100),
-      crearPedido(2, 'PENDIENTE', 101),
-      crearPedido(3, 'PENDIENTE', 102),
-      crearPedido(4, 'PENDIENTE', 103)
-    ]);
+  const repo = new InMemoryPedidoRepartidorRepository([
+    crearPedido(1, 'CONFIRMADO', 100),
+    crearPedido(2, 'CONFIRMADO', 101),
+    crearPedido(3, 'CONFIRMADO', 102),
+    crearPedido(4, 'CONFIRMADO', 103)
+  ]);
 
-    await repo.actualizarPedido(1, { id_repartidor: 10, estado: 'ASIGNADO' });
-    await repo.actualizarPedido(2, { id_repartidor: 10, estado: 'ASIGNADO' });
-    await repo.actualizarPedido(3, { id_repartidor: 10, estado: 'ASIGNADO' });
+  await repo.actualizarPedido(1, { id_repartidor: 10, estado: 'ASIGNADO' });
+  await repo.actualizarPedido(2, { id_repartidor: 10, estado: 'ASIGNADO' });
+  await repo.actualizarPedido(3, { id_repartidor: 10, estado: 'ASIGNADO' });
 
-    const useCase = new AsignarRepartidorUseCase(repo);
-    await expect(useCase.ejecutar(4, 10)).rejects.toThrow('El repartidor ha alcanzado el límite de pedidos diarios');
-  });
+  const useCase = new AsignarRepartidorUseCase(repo);
+  await expect(useCase.ejecutar(4, 10)).rejects.toThrow('El repartidor ha alcanzado el límite de pedidos diarios');
+});
 
   test('Cancelación directa exitosa con motivo predefinido - CP-CU-020-01', async () => {
     const repo = new InMemoryPedidoRepartidorRepository([
@@ -97,14 +109,57 @@ describe('Módulo administración de pedidos (CU-019, CU-020, CU-027)', () => {
     ).rejects.toThrow('Debe especificar el motivo en la observación');
   });
 
-  test('Bloqueo de cancelación en estado EN_RUTA - CU-020', async () => {
-    const repo = new InMemoryPedidoRepartidorRepository([
-      crearPedido(1, 'EN_RUTA', 100, 10)
-    ]);
-    const useCase = new CancelarPedidoAdminUseCase(repo);
+ test('Bloqueo de cancelación en estado EN_CAMINO - CU-020', async () => {
+  const repo = new InMemoryPedidoRepartidorRepository([
+    crearPedido(1, 'EN_CAMINO', 100, 10)
+  ]);
+  const useCase = new CancelarPedidoAdminUseCase(repo);
 
-    await expect(
-      useCase.ejecutar(1, 'Otro', 'Observación de prueba')
-    ).rejects.toThrow('No se puede cancelar un pedido en este estado');
-  });
+  await expect(
+    useCase.ejecutar(1, 'Otro', 'Observación de prueba')
+  ).rejects.toThrow('No se puede cancelar un pedido en este estado');
+});
+
+  test('CP-CU-020-03: Cancelación de pedido NO_ENTREGADO con revisión de observación', async () => {
+  const repo = new InMemoryPedidoRepartidorRepository([
+    crearPedido(1, 'NO_ENTREGADO', 100, 10)
+  ]);
+  const useCase = new CancelarPedidoAdminUseCase(repo);
+
+  const cancelado = await useCase.ejecutar(1, 'Cliente no responde', 'Revisión de observación del repartidor');
+  expect(cancelado.estado).toBe('CANCELADO');
+  expect(cancelado.motivo_cancelacion).toBe('Cliente no responde');
+});
+
+test('CP-CU-020-04: Mantener pedido activo no modifica el estado', async () => {
+  const repo = new InMemoryPedidoRepartidorRepository([
+    crearPedido(1, 'NO_ENTREGADO', 100, 10)
+  ]);
+
+  const pedido = await repo.obtenerDetallePedido(1);
+  expect(pedido.estado).toBe('NO_ENTREGADO');
+  // Al no llamar al caso de uso, el pedido permanece igual
+});
+
+  test('CP-RF-008.2-03: Bloqueo de saltos ilógicos en la máquina de estados', async () => {
+  const repo = new InMemoryPedidoRepartidorRepository([
+    crearPedido(1, 'PENDIENTE', 100)
+  ]);
+  const useCase = new ActualizarEstadoPedidoAdminUseCase(repo);
+
+  await expect(
+    useCase.ejecutar(1, 'ENTREGADO')
+  ).rejects.toThrow('No se pudo actualizar el estado del pedido. Transición inválida.');
+});
+
+test('CP-CU-027-01: Transición válida PENDIENTE -> CONFIRMADO', async () => {
+  const repo = new InMemoryPedidoRepartidorRepository([
+    crearPedido(1, 'PENDIENTE', 100)
+  ]);
+  const useCase = new ActualizarEstadoPedidoAdminUseCase(repo);
+
+  const pedidoActualizado = await useCase.ejecutar(1, 'CONFIRMADO');
+
+  expect(pedidoActualizado.estado).toBe('CONFIRMADO');
+});
 });

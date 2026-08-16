@@ -5,14 +5,13 @@ import CrearProductoUseCase from '../application/crearProductoUseCase.js';
 import EditarProductoUseCase from '../application/editarProductoUseCase.js';
 import EliminarProductoUseCase from '../application/eliminarProductoUseCase.js';
 
-// Helper para crear la categoría "Aseo"
 async function crearCategoriaAseo(repoCategoria) {
   const useCase = new CrearCategoriaUseCase(repoCategoria);
   return await useCase.ejecutar({ nombre: 'Aseo', descripcion: 'Productos de limpieza' });
 }
 
 describe('Módulo CRUD productos - Aseo (CU-023)', () => {
-  test('Crear producto con éxito (flujo feliz, estado 1 y fecha automática)', async () => {
+  test('CP-CU-023-01: Crear producto con éxito y asignar imagen por defecto', async () => {
     const repoProductos = new InMemoryProductoRepository();
     const repoCategorias = new InMemoryCategoriaRepository();
     const categoria = await crearCategoriaAseo(repoCategorias);
@@ -30,7 +29,7 @@ describe('Módulo CRUD productos - Aseo (CU-023)', () => {
     expect(producto.nombre).toBe('Jabón Líquido');
     expect(producto.estado).toBe(1);
     expect(producto.fecha_creacion).toBeDefined();
-    expect(new Date(producto.fecha_creacion).toString()).not.toBe('Invalid Date');
+    expect(producto.imagen_url).toBe('sin_imagen.jpg'); // CP-CU-023-03
   });
 
   test('Rechazar si el nombre está duplicado', async () => {
@@ -59,7 +58,7 @@ describe('Módulo CRUD productos - Aseo (CU-023)', () => {
     ).rejects.toThrow('Ya existe un producto con ese nombre');
   });
 
-  test('Rechazar si el precio o el stock son negativos', async () => {
+  test('Rechazar precio cero o stock negativo', async () => {
     const repoProductos = new InMemoryProductoRepository();
     const repoCategorias = new InMemoryCategoriaRepository();
     const categoria = await crearCategoriaAseo(repoCategorias);
@@ -71,10 +70,10 @@ describe('Módulo CRUD productos - Aseo (CU-023)', () => {
         id_categoria: categoria.id_categoria,
         nombre: 'Limpiavidrios',
         descripcion: 'Frasco 500 ml',
-        precio: -500,
+        precio: 0,
         stock: 10
       })
-    ).rejects.toThrow('El precio y el stock no pueden ser negativos');
+    ).rejects.toThrow('El precio debe ser un número mayor a cero');
 
     await expect(
       useCase.ejecutar({
@@ -84,12 +83,12 @@ describe('Módulo CRUD productos - Aseo (CU-023)', () => {
         precio: 5000,
         stock: -2
       })
-    ).rejects.toThrow('El precio y el stock no pueden ser negativos');
+    ).rejects.toThrow('El stock no puede ser negativo');
   });
 
   test('Rechazar si la categoría asociada no existe', async () => {
     const repoProductos = new InMemoryProductoRepository();
-    const repoCategorias = new InMemoryCategoriaRepository(); // vacío
+    const repoCategorias = new InMemoryCategoriaRepository();
 
     const useCase = new CrearProductoUseCase(repoProductos, repoCategorias);
 

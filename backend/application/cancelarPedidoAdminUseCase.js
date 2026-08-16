@@ -7,8 +7,8 @@ class CancelarPedidoAdminUseCase {
     const pedido = await this.pedidoRepo.obtenerDetallePedido(id_pedido);
     if (!pedido) throw new Error('Pedido no encontrado');
 
-    // CU-020: Bloquear cancelación en estados EN_RUTA o ENTREGADO
-    if (['EN_RUTA', 'ENTREGADO'].includes(pedido.estado)) {
+    // CU-020: Bloquear cancelación en estados EN_CAMINO o ENTREGADO
+    if (['EN_CAMINO', 'ENTREGADO', 'CANCELADO'].includes(pedido.estado)) {
       throw new Error('No se puede cancelar un pedido en este estado');
     }
 

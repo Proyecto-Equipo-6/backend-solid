@@ -2,6 +2,7 @@ import InMemoryProveedorRepository from '../infraestructure/repositories/in-memo
 import CrearProveedorUseCase from '../application/crearProveedorUseCase.js';
 import EditarProveedorUseCase from '../application/editarProveedorUseCase.js';
 import EliminarProveedorUseCase from '../application/eliminarProveedorUseCase.js';
+import ListarProveedoresActivosUseCase from '../application/listarProveedoresActivosUseCase.js';
 
 describe('Módulo CRUD proveedores (CU-025)', () => {
   test('Registrar proveedor con éxito (flujo feliz, estado 1 y fecha automática)', async () => {
@@ -99,4 +100,31 @@ describe('Módulo CRUD proveedores (CU-025)', () => {
     const proveedorDesactivado = await repo.buscarPorId(proveedor.id_proveedor);
     expect(proveedorDesactivado.estado).toBe(0);
   });
+  test('CP-CU-025-03: Solo proveedores activos aparecen en selectores de productos', async () => {
+  const repo = new InMemoryProveedorRepository();
+  const crear = new CrearProveedorUseCase(repo);
+  const listar = new ListarProveedoresActivosUseCase(repo);
+
+  const activo = await crear.ejecutar({
+    nit_proveedor: '900111222-3',
+    razon_social: 'Proveedor Activo S.A.S.',
+    telefono: '6012345678',
+    email: 'activo@proveedor.com'
+  });
+
+  const inactivo = await crear.ejecutar({
+    nit_proveedor: '900333444-5',
+    razon_social: 'Proveedor Inactivo S.A.S.',
+    telefono: '6019876543',
+    email: 'inactivo@proveedor.com'
+  });
+
+  // Desactivar al segundo
+  await repo.actualizar(inactivo.id_proveedor, { estado: 0 });
+
+  const activos = await listar.ejecutar();
+
+  expect(activos).toHaveLength(1);
+  expect(activos[0].id_proveedor).toBe(activo.id_proveedor);
+});
 });

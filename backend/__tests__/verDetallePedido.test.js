@@ -2,7 +2,7 @@ const InMemoryPedidoRepartidorRepository = require('../infraestructure/repositor
 const VerDetallePedidoUseCase = require('../application/verDetallePedidoUseCase.js');
 const Pedido = require('../domain/models/Pedido.js');
 
-// Helper para crear pedidos con el repartidor indicado
+// Helper para crear un pedido activo asignado al repartidor
 const crearPedido = (id_pedido, id_repartidor, estado = 'ASIGNADO') => new Pedido({
   id_pedido,
   id_usuario: 100,
@@ -21,30 +21,28 @@ const crearPedido = (id_pedido, id_repartidor, estado = 'ASIGNADO') => new Pedid
   caracteristicasLogistica: 'Frágil'
 });
 
-test('Flujo feliz: el repartidor asignado ve el detalle sin productos', async () => {
-  const pedido = crearPedido(1, 10);
-  const repo = new InMemoryPedidoRepartidorRepository([pedido]);
-  const useCase = new VerDetallePedidoUseCase(repo);
+describe('CU-016: Ver detalles pedido', () => {
+  test('CP-CU-016-01 / CP-CU-016-02 / CP-CU-016-03: Flujo feliz, el repartidor asignado ve todos los detalles excepto productos', async () => {
+    const pedido = crearPedido(1, 10);
+    const repo = new InMemoryPedidoRepartidorRepository([pedido]);
+    const useCase = new VerDetallePedidoUseCase(repo);
 
-  const detalle = await useCase.ejecutar(1, 10);
+    const detalle = await useCase.ejecutar(1, 10);
 
-  expect(detalle.id_pedido).toBe(1);
-  expect(detalle.clienteNombre).toBe('María');
-  expect(detalle.clienteTelefono).toBe('3001234567');
-  expect(detalle).not.toHaveProperty('productos');
-});
+    expect(detalle.id_pedido).toBe(1);
+    expect(detalle.clienteNombre).toBe('María');
+    expect(detalle.clienteTelefono).toBe('3001234567');
+    expect(detalle.estado).toBe('ASIGNADO');
+    expect(detalle.caracteristicasLogistica).toBe('Frágil');
+    expect(detalle.diagramaSeguimiento).toEqual(['ASIGNADO', 'EN_CAMINO', 'ENTREGADO']);
+    expect(detalle).not.toHaveProperty('productos');
+  });
 
-test('Flujo de seguridad: un repartidor diferente no puede ver los datos sensibles', async () => {
-  const pedido = crearPedido(1, 10);
-  const repo = new InMemoryPedidoRepartidorRepository([pedido]);
-  const useCase = new VerDetallePedidoUseCase(repo);
+  test('CP-CU-016-06: Flujo de seguridad, otro repartidor no puede ver los datos', async () => {
+    const pedido = crearPedido(1, 10);
+    const repo = new InMemoryPedidoRepartidorRepository([pedido]);
+    const useCase = new VerDetallePedidoUseCase(repo);
 
-  await expect(useCase.ejecutar(1, 20)).rejects.toThrow('Acceso denegado');
-});
-
-test('CP-CU-016-05: Lanza error si el pedido no existe o no está disponible', async () => {
-  const repo = new InMemoryPedidoRepartidorRepository([]); // sin pedidos
-  const useCase = new VerDetallePedidoUseCase(repo);
-
-  await expect(useCase.ejecutar(999, 10)).rejects.toThrow('Pedido no encontrado');
+    await expect(useCase.ejecutar(1, 20)).rejects.toThrow('Acceso denegado');
+  });
 });

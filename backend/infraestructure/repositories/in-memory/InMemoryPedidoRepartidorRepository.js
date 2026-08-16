@@ -11,7 +11,7 @@ class InMemoryPedidoRepartidorRepository extends PedidoRepartidorRepository {
     return new Pedido({ ...pedido });
   }
 
-  // Métodos Repartidor (se mantienen igual)
+  // Métodos para Repartidor
 
   async obtenerPedidosDelDia(repartidorId) {
     const hoy = new Date().toLocaleDateString('en-CA');
@@ -43,9 +43,10 @@ class InMemoryPedidoRepartidorRepository extends PedidoRepartidorRepository {
       throw new Error('El pedido fue actualizado por otro proceso. Recargue la información.');
     }
 
+    // Máquina de estados real: ASIGNADO → EN_CAMINO → ENTREGADO / NO_ENTREGADO
     const transicionesValidas = {
-      'ASIGNADO': ['EN_RUTA'],
-      'EN_RUTA': ['ENTREGADO', 'NO_ENTREGADO']
+      'ASIGNADO': ['EN_CAMINO'],
+      'EN_CAMINO': ['ENTREGADO', 'NO_ENTREGADO']
     };
 
     const estadosPermitidos = transicionesValidas[pedido.estado] || [];
@@ -69,7 +70,7 @@ class InMemoryPedidoRepartidorRepository extends PedidoRepartidorRepository {
     return this._clonar(pedidoActualizado);
   }
 
-  // Métodos Administrador
+  // Métodos para Administrador
 
   async obtenerTodos(filtros = {}) {
     let pedidos = this.pedidos.map(p => this._clonar(p));
@@ -86,6 +87,11 @@ class InMemoryPedidoRepartidorRepository extends PedidoRepartidorRepository {
     if (filtros.fechaHasta) {
       const hasta = new Date(filtros.fechaHasta);
       pedidos = pedidos.filter(p => new Date(p.fecha_pedido) <= hasta);
+    }
+
+    if (filtros.cliente) {
+      const clienteId = Number(filtros.cliente);
+      pedidos = pedidos.filter(p => p.id_usuario === clienteId);
     }
 
     return pedidos;
