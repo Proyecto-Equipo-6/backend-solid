@@ -2,17 +2,17 @@ const PedidoRepartidorRepository = require('../../../domain/ports/PedidoRepartid
 const Pedido = require('../../../domain/models/Pedido');
 
 class InMemoryPedidoRepartidorRepository extends PedidoRepartidorRepository {
-  constructor(pedidos = []) {
+  constructor(pedidos = [], detallesPedido = []) {
     super();
     this.pedidos = pedidos.map(p => this._clonar(p));
+    this.detallesPedido = detallesPedido.map(d => ({ ...d }));
   }
 
   _clonar(pedido) {
     return new Pedido({ ...pedido });
   }
 
-  // Métodos para Repartidor
-
+  // ----- Repartidor -----
   async obtenerPedidosDelDia(repartidorId) {
     const hoy = new Date().toLocaleDateString('en-CA');
     return this.pedidos
@@ -43,22 +43,8 @@ class InMemoryPedidoRepartidorRepository extends PedidoRepartidorRepository {
       throw new Error('El pedido fue actualizado por otro proceso. Recargue la información.');
     }
 
-    // Máquina de estados real: ASIGNADO → EN_CAMINO → ENTREGADO / NO_ENTREGADO
-    const transicionesValidas = {
-      'ASIGNADO': ['EN_CAMINO'],
-      'EN_CAMINO': ['ENTREGADO', 'NO_ENTREGADO']
-    };
-
-    const estadosPermitidos = transicionesValidas[pedido.estado] || [];
-    if (!estadosPermitidos.includes(nuevoEstado)) {
-      throw new Error(`Transición inválida de ${pedido.estado} a ${nuevoEstado}`);
-    }
-
-    if (nuevoEstado === 'ENTREGADO' && !datosAdicionales.foto) {
-      throw new Error('La foto es obligatoria para confirmar la entrega');
-    }
-    if (nuevoEstado === 'NO_ENTREGADO' && !datosAdicionales.observacion) {
-      throw new Error('La observación es obligatoria para marcar No Entregado');
+    if (nuevoEstado === 'ENTREGADO') {
+      pedido.comprobante_url = `https://cloudinary.com/evidencia_${pedidoId}.jpg`;
     }
 
     const pedidoActualizado = this._clonar({
@@ -70,25 +56,21 @@ class InMemoryPedidoRepartidorRepository extends PedidoRepartidorRepository {
     return this._clonar(pedidoActualizado);
   }
 
-  // Métodos para Administrador
-
+  // ----- Administrador -----
   async obtenerTodos(filtros = {}) {
     let pedidos = this.pedidos.map(p => this._clonar(p));
 
     if (filtros.estado) {
       pedidos = pedidos.filter(p => p.estado === filtros.estado);
     }
-
     if (filtros.fechaDesde) {
       const desde = new Date(filtros.fechaDesde);
       pedidos = pedidos.filter(p => new Date(p.fecha_pedido) >= desde);
     }
-
     if (filtros.fechaHasta) {
       const hasta = new Date(filtros.fechaHasta);
       pedidos = pedidos.filter(p => new Date(p.fecha_pedido) <= hasta);
     }
-
     if (filtros.cliente) {
       const clienteId = Number(filtros.cliente);
       pedidos = pedidos.filter(p => p.id_usuario === clienteId);
@@ -103,6 +85,8 @@ class InMemoryPedidoRepartidorRepository extends PedidoRepartidorRepository {
       const fechaPedido = new Date(p.fecha_pedido).toLocaleDateString('en-CA');
       return (
         p.id_repartidor === repartidorId &&
+        p.estado !== 'CANCELADO' &&
+        p.estado !== 'ENTREGADO' &&
         fechaPedido === hoy
       );
     }).length;
@@ -120,6 +104,17 @@ class InMemoryPedidoRepartidorRepository extends PedidoRepartidorRepository {
     });
     this.pedidos[index] = pedidoActualizado;
     return this._clonar(pedidoActualizado);
+  }
+
+  // NUEVO: Obtener detalles del pedido (simula tabla pedido_detalles)
+  async obtenerDetallesPorPedido(id_pedido) {
+    return this.detallesPedido
+      .filter(d => d.id_pedido === id_pedido)
+      .map(d => ({ ...d }));
+  }
+
+  agregarDetallePedido(detalle) {
+    this.detallesPedido.push({ ...detalle });
   }
 }
 

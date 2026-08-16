@@ -43,7 +43,7 @@ class Pedido {
   }
 
   puedeActualizar() {
-    return ['ASIGNADO', 'EN_RUTA'].includes(this.estado);
+  return ['ASIGNADO', 'EN_CAMINO'].includes(this.estado);
   }
 
   esFinalizado() {
