@@ -116,6 +116,17 @@ describe('ActualizarPerfilUseCase', () => {
     expect(error.message).toContain('direccion');
   });
 
+  it('actualiza solo la dirección sin pedir contraseña actual', async () => {
+    const resultado = await casoUso.execute({
+      id_usuario: 1,
+      datos: { direccion: 'Calle 80 # 45-10, Envigado' },
+    });
+
+    expect(resultado.mensaje).toBe('Perfil actualizado correctamente');
+    expect(resultado.perfil.direccion).toBe('Calle 80 # 45-10, Envigado');
+    expect(resultado.perfil.nombre_apellido).toBe('Ana Torres');
+  });
+
   it('lanza 401 si el usuario autenticado ya no existe', async () => {
     const error = await casoUso
       .execute({ id_usuario: 999, password: 'abcd1234', datos: datosValidos })

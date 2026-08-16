@@ -26,8 +26,16 @@ const MySQLCategoriaRepository = require('./backend/infraestructure/repositories
 const ListarCategoriasUseCase = require('./backend/application/ListarCategoriasUseCase');
 const CategoriaController = require('./backend/infraestructure/controllers/CategoriaController');
 const createCategoriaRouter = require('./backend/infraestructure/routes/categoriaRoutes');
+const MySQLBancoRepository = require('./backend/infraestructure/repositories/mysql/MySQLBancoRepository');
+const ListarBancosUseCase = require('./backend/application/ListarBancosUseCase');
+const BancoController = require('./backend/infraestructure/controllers/BancoController');
+const createBancoRouter = require('./backend/infraestructure/routes/bancoRoutes');
 const ObtenerPerfilUseCase = require('./backend/application/ObtenerPerfilUseCase');
 const ActualizarPerfilUseCase = require('./backend/application/ActualizarPerfilUseCase');
+const MySQLAnaliticaRepository = require('./backend/infraestructure/repositories/mysql/MySQLAnaliticaRepository');
+const ObtenerResumenAnaliticaUseCase = require('./backend/application/ObtenerResumenAnaliticaUseCase');
+const AnaliticaController = require('./backend/infraestructure/controllers/AnaliticaController');
+const createAnaliticaRouter = require('./backend/infraestructure/routes/analiticaRoutes');
 const crearAutenticador = require('./backend/infraestructure/middlewares/autenticacion');
 
 const app = express();
@@ -105,12 +113,24 @@ const categoriaRepository = new MySQLCategoriaRepository();
 const listarCategoriasUseCase = new ListarCategoriasUseCase(categoriaRepository);
 const categoriaController = new CategoriaController(listarCategoriasUseCase);
 
+// --- Inyección de Dependencias para Bancos (DIP) ---
+const bancoRepository = new MySQLBancoRepository();
+const listarBancosUseCase = new ListarBancosUseCase(bancoRepository);
+const bancoController = new BancoController(listarBancosUseCase);
+
+// --- Inyección de Dependencias para Reportes del Panel (DIP) ---
+const analiticaRepository = new MySQLAnaliticaRepository();
+const obtenerResumenAnaliticaUseCase = new ObtenerResumenAnaliticaUseCase(analiticaRepository);
+const analiticaController = new AnaliticaController(obtenerResumenAnaliticaUseCase);
+
 // --- Rutas (Cargadas como Middleware) ---
 app.use('/api/v1/users', createUserRouter(userController, autenticar));
 app.use('/api/v1/roles', createRolRouter(adminUpdateRolController));
 app.use('/api/v1/auth', createAuthRouter(authController));
 app.use('/api/v1/productos', createProductoRouter(productoController));
 app.use('/api/v1/categorias', createCategoriaRouter(categoriaController));
+app.use('/api/v1/bancos', createBancoRouter(bancoController));
+app.use('/api/v1/analitica', createAnaliticaRouter(analiticaController));
 
 // --- 404 ---
 app.use((req, res) => {
