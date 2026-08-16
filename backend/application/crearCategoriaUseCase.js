@@ -1,4 +1,7 @@
+
 // Convierte el estado textual a su valor numérico (1=Activo, 0=Inactivo).
+
+
 function convertirEstado(estado) {
   if (estado === 'Activo') return 1;
   if (estado === 'Inactivo') return 0;
