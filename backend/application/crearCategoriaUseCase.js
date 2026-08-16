@@ -5,15 +5,20 @@ class CrearCategoriaUseCase {
 
   async ejecutar({ nombre, descripcion = '', estado = 'Activo' }) {
     if (!nombre || nombre.trim() === '') {
-      throw new Error('Complete los campos obligatorios'); // FA-002
+      throw new Error('Complete los campos obligatorios');
+    }
+
+    // Validar que el nombre no contenga números ni símbolos
+    const regexNombre = /^[A-Za-zÁÉÍÓÚÑáéíóúñ\s]+$/;
+    if (!regexNombre.test(nombre.trim())) {
+      throw new Error('El nombre solo debe contener letras y espacios');
     }
 
     const existente = await this.categoriaRepo.buscarPorNombre(nombre.trim());
     if (existente) {
-      throw new Error('Ya existe una categoría con ese nombre'); // RN-092 / FA-001
+      throw new Error('Ya existe una categoría con ese nombre');
     }
 
-    // Convertir estado string a numérico si es necesario
     const estadoNumerico = estado === 'Activo' ? 1 : estado === 'Inactivo' ? 0 : estado;
 
     return await this.categoriaRepo.guardar({

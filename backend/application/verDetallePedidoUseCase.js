@@ -11,7 +11,6 @@ class VerDetallePedidoUseCase {
     }
 
     // RN-063: Solo el repartidor asignado puede ver los datos sensibles
-    // Nota: En la BD real, id_usuario es el cliente; usamos id_repartidor para la validación.
     if (pedido.id_repartidor !== repartidorId) {
       throw new Error('Acceso denegado: el pedido pertenece a otro repartidor');
     }
@@ -24,9 +23,10 @@ class VerDetallePedidoUseCase {
       direccion_entrega: pedido.direccion_entrega,
       estado: pedido.estado,
       caracteristicasLogistica: pedido.caracteristicasLogistica || 'Ninguna',
+      diagramaSeguimiento: ['ASIGNADO', 'EN_CAMINO', 'ENTREGADO'], // RN-064
       fecha_pedido: pedido.fecha_pedido,
       fecha_actualizacion: pedido.fecha_actualizacion
-};
+    };
   }
 }
 

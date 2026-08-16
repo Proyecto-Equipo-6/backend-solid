@@ -57,6 +57,11 @@ class InMemoryProveedorRepository extends ProveedorRepository {
     // Borrado lógico
     return this.actualizar(id_proveedor, { estado: 0 });
   }
+
+  // NUEVO MÉTODO: para el CP-CU-025-03
+  async findActivos() {
+    return this.proveedores.filter((p) => p.estado === 1);
+  }
 }
 
 module.exports = InMemoryProveedorRepository;

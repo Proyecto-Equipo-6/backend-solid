@@ -10,15 +10,19 @@ class EditarCategoriaUseCase {
     }
 
     if (!nombre || nombre.trim() === '') {
-      throw new Error('Complete los campos obligatorios'); // FA-002
+      throw new Error('Complete los campos obligatorios');
+    }
+
+    const regexNombre = /^[A-Za-zÁÉÍÓÚÑáéíóúñ\s]+$/;
+    if (!regexNombre.test(nombre.trim())) {
+      throw new Error('El nombre solo debe contener letras y espacios');
     }
 
     const existente = await this.categoriaRepo.buscarPorNombre(nombre.trim());
     if (existente && existente.id_categoria !== id_categoria) {
-      throw new Error('Ya existe una categoría con ese nombre'); // RN-092
+      throw new Error('Ya existe una categoría con ese nombre');
     }
 
-    // Validar y convertir estado
     let estadoNumerico = categoria.estado;
     if (estado !== undefined) {
       if (estado === 'Activo') estadoNumerico = 1;

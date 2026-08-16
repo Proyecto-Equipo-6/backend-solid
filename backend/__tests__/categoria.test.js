@@ -41,14 +41,50 @@ describe('Módulo CRUD categorías (CU-022)', () => {
     ).rejects.toThrow('No se puede eliminar: la categoría tiene 3 productos asociados');
   });
 
-  test('Editar estado de categoría a Inactivo', async () => {
-    const repo = new InMemoryCategoriaRepository();
-    const crear = new CrearCategoriaUseCase(repo);
-    const editar = new EditarCategoriaUseCase(repo);
+  test('CP-CU-022-03: Editar categoría cambia descripción y estado', async () => {
+  const repo = new InMemoryCategoriaRepository();
+  const crear = new CrearCategoriaUseCase(repo);
+  const editar = new EditarCategoriaUseCase(repo);
 
-    const creada = await crear.ejecutar({ nombre: 'Limpieza' });
-    const editada = await editar.ejecutar(creada.id_categoria, { nombre: 'Limpieza', estado: 'Inactivo' });
-
-    expect(editada.estado).toBe(0);
+  // Crear categoría inicial
+  const creada = await crear.ejecutar({
+    nombre: 'Limpieza',
+    descripcion: 'Artículos de limpieza'
   });
+
+  // Editar descripción y estado
+  const editada = await editar.ejecutar(creada.id_categoria, {
+    nombre: 'Limpieza',
+    descripcion: 'Productos de aseo y desinfección',
+    estado: 'Inactivo'
+  });
+
+  // Verificar que se actualizaron ambos campos
+  expect(editada.id_categoria).toBe(creada.id_categoria);
+  expect(editada.nombre).toBe('Limpieza');
+  expect(editada.descripcion).toBe('Productos de aseo y desinfección');
+  expect(editada.estado).toBe(0); // Inactivo
+});
+
+  test('CP-CU-022-05: Eliminar categoría sin productos asociados exitosamente', async () => {
+  const repo = new InMemoryCategoriaRepository();
+  const crear = new CrearCategoriaUseCase(repo);
+  const eliminar = new EliminarCategoriaUseCase(repo);
+
+  // Crear una categoría sin productos
+  const categoria = await crear.ejecutar({ nombre: 'Cocina', descripcion: 'Artículos de cocina' });
+
+  // Verificar que no tiene productos asociados
+  const productosAsociados = await repo.contarProductosAsociados(categoria.id_categoria);
+  expect(productosAsociados).toBe(0);
+
+  // Eliminar la categoría
+  const resultado = await eliminar.ejecutar(categoria.id_categoria);
+
+  expect(resultado).toEqual({ mensaje: 'Categoría eliminada' });
+
+  // Verificar que ya no existe
+  const categoriaEliminada = await repo.buscarPorId(categoria.id_categoria);
+  expect(categoriaEliminada).toBeNull();
+});
 });
