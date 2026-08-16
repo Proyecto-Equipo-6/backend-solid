@@ -1,45 +1,51 @@
+/**
+ * Modelo de Dominio: Pedido
+ * Usa exactamente las columnas de la tabla pedidos de MySQL.
+ * Incluye campos extendidos clienteNombre y clienteTelefono por conveniencia.
+ */
 class Pedido {
   constructor({
-    idPedido,
-    idUsuario,
-    idMetodoPago,
-    direccion,
-    estado,
-    comprobante = null,
+    id_pedido = null,
+    id_usuario = null,
+    id_repartidor = null,
+    id_metodo_pago = null,
+    direccion_entrega = '',
+    total = 0,
+    estado = 'PENDIENTE',
+    comprobante_url = null,
     observaciones = null,
-    motivoCancelacion = null,
-    fechaAsignacion,
-    fechaActualizacion = null,
-    caracteristicasLogistica = 'Ninguna',
+    motivo_cancelacion = null,
+    fecha_pedido = new Date().toISOString(),
+    fecha_actualizacion = null,
     clienteNombre = '',
-    clienteTelefono = ''
-  }) {
-    this.idPedido = idPedido;
-    this.idUsuario = idUsuario;
-    this.idMetodoPago = idMetodoPago;
-    this.direccion = direccion;
+    clienteTelefono = '',
+    caracteristicasLogistica = 'Ninguna'
+  } = {}) {
+    this.id_pedido = id_pedido;
+    this.id_usuario = id_usuario;
+    this.id_repartidor = id_repartidor;
+    this.id_metodo_pago = id_metodo_pago;
+    this.direccion_entrega = direccion_entrega;
+    this.total = total;
     this.estado = estado;
-    this.comprobante = comprobante;
+    this.comprobante_url = comprobante_url;
     this.observaciones = observaciones;
-    this.motivoCancelacion = motivoCancelacion;
-    this.fechaAsignacion = fechaAsignacion;
-    this.fechaActualizacion = fechaActualizacion;
-    this.caracteristicasLogistica = caracteristicasLogistica;
+    this.motivo_cancelacion = motivo_cancelacion;
+    this.fecha_pedido = fecha_pedido;
+    this.fecha_actualizacion = fecha_actualizacion;
     this.clienteNombre = clienteNombre;
     this.clienteTelefono = clienteTelefono;
+    this.caracteristicasLogistica = caracteristicasLogistica;
   }
 
-  // RN: Solo pedidos asignados pueden ser vistos
   esAsignado() {
     return this.estado === 'ASIGNADO';
   }
 
-  // RN: Solo pedidos asignados o en camino pueden ser actualizados
   puedeActualizar() {
-    return ['ASIGNADO', 'EN_CAMINO'].includes(this.estado);
+    return ['ASIGNADO', 'EN_RUTA'].includes(this.estado);
   }
 
-  // RN: Estados finales
   esFinalizado() {
     return ['ENTREGADO', 'NO_ENTREGADO', 'CANCELADO'].includes(this.estado);
   }

@@ -4,7 +4,6 @@ const Pedido = require('../../../domain/models/Pedido');
 class InMemoryPedidoRepartidorRepository extends PedidoRepartidorRepository {
   constructor(pedidos = []) {
     super();
-    // Clonamos los pedidos para evitar mutar los originales
     this.pedidos = pedidos.map(p => this._clonar(p));
   }
 
@@ -12,43 +11,41 @@ class InMemoryPedidoRepartidorRepository extends PedidoRepartidorRepository {
     return new Pedido({ ...pedido });
   }
 
-  async obtenerPedidosDelDia(repartidorId) {
-    const hoy = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD
+  // Métodos Repartidor (se mantienen igual)
 
-    const pedidosDelDia = this.pedidos
+  async obtenerPedidosDelDia(repartidorId) {
+    const hoy = new Date().toLocaleDateString('en-CA');
+    return this.pedidos
       .filter(p => {
-        const fechaPedido = new Date(p.fechaAsignacion).toLocaleDateString('en-CA');
+        const fechaPedido = new Date(p.fecha_pedido).toLocaleDateString('en-CA');
         return (
-          p.idUsuario === repartidorId && // repartidorId viaja en id_usuario
+          p.id_repartidor === repartidorId &&
           p.estado === 'ASIGNADO' &&
           fechaPedido === hoy
         );
       })
-      .sort((a, b) => new Date(a.fechaAsignacion) - new Date(b.fechaAsignacion));
-
-    return pedidosDelDia.map(p => this._clonar(p));
+      .sort((a, b) => new Date(a.fecha_pedido) - new Date(b.fecha_pedido))
+      .map(p => this._clonar(p));
   }
 
   async obtenerDetallePedido(pedidoId) {
-    const pedido = this.pedidos.find(p => p.idPedido === pedidoId);
+    const pedido = this.pedidos.find(p => p.id_pedido === pedidoId);
     return pedido ? this._clonar(pedido) : null;
   }
 
   async actualizarEstado(pedidoId, nuevoEstado, estadoAnterior, datosAdicionales = {}) {
-    const index = this.pedidos.findIndex(p => p.idPedido === pedidoId);
+    const index = this.pedidos.findIndex(p => p.id_pedido === pedidoId);
     if (index === -1) throw new Error('Pedido no encontrado');
 
     const pedido = this.pedidos[index];
 
-    // Simulación de concurrencia
     if (pedido.estado !== estadoAnterior) {
       throw new Error('El pedido fue actualizado por otro proceso. Recargue la información.');
     }
 
-    // Máquina de estados real
     const transicionesValidas = {
-      'ASIGNADO': ['EN_CAMINO'],
-      'EN_CAMINO': ['ENTREGADO', 'NO_ENTREGADO']
+      'ASIGNADO': ['EN_RUTA'],
+      'EN_RUTA': ['ENTREGADO', 'NO_ENTREGADO']
     };
 
     const estadosPermitidos = transicionesValidas[pedido.estado] || [];
@@ -63,13 +60,58 @@ class InMemoryPedidoRepartidorRepository extends PedidoRepartidorRepository {
       throw new Error('La observación es obligatoria para marcar No Entregado');
     }
 
-    // Clonamos y reemplazamos (inmutabilidad)
     const pedidoActualizado = this._clonar({
       ...pedido,
       estado: nuevoEstado,
-      fechaActualizacion: new Date().toISOString()
+      fecha_actualizacion: new Date().toISOString()
     });
+    this.pedidos[index] = pedidoActualizado;
+    return this._clonar(pedidoActualizado);
+  }
 
+  // Métodos Administrador
+
+  async obtenerTodos(filtros = {}) {
+    let pedidos = this.pedidos.map(p => this._clonar(p));
+
+    if (filtros.estado) {
+      pedidos = pedidos.filter(p => p.estado === filtros.estado);
+    }
+
+    if (filtros.fechaDesde) {
+      const desde = new Date(filtros.fechaDesde);
+      pedidos = pedidos.filter(p => new Date(p.fecha_pedido) >= desde);
+    }
+
+    if (filtros.fechaHasta) {
+      const hasta = new Date(filtros.fechaHasta);
+      pedidos = pedidos.filter(p => new Date(p.fecha_pedido) <= hasta);
+    }
+
+    return pedidos;
+  }
+
+  async contarPedidosDelDia(repartidorId) {
+    const hoy = new Date().toLocaleDateString('en-CA');
+    return this.pedidos.filter(p => {
+      const fechaPedido = new Date(p.fecha_pedido).toLocaleDateString('en-CA');
+      return (
+        p.id_repartidor === repartidorId &&
+        fechaPedido === hoy
+      );
+    }).length;
+  }
+
+  async actualizarPedido(idPedido, cambios) {
+    const index = this.pedidos.findIndex(p => p.id_pedido === idPedido);
+    if (index === -1) throw new Error('Pedido no encontrado');
+
+    const pedidoActualizado = this._clonar({
+      ...this.pedidos[index],
+      ...cambios,
+      id_pedido: idPedido,
+      fecha_actualizacion: new Date().toISOString()
+    });
     this.pedidos[index] = pedidoActualizado;
     return this._clonar(pedidoActualizado);
   }
