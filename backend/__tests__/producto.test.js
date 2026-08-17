@@ -235,31 +235,36 @@ describe('Módulo CRUD productos - Aseo (CU-023)', () => {
     expect(editado.estado).toBe(0);
   });
 
-  test('Eliminar producto lo desactiva (borrado lógico, RN-101)', async () => {
-    const repoProductos = new InMemoryProductoRepository();
-    const repoCategorias = new InMemoryCategoriaRepository();
-    const repoProveedores = new InMemoryProveedorRepository();
+  test('CP-RF-007.2-02: Eliminar producto con historial de ventas lo desactiva y devuelve mensaje informativo', async () => {
+  const repoProductos = new InMemoryProductoRepository();
+  const repoCategorias = new InMemoryCategoriaRepository();
+  const repoProveedores = new InMemoryProveedorRepository();
 
-    const categoria = await crearCategoria(repoCategorias);
-    crearProveedor(repoProveedores, 1, 'Proveedor Test');
+  const categoria = await crearCategoria(repoCategorias);
+  crearProveedor(repoProveedores, 1, 'Proveedor Test');
 
-    const crear = new CrearProductoUseCase(repoProductos, repoCategorias, repoProveedores);
-    const producto = await crear.ejecutar({
-      sku: 'ASE-ESC-10',
-      id_categoria: categoria.id_categoria,
-      id_proveedor: 1,
-      nombre: 'Escoba',
-      descripcion: 'Cerdas suaves',
-      precio: 8000,
-      stock: 20
-    });
-
-    const eliminar = new EliminarProductoUseCase(repoProductos);
-    await eliminar.ejecutar(producto.id_producto);
-
-    const productoDesactivado = await repoProductos.findById(producto.id_producto);
-    expect(productoDesactivado.estado).toBe(0);
+  const crear = new CrearProductoUseCase(repoProductos, repoCategorias, repoProveedores);
+  const producto = await crear.ejecutar({
+    sku: 'ASE-ESC-10',
+    id_categoria: categoria.id_categoria,
+    id_proveedor: 1,
+    nombre: 'Escoba',
+    descripcion: 'Cerdas suaves',
+    precio: 8000,
+    stock: 20
   });
+
+  // Simulamos que tiene historial de ventas
+  repoProductos.marcarConHistorial(producto.id_producto);
+
+  const eliminar = new EliminarProductoUseCase(repoProductos);
+  const resultado = await eliminar.ejecutar(producto.id_producto);
+
+  expect(resultado.mensaje).toBe('El producto registra ventas en el historial; se ha inactivado del catálogo comercial.');
+
+  const productoDesactivado = await repoProductos.findById(producto.id_producto);
+  expect(productoDesactivado.estado).toBe(0);
+});
 
   test('CP-HU007.2-03: Ejecutar un ajuste rápido de stock con éxito y verificar auditoría', async () => {
     const repoProductos = new InMemoryProductoRepository([
@@ -297,4 +302,39 @@ describe('Módulo CRUD productos - Aseo (CU-023)', () => {
       motivo: 'Ingreso de mercancía'
     });
   });
+  test('CP-HU007.2-04: Productos inactivos no se retornan en catálogo público', async () => {
+  const repoProductos = new InMemoryProductoRepository([
+    {
+      id_producto: 1,
+      sku: 'ASE-ACT-01',
+      id_categoria: 1,
+      id_proveedor: 1,
+      nombre: 'Producto Activo',
+      descripcion: 'Desc',
+      precio: 1000,
+      stock: 10,
+      estado: 1,
+      imagen_url: null,
+      fecha_creacion: new Date().toISOString()
+    },
+    {
+      id_producto: 2,
+      sku: 'ASE-INA-02',
+      id_categoria: 1,
+      id_proveedor: 1,
+      nombre: 'Producto Inactivo',
+      descripcion: 'Desc',
+      precio: 2000,
+      stock: 5,
+      estado: 0,
+      imagen_url: null,
+      fecha_creacion: new Date().toISOString()
+    }
+  ]);
+
+  const activos = await repoProductos.findActivos();
+  expect(activos).toHaveLength(1);
+  expect(activos[0].id_producto).toBe(1);
+  });
+
 });
