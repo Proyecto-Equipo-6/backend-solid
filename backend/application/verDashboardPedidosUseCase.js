@@ -6,8 +6,8 @@ class VerDashboardPedidosUseCase {
   }
 
   async ejecutar(repartidorId) {
-    // repartidorId es el id_usuario del repartidor
-    const pedidos = await this.pedidoRepo.obtenerPedidosAsignadosDelDia(repartidorId);
+    // Usamos obtenerPedidosDelDia (no obtenerPedidosAsignadosDelDia)
+    const pedidos = await this.pedidoRepo.obtenerPedidosDelDia(repartidorId);
 
     if (pedidos.length === 0) {
       return {
@@ -18,7 +18,6 @@ class VerDashboardPedidosUseCase {
       };
     }
 
-    // El repositorio ya entrega ordenado por fecha/hora de asignación ascendente
     const pedidoActivo = pedidos[0];
     const pedidosEnCola = pedidos.slice(1);
 

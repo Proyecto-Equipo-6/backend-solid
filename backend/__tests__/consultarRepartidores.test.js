@@ -1,0 +1,116 @@
+import InMemoryRepartidorRepository from '../infraestructure/repositories/in-memory/InMemoryRepartidorRepository.js';
+import InMemoryPedidoRepartidorRepository from '../infraestructure/repositories/in-memory/InMemoryPedidoRepartidorRepository.js';
+import ConsultarRepartidoresUseCase from '../application/consultarRepartidoresUseCase.js';
+import Pedido from '../domain/models/Pedido.js';
+
+describe('Módulo Consultar Repartidores (CU-021)', () => {
+  test('CP-CU-021-01: Visualizar tabla de repartidores con métricas', async () => {
+    const repoRepartidores = new InMemoryRepartidorRepository([
+      { id_usuario: 10, nombre: 'Juan', apellidos: 'Pérez', telefono: '3001234567', email: 'juan@example.com', estado: 'DISPONIBLE' },
+      { id_usuario: 20, nombre: 'María', apellidos: 'Gómez', telefono: '3012345678', email: 'maria@example.com', estado: 'INACTIVO' }
+    ]);
+
+    const hoy = new Date();
+    const pedido1 = new Pedido({
+      id_pedido: 1,
+      id_usuario: 100,
+      id_repartidor: 10,
+      id_metodo_pago: 1,
+      direccion_entrega: 'Calle 123',
+      total: 50000,
+      estado: 'ENTREGADO',
+      fecha_pedido: hoy.toISOString(),
+      fecha_actualizacion: hoy.toISOString()
+    });
+
+    const repoPedidos = new InMemoryPedidoRepartidorRepository([pedido1]);
+    const useCase = new ConsultarRepartidoresUseCase(repoRepartidores, repoPedidos);
+    const lista = await useCase.ejecutar();
+
+    expect(lista).toHaveLength(2);
+    expect(lista[0].pedidos_hoy).toBe(1);
+    expect(lista[0].pedidos_semana).toBe(1);
+    expect(lista[0].pedidos_mes).toBe(1);
+    expect(lista[1].pedidos_hoy).toBe(0);
+  });
+
+  test('CP-CU-021-02: Buscar por ID o nombre', async () => {
+    const repoRepartidores = new InMemoryRepartidorRepository([
+      { id_usuario: 10, nombre: 'Juan', apellidos: 'Pérez', telefono: '3001234567', email: 'juan@example.com', estado: 'DISPONIBLE' },
+      { id_usuario: 20, nombre: 'María', apellidos: 'Gómez', telefono: '3012345678', email: 'maria@example.com', estado: 'DISPONIBLE' }
+    ]);
+    const repoPedidos = new InMemoryPedidoRepartidorRepository();
+    const useCase = new ConsultarRepartidoresUseCase(repoRepartidores, repoPedidos);
+    
+    const resultado = await useCase.ejecutar({ termino: 'María' });
+    expect(resultado).toHaveLength(1);
+    expect(resultado[0].id_repartidor).toBe(20);
+  });
+
+  test('CP-CU-021-04: Búsqueda sin coincidencias devuelve lista vacía', async () => {
+    const repoRepartidores = new InMemoryRepartidorRepository([
+      { id_usuario: 10, nombre: 'Juan', apellidos: 'Pérez', telefono: '3001234567', email: 'juan@example.com', estado: 'DISPONIBLE' }
+    ]);
+    const repoPedidos = new InMemoryPedidoRepartidorRepository();
+    const useCase = new ConsultarRepartidoresUseCase(repoRepartidores, repoPedidos);
+    
+    const resultado = await useCase.ejecutar({ termino: 'NoExiste' });
+    expect(resultado).toHaveLength(0);
+  });
+
+  test('CP-CU-021-03: Ver historial de pedidos de un repartidor en orden descendente', async () => {
+    const repoRepartidores = new InMemoryRepartidorRepository([
+      { id_usuario: 10, nombre: 'Juan', apellidos: 'Pérez', telefono: '3001234567', email: 'juan@example.com', estado: 'DISPONIBLE' }
+    ]);
+
+    const pedidoViejo = new Pedido({
+      id_pedido: 1,
+      id_usuario: 100,
+      id_repartidor: 10,
+      id_metodo_pago: 1,
+      direccion_entrega: 'Calle 1',
+      total: 10000,
+      estado: 'ENTREGADO',
+      fecha_pedido: new Date('2026-08-14').toISOString(),
+      fecha_actualizacion: new Date('2026-08-14').toISOString()
+    });
+
+    const pedidoReciente = new Pedido({
+      id_pedido: 2,
+      id_usuario: 101,
+      id_repartidor: 10,
+      id_metodo_pago: 1,
+      direccion_entrega: 'Calle 2',
+      total: 20000,
+      estado: 'ENTREGADO',
+      fecha_pedido: new Date('2026-08-16').toISOString(),
+      fecha_actualizacion: new Date('2026-08-16').toISOString()
+    });
+
+    const repoPedidos = new InMemoryPedidoRepartidorRepository([pedidoViejo, pedidoReciente]);
+    const historial = await repoPedidos.obtenerHistorialPedidos(10);
+
+    expect(historial).toHaveLength(2);
+    expect(historial[0].id_pedido).toBe(2); // Más reciente primero (orden descendente)
+    expect(historial[1].id_pedido).toBe(1);
+  });
+
+  test('CP-CU-021-05: Respuesta controlada con guion cuando falla el cálculo de métricas', async () => {
+    const repoRepartidores = new InMemoryRepartidorRepository([
+      { id_usuario: 10, nombre: 'Juan', apellidos: 'Pérez', telefono: '3001234567', email: 'juan@example.com', estado: 'DISPONIBLE' }
+    ]);
+
+    // Mocks simulando fallas críticas del servidor de base de datos
+    const pedidoRepoFalso = {
+      contarPedidosDelDia: () => { throw new Error('Fallo crítico simulado'); },
+      contarPedidosDelPeriodo: () => { throw new Error('Fallo crítico simulado'); }
+    };
+
+    const useCase = new ConsultarRepartidoresUseCase(repoRepartidores, pedidoRepoFalso);
+    const lista = await useCase.ejecutar();
+
+    expect(lista[0].pedidos_hoy).toBe('-');
+    expect(lista[0].pedidos_semana).toBe('-');
+    expect(lista[0].pedidos_mes).toBe('-');
+  });
+});

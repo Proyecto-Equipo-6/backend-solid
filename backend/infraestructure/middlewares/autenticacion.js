@@ -56,6 +56,22 @@ function crearRequerirRepartidor(idRolRepartidor = 3) {
   };
 }
 
+/**
+ * Adaptador de Infraestructura: crearRequerirAdmin
+ * Factory que crea un middleware que restringe el acceso a usuarios con
+ * rol Administrador (CU-025). Se inyecta el id del rol Administrador para
+ * no acoplarse a un valor fijo (id_rol = 1 en Seed.sql).
+ */
+function crearRequerirAdmin(idRolAdmin = 1) {
+  return function requerirAdmin(req, res, next) {
+    if (!req.usuario || Number(req.usuario.id_rol) !== Number(idRolAdmin)) {
+      return res.status(403).json({ error: 'Debes iniciar sesión como Administrador' });
+    }
+    return next();
+  };
+}
+
 module.exports = crearAutenticador;
 module.exports.crearRequerirCliente = crearRequerirCliente;
 module.exports.crearRequerirRepartidor = crearRequerirRepartidor;
+module.exports.crearRequerirAdmin = crearRequerirAdmin;

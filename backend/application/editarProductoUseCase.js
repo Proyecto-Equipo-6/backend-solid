@@ -12,22 +12,22 @@ class EditarProductoUseCase {
     this.categoriaRepo = categoriaRepo;
     this.proveedorRepo = proveedorRepo;
   }
-
-  async ejecutar(id_producto, {
-    sku,
-    id_categoria,
-    id_proveedor,
-    nombre,
-    descripcion = '',
-    precio,
-    stock,
-    imagen_url,
-    estado
-  }) {
-    const producto = await this.productoRepo.findById(id_producto);
-    if (!producto) {
-      throw new Error('Producto no encontrado');
-    }
+  
+async ejecutar(id_producto, {
+  sku,
+  id_categoria,
+  id_proveedor,
+  nombre,
+  descripcion = '',
+  precio,
+  stock,
+  imagen_url,
+  estado
+}) {
+  const producto = await this.productoRepo.findById(id_producto);
+  if (!producto) {
+    throw new Error('Producto no encontrado');
+  }
 
     validarCamposObligatoriosProducto({ sku, nombre, precio, stock });
     validarValoresNumericosProducto(precio, stock);

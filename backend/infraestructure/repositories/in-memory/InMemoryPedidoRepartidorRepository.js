@@ -12,8 +12,7 @@ class InMemoryPedidoRepartidorRepository extends PedidoRepartidorRepository {
     return new Pedido({ ...pedido });
   }
 
-  // ----- Repartidor -----
-
+  // Métodos para Repartidor
   async obtenerPedidosDelDia(repartidorId) {
     const hoy = new Date().toLocaleDateString('en-CA');
     return this.pedidos
@@ -29,19 +28,9 @@ class InMemoryPedidoRepartidorRepository extends PedidoRepartidorRepository {
       .map(p => this._clonar(p));
   }
 
-  // Alias compatible con origin/main
-  async obtenerPedidosAsignadosDelDia(repartidorId) {
-    return this.obtenerPedidosDelDia(repartidorId);
-  }
-
   async obtenerDetallePedido(pedidoId) {
     const pedido = this.pedidos.find(p => p.id_pedido === pedidoId);
     return pedido ? this._clonar(pedido) : null;
-  }
-
-  // Alias compatible con origin/main
-  async obtenerPedidoPorId(pedidoId) {
-    return this.obtenerDetallePedido(pedidoId);
   }
 
   async actualizarEstado(pedidoId, nuevoEstado, estadoAnterior, datosAdicionales = {}) {
@@ -67,30 +56,21 @@ class InMemoryPedidoRepartidorRepository extends PedidoRepartidorRepository {
     return this._clonar(pedidoActualizado);
   }
 
-  // Alias compatible con origin/main
-  async actualizarEstadoPedido(pedidoId, nuevoEstado, estadoAnterior, datosAdicionales = {}) {
-    return this.actualizarEstado(pedidoId, nuevoEstado, estadoAnterior, datosAdicionales);
-  }
-
-  // ----- Administrador -----
-
-    async obtenerTodos(filtros = {}) {
+  // Métodos para Administrador
+  async obtenerTodos(filtros = {}) {
     let pedidos = this.pedidos.map(p => this._clonar(p));
 
     if (filtros.estado) {
       pedidos = pedidos.filter(p => p.estado === filtros.estado);
     }
-
     if (filtros.fechaDesde) {
       const desde = new Date(filtros.fechaDesde);
       pedidos = pedidos.filter(p => new Date(p.fecha_pedido) >= desde);
     }
-
     if (filtros.fechaHasta) {
       const hasta = new Date(filtros.fechaHasta);
       pedidos = pedidos.filter(p => new Date(p.fecha_pedido) <= hasta);
     }
-
     if (filtros.cliente) {
       const clienteId = Number(filtros.cliente);
       pedidos = pedidos.filter(p => p.id_usuario === clienteId);
@@ -102,15 +82,13 @@ class InMemoryPedidoRepartidorRepository extends PedidoRepartidorRepository {
     const start = (page - 1) * limit;
     const end = start + limit;
 
-    const data = pedidos.slice(start, end);
-
     return {
-      data,
+      data: pedidos.slice(start, end),
       total,
       page,
       limit
     };
-    }
+  }
 
   async contarPedidosDelDia(repartidorId) {
     const hoy = new Date().toLocaleDateString('en-CA');
@@ -139,7 +117,6 @@ class InMemoryPedidoRepartidorRepository extends PedidoRepartidorRepository {
     return this._clonar(pedidoActualizado);
   }
 
-  // Método para cancelación con reintegración (HEAD)
   async obtenerDetallesPorPedido(id_pedido) {
     return this.detallesPedido
       .filter(d => d.id_pedido === id_pedido)
@@ -150,7 +127,47 @@ class InMemoryPedidoRepartidorRepository extends PedidoRepartidorRepository {
     this.detallesPedido.push({ ...detalle });
   }
 
-  // CU-018 · Historial de pedidos finalizados (origin/main)
+  // Métodos de métricas para CU-021
+  async contarPedidosDeHoyParaMetrica(repartidorId) {
+    const hoy = new Date().toLocaleDateString('en-CA');
+    return this.pedidos.filter(p => {
+      const fechaPedido = new Date(p.fecha_pedido).toLocaleDateString('en-CA');
+      return (
+        p.id_repartidor === repartidorId &&
+        fechaPedido === hoy
+      );
+    }).length;
+  }
+
+  async contarPedidosDelPeriodo(repartidorId) {
+    const ahora = new Date();
+    const inicioMes = new Date(ahora.getFullYear(), ahora.getMonth(), 1);
+    const diasDesdeLunes = ahora.getDay() === 0 ? 6 : ahora.getDay() - 1;
+    const inicioSemana = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate() - diasDesdeLunes);
+
+    const pedidos = this.pedidos.filter(p => p.id_repartidor === repartidorId);
+
+    const totalMes = pedidos.filter(p => {
+      const fecha = new Date(p.fecha_actualizacion || p.fecha_pedido);
+      const fechaNormalizada = new Date(fecha.getFullYear(), fecha.getMonth(), fecha.getDate());
+      return fechaNormalizada >= inicioMes;
+    }).length;
+
+    const totalSemana = pedidos.filter(p => {
+      const fecha = new Date(p.fecha_actualizacion || p.fecha_pedido);
+      const fechaNormalizada = new Date(fecha.getFullYear(), fecha.getMonth(), fecha.getDate());
+      return fechaNormalizada >= inicioSemana;
+    }).length;
+
+    return { totalMes, totalSemana };
+  }
+
+  async contarPedidosEnCamino(repartidorId) {
+  return this.pedidos.filter(p =>
+    p.id_repartidor === repartidorId && p.estado === 'EN_CAMINO'
+  ).length;
+  }
+
   async obtenerHistorialPedidos(repartidorId, filtros = {}) {
     const estadosFinales = new Set(['ENTREGADO', 'NO_ENTREGADO', 'CANCELADO']);
     let pedidos = this.pedidos.filter(p =>
@@ -161,6 +178,9 @@ class InMemoryPedidoRepartidorRepository extends PedidoRepartidorRepository {
       pedidos = pedidos.filter(p => p.estado === filtros.filtroEstado);
     }
 
+    // Orden descendente por fecha
+    pedidos.sort((a, b) => new Date(b.fecha_pedido) - new Date(a.fecha_pedido));
+
     return pedidos.map(p => ({
       id_pedido: p.id_pedido,
       fechaEntregaReal: p.fecha_actualizacion || p.fecha_pedido,
@@ -168,32 +188,7 @@ class InMemoryPedidoRepartidorRepository extends PedidoRepartidorRepository {
       direccion_entrega: p.direccion_entrega,
     }));
   }
-
-  async contarPedidosDelPeriodo(repartidorId) {
-    const estadosFinales = new Set(['ENTREGADO', 'NO_ENTREGADO', 'CANCELADO']);
-    const ahora = new Date();
-    const inicioMes = new Date(ahora.getFullYear(), ahora.getMonth(), 1);
-    const diasDesdeLunes = ahora.getDay() === 0 ? 6 : ahora.getDay() - 1;
-    const inicioSemana = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate() - diasDesdeLunes);
-
-    const finalizados = this.pedidos.filter(p =>
-      p.id_repartidor === repartidorId && estadosFinales.has(p.estado)
-    );
-
-    const totalMes = finalizados.filter(p => {
-      const fecha = new Date(p.fecha_actualizacion || p.fecha_pedido);
-      const fechaNormalizada = new Date(fecha.getFullYear(), fecha.getMonth(), fecha.getDate());
-      return fechaNormalizada >= inicioMes;
-    }).length;
-
-    const totalSemana = finalizados.filter(p => {
-      const fecha = new Date(p.fecha_actualizacion || p.fecha_pedido);
-      const fechaNormalizada = new Date(fecha.getFullYear(), fecha.getMonth(), fecha.getDate());
-      return fechaNormalizada >= inicioSemana;
-    }).length;
-
-    return { totalMes, totalSemana };
-  }
+  
 }
 
 module.exports = InMemoryPedidoRepartidorRepository;

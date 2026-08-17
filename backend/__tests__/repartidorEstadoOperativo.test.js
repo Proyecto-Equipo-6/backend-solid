@@ -1,0 +1,44 @@
+import InMemoryRepartidorRepository from '../infraestructure/repositories/in-memory/InMemoryRepartidorRepository.js';
+import InMemoryPedidoRepartidorRepository from '../infraestructure/repositories/in-memory/InMemoryPedidoRepartidorRepository.js';
+import CambiarEstadoOperativoRepartidorUseCase from '../application/cambiarEstadoOperativoRepartidorUseCase.js';
+import Pedido from '../domain/models/Pedido.js';
+
+describe('HU-010.2: Gestión de Estado Operativo de Repartidor', () => {
+  test('CP-HU-010.2-01: Cambiar estado de Inactivo a Disponible', async () => {
+    const repoRepartidores = new InMemoryRepartidorRepository([
+      { id_usuario: 10, nombre: 'Juan', apellidos: 'Pérez', telefono: '3001234567', email: 'juan@example.com', estado: 'INACTIVO' }
+    ]);
+    const repoPedidos = new InMemoryPedidoRepartidorRepository();
+
+    const useCase = new CambiarEstadoOperativoRepartidorUseCase(repoRepartidores, repoPedidos);
+    const repartidor = await useCase.ejecutar(10, 'DISPONIBLE');
+
+    expect(repartidor.estado).toBe('DISPONIBLE');
+  });
+
+  test('CP-HU-010.2-02: Bloquear cambio a Inactivo si tiene pedidos EN_CAMINO', async () => {
+    const repoRepartidores = new InMemoryRepartidorRepository([
+      { id_usuario: 10, nombre: 'Juan', apellidos: 'Pérez', telefono: '3001234567', email: 'juan@example.com', estado: 'OCUPADO' }
+    ]);
+
+    // Pedido en estado EN_CAMINO asignado al repartidor 10
+    const pedido = new Pedido({
+      id_pedido: 1,
+      id_usuario: 100,
+      id_repartidor: 10,
+      id_metodo_pago: 1,
+      direccion_entrega: 'Calle 123',
+      total: 50000,
+      estado: 'EN_CAMINO',
+      fecha_pedido: new Date().toISOString(),
+      fecha_actualizacion: new Date().toISOString()
+    });
+
+    const repoPedidos = new InMemoryPedidoRepartidorRepository([pedido]);
+    const useCase = new CambiarEstadoOperativoRepartidorUseCase(repoRepartidores, repoPedidos);
+
+    await expect(
+      useCase.ejecutar(10, 'INACTIVO')
+    ).rejects.toThrow('No se puede inactivar un repartidor con entregas pendientes sin finalizar');
+  });
+});

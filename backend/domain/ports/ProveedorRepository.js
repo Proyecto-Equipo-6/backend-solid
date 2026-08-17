@@ -22,6 +22,14 @@ class ProveedorRepository {
   async eliminar(id_proveedor) {
     throw new Error("Método 'eliminar' no implementado");
   }
+
+  /**
+   * CU-025: lista los proveedores activos (estado = 1).
+   * @returns {Promise<Array>}
+   */
+  async findActivos() {
+    throw new Error("Método 'findActivos' no implementado");
+  }
 }
 
 module.exports = ProveedorRepository;
