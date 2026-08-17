@@ -2,18 +2,19 @@ const PedidoRepartidorRepository = require('../../../domain/ports/PedidoRepartid
 const Pedido = require('../../../domain/models/Pedido');
 
 class InMemoryPedidoRepartidorRepository extends PedidoRepartidorRepository {
-  constructor(pedidos = []) {
+  constructor(pedidos = [], detallesPedido = []) {
     super();
     this.pedidos = pedidos.map(p => this._clonar(p));
+    this.detallesPedido = detallesPedido.map(d => ({ ...d }));
   }
 
   _clonar(pedido) {
     return new Pedido({ ...pedido });
   }
 
-  // Métodos para Repartidor
+  // ----- Repartidor -----
 
-  async obtenerPedidosAsignadosDelDia(repartidorId) {
+  async obtenerPedidosDelDia(repartidorId) {
     const hoy = new Date().toLocaleDateString('en-CA');
     return this.pedidos
       .filter(p => {
@@ -28,12 +29,22 @@ class InMemoryPedidoRepartidorRepository extends PedidoRepartidorRepository {
       .map(p => this._clonar(p));
   }
 
-  async obtenerPedidoPorId(pedidoId) {
+  // Alias compatible con origin/main
+  async obtenerPedidosAsignadosDelDia(repartidorId) {
+    return this.obtenerPedidosDelDia(repartidorId);
+  }
+
+  async obtenerDetallePedido(pedidoId) {
     const pedido = this.pedidos.find(p => p.id_pedido === pedidoId);
     return pedido ? this._clonar(pedido) : null;
   }
 
-  async actualizarEstadoPedido(pedidoId, nuevoEstado, estadoAnterior, datosAdicionales = {}) {
+  // Alias compatible con origin/main
+  async obtenerPedidoPorId(pedidoId) {
+    return this.obtenerDetallePedido(pedidoId);
+  }
+
+  async actualizarEstado(pedidoId, nuevoEstado, estadoAnterior, datosAdicionales = {}) {
     const index = this.pedidos.findIndex(p => p.id_pedido === pedidoId);
     if (index === -1) throw new Error('Pedido no encontrado');
 
@@ -43,22 +54,8 @@ class InMemoryPedidoRepartidorRepository extends PedidoRepartidorRepository {
       throw new Error('El pedido fue actualizado por otro proceso. Recargue la información.');
     }
 
-    // Máquina de estados real: ASIGNADO → EN_CAMINO → ENTREGADO / NO_ENTREGADO
-    const transicionesValidas = {
-      'ASIGNADO': ['EN_CAMINO'],
-      'EN_CAMINO': ['ENTREGADO', 'NO_ENTREGADO']
-    };
-
-    const estadosPermitidos = transicionesValidas[pedido.estado] || [];
-    if (!estadosPermitidos.includes(nuevoEstado)) {
-      throw new Error(`Transición inválida de ${pedido.estado} a ${nuevoEstado}`);
-    }
-
-    if (nuevoEstado === 'ENTREGADO' && !datosAdicionales.foto) {
-      throw new Error('La foto es obligatoria para confirmar la entrega');
-    }
-    if (nuevoEstado === 'NO_ENTREGADO' && !datosAdicionales.observacion) {
-      throw new Error('La observación es obligatoria para marcar No Entregado');
+    if (nuevoEstado === 'ENTREGADO') {
+      pedido.comprobante_url = `https://cloudinary.com/evidencia_${pedidoId}.jpg`;
     }
 
     const pedidoActualizado = this._clonar({
@@ -70,7 +67,12 @@ class InMemoryPedidoRepartidorRepository extends PedidoRepartidorRepository {
     return this._clonar(pedidoActualizado);
   }
 
-  // Métodos para Administrador
+  // Alias compatible con origin/main
+  async actualizarEstadoPedido(pedidoId, nuevoEstado, estadoAnterior, datosAdicionales = {}) {
+    return this.actualizarEstado(pedidoId, nuevoEstado, estadoAnterior, datosAdicionales);
+  }
+
+  // ----- Administrador -----
 
   async obtenerTodos(filtros = {}) {
     let pedidos = this.pedidos.map(p => this._clonar(p));
@@ -78,17 +80,14 @@ class InMemoryPedidoRepartidorRepository extends PedidoRepartidorRepository {
     if (filtros.estado) {
       pedidos = pedidos.filter(p => p.estado === filtros.estado);
     }
-
     if (filtros.fechaDesde) {
       const desde = new Date(filtros.fechaDesde);
       pedidos = pedidos.filter(p => new Date(p.fecha_pedido) >= desde);
     }
-
     if (filtros.fechaHasta) {
       const hasta = new Date(filtros.fechaHasta);
       pedidos = pedidos.filter(p => new Date(p.fecha_pedido) <= hasta);
     }
-
     if (filtros.cliente) {
       const clienteId = Number(filtros.cliente);
       pedidos = pedidos.filter(p => p.id_usuario === clienteId);
@@ -103,6 +102,8 @@ class InMemoryPedidoRepartidorRepository extends PedidoRepartidorRepository {
       const fechaPedido = new Date(p.fecha_pedido).toLocaleDateString('en-CA');
       return (
         p.id_repartidor === repartidorId &&
+        p.estado !== 'CANCELADO' &&
+        p.estado !== 'ENTREGADO' &&
         fechaPedido === hoy
       );
     }).length;
@@ -122,8 +123,18 @@ class InMemoryPedidoRepartidorRepository extends PedidoRepartidorRepository {
     return this._clonar(pedidoActualizado);
   }
 
-  // CU-018 · Historial de pedidos finalizados
+  // Método para cancelación con reintegración (HEAD)
+  async obtenerDetallesPorPedido(id_pedido) {
+    return this.detallesPedido
+      .filter(d => d.id_pedido === id_pedido)
+      .map(d => ({ ...d }));
+  }
 
+  agregarDetallePedido(detalle) {
+    this.detallesPedido.push({ ...detalle });
+  }
+
+  // CU-018 · Historial de pedidos finalizados (origin/main)
   async obtenerHistorialPedidos(repartidorId, filtros = {}) {
     const estadosFinales = new Set(['ENTREGADO', 'NO_ENTREGADO', 'CANCELADO']);
     let pedidos = this.pedidos.filter(p =>
@@ -146,9 +157,6 @@ class InMemoryPedidoRepartidorRepository extends PedidoRepartidorRepository {
     const estadosFinales = new Set(['ENTREGADO', 'NO_ENTREGADO', 'CANCELADO']);
     const ahora = new Date();
     const inicioMes = new Date(ahora.getFullYear(), ahora.getMonth(), 1);
-    // Semana calendario con inicio en lunes (ISO), consistente con
-    // WEEKDAY(CURDATE()) del adaptador MySQL (RN-073/RN-076).
-    // Ambos inicios se normalizan a medianoche para comparar solo la fecha.
     const diasDesdeLunes = ahora.getDay() === 0 ? 6 : ahora.getDay() - 1;
     const inicioSemana = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate() - diasDesdeLunes);
 

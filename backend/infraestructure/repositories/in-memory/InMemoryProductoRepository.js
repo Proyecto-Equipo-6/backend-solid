@@ -1,24 +1,21 @@
 const Producto = require('../../../domain/models/Producto');
 const ProductoRepository = require('../../../domain/ports/ProductoRepository');
 
-/**
- * Adaptador de Infraestructura: InMemoryProductoRepository
- * Implementa el puerto ProductoRepository usando memoria volátil.
- * Conserva los métodos públicos existentes y agrega los del CRUD.
- */
 class InMemoryProductoRepository extends ProductoRepository {
-  constructor() {
+  constructor(productos = []) {
     super();
-    this.productos = [];
-    this.contadorId = 0;
+    this.productos = productos.map(p => new Producto({ ...p }));
+    this.contadorId = this.productos.length > 0
+      ? Math.max(...this.productos.map(p => p.id_producto))
+      : 0;
   }
 
   async findActivos() {
-    return this.productos.filter((producto) => producto.estado === 1);
+    return this.productos.filter(p => p.estado === 1);
   }
 
   async findById(id) {
-    return this.productos.find((p) => p.id_producto === id) || null;
+    return this.productos.find(p => p.id_producto === id) || null;
   }
 
   async guardar(productoData) {
@@ -27,10 +24,8 @@ class InMemoryProductoRepository extends ProductoRepository {
       ...productoData,
       id_producto: nuevoId,
       estado: productoData.estado ?? 1,
-      fecha_creacion: new Date().toISOString(),
-      fecha_actualizacion: new Date().toISOString() // AÑADIDO
+      fecha_creacion: new Date().toISOString()
     });
-
     this.productos.push(nuevoProducto);
     this.contadorId = nuevoId;
     return new Producto({ ...nuevoProducto });
@@ -38,12 +33,12 @@ class InMemoryProductoRepository extends ProductoRepository {
 
   async buscarPorNombre(nombre) {
     return this.productos.find(
-      (p) => p.nombre.toLowerCase() === nombre.toLowerCase()
+      p => p.nombre.toLowerCase() === nombre.toLowerCase()
     ) || null;
   }
 
   async actualizar(id_producto, datos) {
-    const index = this.productos.findIndex((p) => p.id_producto === id_producto);
+    const index = this.productos.findIndex(p => p.id_producto === id_producto);
     if (index === -1) throw new Error('Producto no encontrado');
 
     const actualizado = new Producto({
@@ -53,7 +48,6 @@ class InMemoryProductoRepository extends ProductoRepository {
       fecha_creacion: this.productos[index].fecha_creacion,
       fecha_actualizacion: new Date().toISOString()
     });
-
     this.productos[index] = actualizado;
     return new Producto({ ...actualizado });
   }
@@ -61,8 +55,16 @@ class InMemoryProductoRepository extends ProductoRepository {
   async eliminar(id_producto) {
     const producto = await this.findById(id_producto);
     if (!producto) throw new Error('Producto no encontrado');
-    // Borrado lógico (RN-101)
     return this.actualizar(id_producto, { estado: 0 });
+  }
+
+  // NUEVO: Reintegrar inventario (RN-012.2)
+  async reintegrarInventario(id_producto, cantidad) {
+    const producto = await this.findById(id_producto);
+    if (!producto) throw new Error('Producto no encontrado');
+
+    const nuevoStock = producto.stock + cantidad;
+    return this.actualizar(id_producto, { stock: nuevoStock });
   }
 }
 
