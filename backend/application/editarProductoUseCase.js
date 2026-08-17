@@ -4,7 +4,7 @@ class EditarProductoUseCase {
     this.categoriaRepo = categoriaRepo;
   }
 
-  async ejecutar(id_producto, { id_categoria, nombre, descripcion, precio, stock, estado }) {
+  async ejecutar(id_producto, { id_categoria, id_proveedor, nombre, descripcion, precio, stock, estado }) {
     const producto = await this.productoRepo.findById(id_producto);
     if (!producto) {
       throw new Error('Producto no encontrado');
@@ -44,6 +44,7 @@ class EditarProductoUseCase {
 
     return await this.productoRepo.actualizar(id_producto, {
       id_categoria,
+      id_proveedor,
       nombre: nombre.trim(),
       descripcion: descripcion || '',
       precio,

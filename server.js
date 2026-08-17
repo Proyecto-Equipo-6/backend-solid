@@ -20,6 +20,9 @@ const SmtpEmailSender = require('./backend/infraestructure/services/SmtpEmailSen
 const MySQLProductoRepository = require('./backend/infraestructure/repositories/mysql/MySQLProductoRepository');
 const ListarProductosPublicosUseCase = require('./backend/application/ListarProductosPublicosUseCase');
 const ObtenerProductoPublicoUseCase = require('./backend/application/ObtenerProductoPublicoUseCase');
+const CrearProductoUseCase = require('./backend/application/crearProductoUseCase');
+const EditarProductoUseCase = require('./backend/application/editarProductoUseCase');
+const EliminarProductoUseCase = require('./backend/application/eliminarProductoUseCase');
 const ProductoController = require('./backend/infraestructure/controllers/ProductoController');
 const createProductoRouter = require('./backend/infraestructure/routes/productoRoutes');
 const MySQLCategoriaRepository = require('./backend/infraestructure/repositories/mysql/MySQLCategoriaRepository');
@@ -135,15 +138,6 @@ const authController = new AuthController(
   restablecerContrasenaUseCase
 );
 
-// --- Inyección de Dependencias para el Catálogo de Productos (DIP) ---
-const productoRepository = new MySQLProductoRepository();
-const listarProductosUseCase = new ListarProductosPublicosUseCase(productoRepository);
-const obtenerProductoUseCase = new ObtenerProductoPublicoUseCase(productoRepository);
-const productoController = new ProductoController(
-  listarProductosUseCase,
-  obtenerProductoUseCase
-);
-
 // --- Inyección de Dependencias para Categorías (CU-022, DIP) ---
 const categoriaRepository = new MySQLCategoriaRepository();
 const listarCategoriasUseCase = new ListarCategoriasUseCase(categoriaRepository);
@@ -155,6 +149,21 @@ const categoriaController = new CategoriaController({
   crearCategoriaUseCase,
   editarCategoriaUseCase,
   eliminarCategoriaUseCase,
+});
+
+// --- Inyección de Dependencias para Productos (CU-023, DIP) ---
+const productoRepository = new MySQLProductoRepository();
+const listarProductosUseCase = new ListarProductosPublicosUseCase(productoRepository);
+const obtenerProductoUseCase = new ObtenerProductoPublicoUseCase(productoRepository);
+const crearProductoUseCase = new CrearProductoUseCase(productoRepository, categoriaRepository);
+const editarProductoUseCase = new EditarProductoUseCase(productoRepository, categoriaRepository);
+const eliminarProductoUseCase = new EliminarProductoUseCase(productoRepository);
+const productoController = new ProductoController({
+  listarProductosUseCase,
+  obtenerProductoUseCase,
+  crearProductoUseCase,
+  editarProductoUseCase,
+  eliminarProductoUseCase,
 });
 
 // --- Inyección de Dependencias para Bancos (DIP) ---
@@ -212,7 +221,7 @@ const proveedorController = new ProveedorController({
 app.use('/api/v1/users', createUserRouter(userController, autenticar));
 app.use('/api/v1/roles', createRolRouter(adminUpdateRolController));
 app.use('/api/v1/auth', createAuthRouter(authController));
-app.use('/api/v1/productos', createProductoRouter(productoController));
+app.use('/api/v1/productos', createProductoRouter(productoController, autenticar, requerirAdmin));
 app.use('/api/v1/categorias', createCategoriaRouter(categoriaController, autenticar, requerirAdmin));
 app.use('/api/v1/bancos', createBancoRouter(bancoController));
 app.use('/api/v1/analitica', createAnaliticaRouter(analiticaController));

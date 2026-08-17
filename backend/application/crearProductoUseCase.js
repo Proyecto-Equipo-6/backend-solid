@@ -4,7 +4,7 @@ class CrearProductoUseCase {
     this.categoriaRepo = categoriaRepo;
   }
 
-  async ejecutar({ id_categoria, nombre, descripcion = '', precio, stock, imagen_url }) {
+  async ejecutar({ id_categoria, id_proveedor, nombre, descripcion = '', precio, stock, imagen_url }) {
     if (!nombre || nombre.trim() === '') {
       throw new Error('Complete los campos obligatorios');
     }
@@ -35,6 +35,7 @@ class CrearProductoUseCase {
 
     return await this.productoRepo.guardar({
       id_categoria,
+      id_proveedor,
       nombre: nombre.trim(),
       descripcion: descripcion || '',
       precio,
