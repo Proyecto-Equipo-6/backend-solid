@@ -5,6 +5,7 @@ import ObtenerTodosPedidosUseCase from '../application/obtenerTodosPedidosUseCas
 import AsignarRepartidorUseCase from '../application/asignarRepartidorUseCase.js';
 import CancelarPedidoAdminUseCase from '../application/cancelarPedidoAdminUseCase.js';
 import ActualizarEstadoPedidoAdminUseCase from '../application/actualizarEstadoPedidoAdminUseCase.js';
+import ObtenerDetallePedidoAdminUseCase from '../application/obtenerDetallePedidoAdminUseCase.js';
 import Pedido from '../domain/models/Pedido.js';
 
 const crearPedido = (
@@ -267,5 +268,39 @@ describe('Módulo administración de pedidos (CU-019, CU-020, CU-027)', () => {
     const disponible = await repoRepartidores.estaDisponible(10);
     expect(disponible).toBe(true);
     expect(cancelado.estado).toBe('CANCELADO');
+  });
+  
+  test('CP-HU008.1-02: Verificar la visualización completa del detalle de una orden administrativa', async () => {
+  // Pedido ficticio
+  const pedido = crearPedido(1, 'CONFIRMADO', 100, null, '2026-08-15T08:00:00');
+  pedido.clienteNombre = 'María Pérez';
+  pedido.clienteTelefono = '3001234567';
+
+  // Detalles del pedido (simula tabla pedido_detalles)
+  const detalles = [
+    crearDetallePedido(1, 1, 2), // producto 1, cantidad 2
+    crearDetallePedido(1, 2, 1)  // producto 2, cantidad 1
+  ];
+
+  const repoPedidos = new InMemoryPedidoRepartidorRepository([pedido], detalles);
+  const useCase = new ObtenerDetallePedidoAdminUseCase(repoPedidos);
+
+  const detalleAdmin = await useCase.ejecutar(1);
+
+  expect(detalleAdmin.id_pedido).toBe(1);
+  expect(detalleAdmin.cliente.nombre).toBe('María Pérez');
+  expect(detalleAdmin.cliente.telefono).toBe('3001234567');
+  expect(detalleAdmin.direccion_entrega).toBe('Calle 123');
+  expect(detalleAdmin.total).toBe(50000);
+  expect(detalleAdmin.estado).toBe('CONFIRMADO');
+  expect(detalleAdmin.productos).toHaveLength(2);
+  expect(detalleAdmin.productos[0]).toMatchObject({
+    id_producto: 1,
+    cantidad: 2
+  });
+  expect(detalleAdmin.productos[1]).toMatchObject({
+    id_producto: 2,
+    cantidad: 1
+  });
   });
 });

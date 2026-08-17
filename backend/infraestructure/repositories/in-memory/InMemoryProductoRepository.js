@@ -8,6 +8,7 @@ class InMemoryProductoRepository extends ProductoRepository {
     this.contadorId = this.productos.length > 0
       ? Math.max(...this.productos.map(p => p.id_producto))
       : 0;
+    this.historialStock = [];
   }
 
   async findActivos() {
@@ -18,6 +19,19 @@ class InMemoryProductoRepository extends ProductoRepository {
     return this.productos.find(p => p.id_producto === id) || null;
   }
 
+  async buscarPorNombre(nombre) {
+    return this.productos.find(
+      p => p.nombre.toLowerCase() === nombre.toLowerCase()
+    ) || null;
+  }
+
+  // NUEVO: buscar por SKU (RN-011.4)
+  async buscarPorSKU(sku) {
+    return this.productos.find(
+      p => p.sku && p.sku.toLowerCase() === sku.toLowerCase()
+    ) || null;
+  }
+
   async guardar(productoData) {
     const nuevoId = this.contadorId + 1;
     const nuevoProducto = new Producto({
@@ -26,15 +40,10 @@ class InMemoryProductoRepository extends ProductoRepository {
       estado: productoData.estado ?? 1,
       fecha_creacion: new Date().toISOString()
     });
+
     this.productos.push(nuevoProducto);
     this.contadorId = nuevoId;
     return new Producto({ ...nuevoProducto });
-  }
-
-  async buscarPorNombre(nombre) {
-    return this.productos.find(
-      p => p.nombre.toLowerCase() === nombre.toLowerCase()
-    ) || null;
   }
 
   async actualizar(id_producto, datos) {
@@ -48,6 +57,7 @@ class InMemoryProductoRepository extends ProductoRepository {
       fecha_creacion: this.productos[index].fecha_creacion,
       fecha_actualizacion: new Date().toISOString()
     });
+
     this.productos[index] = actualizado;
     return new Producto({ ...actualizado });
   }
@@ -58,13 +68,51 @@ class InMemoryProductoRepository extends ProductoRepository {
     return this.actualizar(id_producto, { estado: 0 });
   }
 
-  // NUEVO: Reintegrar inventario (RN-012.2)
   async reintegrarInventario(id_producto, cantidad) {
     const producto = await this.findById(id_producto);
     if (!producto) throw new Error('Producto no encontrado');
 
     const nuevoStock = producto.stock + cantidad;
     return this.actualizar(id_producto, { stock: nuevoStock });
+  }
+
+  // NUEVO: registrar ajuste de stock con auditoría (Flujo Principal B RF-007.2)
+  async registrarAjusteStock(id_producto, cantidad_nueva, motivo) {
+    const producto = await this.findById(id_producto);
+    if (!producto) throw new Error('Producto no encontrado');
+
+    if (cantidad_nueva === undefined || cantidad_nueva === null || cantidad_nueva < 0) {
+      throw new Error('El stock no puede ser negativo');
+    }
+
+    if (!motivo || motivo.trim() === '') {
+      throw new Error('El motivo del ajuste es obligatorio');
+    }
+
+    const cantidad_anterior = producto.stock;
+
+    // Actualizar stock
+    await this.actualizar(id_producto, { stock: cantidad_nueva });
+
+    // Registrar auditoría
+    const registro = {
+      id_historial: this.historialStock.length + 1,
+      id_producto,
+      id_admin: null,
+      cantidad_anterior,
+      cantidad_nueva,
+      motivo: motivo.trim(),
+      fecha: new Date().toISOString()
+    };
+
+    this.historialStock.push(registro);
+
+    return {
+      id_producto,
+      cantidad_anterior,
+      cantidad_nueva,
+      motivo: motivo.trim()
+    };
   }
 }
 
