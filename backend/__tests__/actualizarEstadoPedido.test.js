@@ -30,14 +30,17 @@ describe('ActualizarEstadoPedidoUseCase', () => {
     expect(pedidoActualizado.estado).toBe('EN_CAMINO');
   });
 
-  test('Flujo feliz 2: EN_CAMINO -> ENTREGADO con foto', async () => {
-    const repo = new InMemoryPedidoRepartidorRepository([crearPedido('EN_CAMINO')]);
-    const useCase = new ActualizarEstadoPedidoUseCase(repo);
+  test('Flujo feliz 2: EN_CAMINO -> ENTREGADO con foto válida', async () => {
+  const repo = new InMemoryPedidoRepartidorRepository([crearPedido('EN_CAMINO')]);
+  const useCase = new ActualizarEstadoPedidoUseCase(repo);
 
-    const pedidoActualizado = await useCase.ejecutar(1, 'ENTREGADO', 'EN_CAMINO', { foto: 'base64-foto' });
-
-    expect(pedidoActualizado.estado).toBe('ENTREGADO');
+  const pedidoActualizado = await useCase.ejecutar(1, 'ENTREGADO', 'EN_CAMINO', {
+    foto: { formato: 'jpg', tamano: 102400 }
   });
+
+  expect(pedidoActualizado.estado).toBe('ENTREGADO');
+  expect(pedidoActualizado.comprobante_url).toContain('evidencia_1');
+});
 
   test('Flujo de excepción 1: ENTREGADO sin foto debe fallar', async () => {
     const repo = new InMemoryPedidoRepartidorRepository([crearPedido('EN_CAMINO')]);
