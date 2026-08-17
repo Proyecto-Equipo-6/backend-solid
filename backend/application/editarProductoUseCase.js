@@ -1,53 +1,60 @@
+const {
+  validarCamposObligatoriosProducto,
+  validarValoresNumericosProducto,
+  validarUnicidadProducto,
+  validarRelacionesProducto,
+  validarEstadoProducto
+} = require('./productoValidationsHelper');
+
 class EditarProductoUseCase {
-  constructor(productoRepo, categoriaRepo) {
+  constructor(productoRepo, categoriaRepo, proveedorRepo) {
     this.productoRepo = productoRepo;
     this.categoriaRepo = categoriaRepo;
+    this.proveedorRepo = proveedorRepo;
   }
 
-  async ejecutar(id_producto, { id_categoria, nombre, descripcion, precio, stock, estado }) {
+  async ejecutar(id_producto, {
+    sku,
+    id_categoria,
+    id_proveedor,
+    nombre,
+    descripcion = '',
+    precio,
+    stock,
+    imagen_url,
+    estado
+  }) {
     const producto = await this.productoRepo.findById(id_producto);
     if (!producto) {
       throw new Error('Producto no encontrado');
     }
 
-    if (!nombre || nombre.trim() === '' ||
-    precio === undefined || precio === null ||
-    stock === undefined || stock === null ||
-    id_categoria === undefined || id_categoria === null) {
-    throw new Error('Complete los campos obligatorios');
-    }
-    
-    if (precio < 0 || stock < 0) {
-      throw new Error('El precio y el stock no pueden ser negativos');
-    }
+    validarCamposObligatoriosProducto({ sku, nombre, precio, stock });
+    validarValoresNumericosProducto(precio, stock);
+    await validarUnicidadProducto(this.productoRepo, sku, nombre, id_producto);
+    await validarRelacionesProducto(
+      this.categoriaRepo,
+      this.proveedorRepo,
+      id_categoria,
+      id_proveedor
+    );
 
-    // Validar nombre único, excluyendo el mismo producto
-    const existente = await this.productoRepo.buscarPorNombre(nombre.trim());
-    if (existente && existente.id_producto !== id_producto) {
-      throw new Error('Ya existe un producto con ese nombre');
-    }
+    const estadoNumerico = validarEstadoProducto(estado, producto.estado);
 
-    // Verificar que la categoría exista
-    const categoria = await this.categoriaRepo.buscarPorId(id_categoria);
-    if (!categoria) {
-      throw new Error('La categoría asociada no existe');
-    }
-
-    // Convertir estado
-    let estadoNumerico = producto.estado;
-    if (estado !== undefined) {
-      if (estado === 'Activo') estadoNumerico = 1;
-      else if (estado === 'Inactivo') estadoNumerico = 0;
-      else if ([0, 1].includes(estado)) estadoNumerico = estado;
-      else throw new Error('Estado inválido');
-    }
+    const imagenFinal =
+      imagen_url && imagen_url.trim() !== ''
+        ? imagen_url.trim()
+        : producto.imagen_url;
 
     return await this.productoRepo.actualizar(id_producto, {
+      sku: sku.trim(),
       id_categoria,
+      id_proveedor,
       nombre: nombre.trim(),
       descripcion: descripcion || '',
       precio,
       stock,
+      imagen_url: imagenFinal,
       estado: estadoNumerico
     });
   }

@@ -74,27 +74,43 @@ class InMemoryPedidoRepartidorRepository extends PedidoRepartidorRepository {
 
   // ----- Administrador -----
 
-  async obtenerTodos(filtros = {}) {
+    async obtenerTodos(filtros = {}) {
     let pedidos = this.pedidos.map(p => this._clonar(p));
 
     if (filtros.estado) {
       pedidos = pedidos.filter(p => p.estado === filtros.estado);
     }
+
     if (filtros.fechaDesde) {
       const desde = new Date(filtros.fechaDesde);
       pedidos = pedidos.filter(p => new Date(p.fecha_pedido) >= desde);
     }
+
     if (filtros.fechaHasta) {
       const hasta = new Date(filtros.fechaHasta);
       pedidos = pedidos.filter(p => new Date(p.fecha_pedido) <= hasta);
     }
+
     if (filtros.cliente) {
       const clienteId = Number(filtros.cliente);
       pedidos = pedidos.filter(p => p.id_usuario === clienteId);
     }
 
-    return pedidos;
-  }
+    const total = pedidos.length;
+    const page = Number(filtros.page) || 1;
+    const limit = Number(filtros.limit) || 10;
+    const start = (page - 1) * limit;
+    const end = start + limit;
+
+    const data = pedidos.slice(start, end);
+
+    return {
+      data,
+      total,
+      page,
+      limit
+    };
+    }
 
   async contarPedidosDelDia(repartidorId) {
     const hoy = new Date().toLocaleDateString('en-CA');
