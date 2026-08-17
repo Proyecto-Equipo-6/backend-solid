@@ -93,6 +93,36 @@ class MySQLPedidoRepository extends PedidoRepository {
     );
     return resultado.affectedRows > 0;
   }
+
+  async obtenerDetallePedido(idPedido) {
+    const [filas] = await pool.execute(
+      `SELECT
+         p.id_pedido,
+         u.nombre_apellido AS clienteNombre,
+         u.telefono AS clienteTelefono,
+         p.direccion_entrega,
+         p.total,
+         p.estado,
+         p.comprobante_url
+       FROM pedidos p
+       INNER JOIN usuarios u ON p.id_usuario = u.id_usuario
+       WHERE p.id_pedido = ?
+       LIMIT 1`,
+      [idPedido]
+    );
+    return filas[0] || null;
+  }
+
+  async obtenerDetallesPorPedido(idPedido) {
+    const [filas] = await pool.execute(
+      `SELECT id_producto, cantidad, precio_unitario, subtotal
+       FROM pedido_detalles
+       WHERE id_pedido = ?
+       ORDER BY id_detalle ASC`,
+      [idPedido]
+    );
+    return filas;
+  }
 }
 
 module.exports = MySQLPedidoRepository;

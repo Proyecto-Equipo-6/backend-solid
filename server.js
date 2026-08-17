@@ -151,12 +151,15 @@ const categoriaController = new CategoriaController({
   eliminarCategoriaUseCase,
 });
 
+// --- Inyección de Dependencias para Proveedores (repositorio compartido) ---
+const proveedorRepository = new MySQLProveedorRepository();
+
 // --- Inyección de Dependencias para Productos (CU-023, DIP) ---
 const productoRepository = new MySQLProductoRepository();
 const listarProductosUseCase = new ListarProductosPublicosUseCase(productoRepository);
 const obtenerProductoUseCase = new ObtenerProductoPublicoUseCase(productoRepository);
-const crearProductoUseCase = new CrearProductoUseCase(productoRepository, categoriaRepository);
-const editarProductoUseCase = new EditarProductoUseCase(productoRepository, categoriaRepository);
+const crearProductoUseCase = new CrearProductoUseCase(productoRepository, categoriaRepository, proveedorRepository);
+const editarProductoUseCase = new EditarProductoUseCase(productoRepository, categoriaRepository, proveedorRepository);
 const eliminarProductoUseCase = new EliminarProductoUseCase(productoRepository);
 const productoController = new ProductoController({
   listarProductosUseCase,
@@ -205,7 +208,6 @@ const requerirAdmin = crearRequerirAdmin(1);
 const pedidoRepartidorRepository = new MySQLPedidoRepartidorRepository();
 
 // --- Inyección de Dependencias para Proveedores (CU-025, DIP) ---
-const proveedorRepository = new MySQLProveedorRepository();
 const crearProveedorUseCase = new CrearProveedorUseCase(proveedorRepository);
 const editarProveedorUseCase = new EditarProveedorUseCase(proveedorRepository);
 const eliminarProveedorUseCase = new EliminarProveedorUseCase(proveedorRepository);

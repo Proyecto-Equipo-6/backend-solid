@@ -19,6 +19,14 @@ class PedidoRepository {
   async cancelarPedido(idPedido, idUsuario, motivo) {
     throw new Error("Método 'cancelarPedido' no implementado");
   }
+
+  async obtenerDetallePedido(idPedido) {
+    throw new Error("Método 'obtenerDetallePedido' no implementado");
+  }
+
+  async obtenerDetallesPorPedido(idPedido) {
+    throw new Error("Método 'obtenerDetallesPorPedido' no implementado");
+  }
 }
 
 module.exports = PedidoRepository;

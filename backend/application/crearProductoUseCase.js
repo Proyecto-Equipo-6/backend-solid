@@ -1,39 +1,42 @@
+const {
+  validarCamposObligatoriosProducto,
+  validarValoresNumericosProducto,
+  validarUnicidadProducto,
+  validarRelacionesProducto
+} = require('./productoValidationsHelper');
+
 class CrearProductoUseCase {
-  constructor(productoRepo, categoriaRepo) {
+  constructor(productoRepo, categoriaRepo, proveedorRepo) {
     this.productoRepo = productoRepo;
     this.categoriaRepo = categoriaRepo;
+    this.proveedorRepo = proveedorRepo;
   }
 
-  async ejecutar({ id_categoria, id_proveedor, nombre, descripcion = '', precio, stock, imagen_url }) {
-    if (!nombre || nombre.trim() === '') {
-      throw new Error('Complete los campos obligatorios');
-    }
-    if (precio === undefined || stock === undefined) {
-      throw new Error('Complete los campos obligatorios');
-    }
+async ejecutar({
+    sku,
+    id_categoria,
+    id_proveedor,
+    nombre,
+    descripcion = '',
+    precio,
+    stock,
+    imagen_url = null
+  }) {
+    validarCamposObligatoriosProducto({ sku, nombre, precio, stock });
+    validarValoresNumericosProducto(precio, stock);
+    await validarUnicidadProducto(this.productoRepo, sku, nombre);
+    await validarRelacionesProducto(
+      this.categoriaRepo,
+      this.proveedorRepo,
+      id_categoria,
+      id_proveedor
+    );
 
-    // Validaciones acordes a BD: precio > 0, stock >= 0
-    if (typeof precio !== 'number' || precio <= 0) {
-      throw new Error('El precio debe ser un número mayor a cero');
-    }
-    if (typeof stock !== 'number' || stock < 0) {
-      throw new Error('El stock no puede ser negativo');
-    }
-
-    const existente = await this.productoRepo.buscarPorNombre(nombre.trim());
-    if (existente) {
-      throw new Error('Ya existe un producto con ese nombre');
-    }
-
-    const categoria = await this.categoriaRepo.buscarPorId(id_categoria);
-    if (!categoria) {
-      throw new Error('La categoría asociada no existe');
-    }
-
-    // CP-CU-023-03: imagen por defecto si no se envía
-    const imagenFinal = imagen_url && imagen_url.trim() !== '' ? imagen_url.trim() : 'sin_imagen.jpg';
+    const imagenFinal =
+      imagen_url && imagen_url.trim() !== '' ? imagen_url.trim() : 'sin_imagen.jpg';
 
     return await this.productoRepo.guardar({
+      sku: sku.trim(),
       id_categoria,
       id_proveedor,
       nombre: nombre.trim(),
@@ -41,7 +44,7 @@ class CrearProductoUseCase {
       precio,
       stock,
       imagen_url: imagenFinal,
-      estado: 1 // Activo por defecto (RN-100)
+      estado: 1
     });
   }
 }

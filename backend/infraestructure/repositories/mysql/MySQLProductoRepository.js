@@ -90,18 +90,26 @@ class MySQLProductoRepository extends ProductoRepository {
     return rows[0] || null;
   }
 
+  async buscarPorSKU(sku) {
+    const query = `${SELECT_BASE} WHERE p.sku = ? LIMIT 1`;
+    const [rows] = await pool.execute(query, [sku]);
+    return rows[0] || null;
+  }
+
   async actualizar(id_producto, datos) {
-    const { id_categoria, id_proveedor, nombre, descripcion, precio, stock, estado } = datos;
+    const { sku, id_categoria, id_proveedor, nombre, descripcion, precio, stock, imagen_url, estado } = datos;
     const actual = await this.findById(id_producto);
     if (!actual) throw new Error('Producto no encontrado');
 
+    const skuFinal = sku ?? actual.sku;
     const proveedorFinal = id_proveedor ?? actual.id_proveedor;
+    const imagenFinal = imagen_url !== undefined ? imagen_url : actual.imagen_url;
 
     await pool.execute(
       `UPDATE productos
-       SET id_categoria = ?, id_proveedor = ?, nombre = ?, descripcion = ?, precio = ?, stock = ?, estado = ?
+       SET sku = ?, id_categoria = ?, id_proveedor = ?, nombre = ?, descripcion = ?, precio = ?, stock = ?, imagen_url = ?, estado = ?
        WHERE id_producto = ?`,
-      [id_categoria, proveedorFinal, nombre, descripcion, precio, stock, estado, id_producto]
+      [skuFinal, id_categoria, proveedorFinal, nombre, descripcion, precio, stock, imagenFinal, estado, id_producto]
     );
     return this.findById(id_producto);
   }
@@ -109,6 +117,39 @@ class MySQLProductoRepository extends ProductoRepository {
   async eliminar(id_producto) {
     await pool.execute('UPDATE productos SET estado = 0 WHERE id_producto = ?', [id_producto]);
     return true;
+  }
+
+  async registrarAjusteStock(id_producto, cantidad_nueva, motivo, id_admin = null) {
+    const producto = await this.findById(id_producto);
+    if (!producto) throw new Error('Producto no encontrado');
+
+    if (cantidad_nueva === undefined || cantidad_nueva === null || cantidad_nueva < 0) {
+      throw new Error('El stock no puede ser negativo');
+    }
+    if (!motivo || motivo.trim() === '') {
+      throw new Error('El motivo del ajuste es obligatorio');
+    }
+
+    const cantidad_anterior = producto.stock;
+
+    await pool.execute('UPDATE productos SET stock = ? WHERE id_producto = ?', [
+      cantidad_nueva,
+      id_producto,
+    ]);
+
+    await pool.execute(
+      `INSERT INTO historial_stock
+        (id_producto, id_admin, cantidad_anterior, cantidad_nueva, motivo)
+       VALUES (?, ?, ?, ?, ?)`,
+      [id_producto, id_admin ?? 1, cantidad_anterior, cantidad_nueva, motivo.trim()]
+    );
+
+    return {
+      id_producto,
+      cantidad_anterior,
+      cantidad_nueva,
+      motivo: motivo.trim(),
+    };
   }
 }
 
