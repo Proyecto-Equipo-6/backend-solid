@@ -60,7 +60,7 @@ function calcularDelta(serie) {
 }
 
 function rotuloMes(mes) {
-  const indice = parseInt(String(mes).slice(5, 7), 10) - 1;
+  const indice = Number.parseInt(String(mes).slice(5, 7), 10) - 1;
   return MESES_CORTO[indice] || mes;
 }
 
