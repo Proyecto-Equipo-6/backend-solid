@@ -24,6 +24,9 @@ const ProductoController = require('./backend/infraestructure/controllers/Produc
 const createProductoRouter = require('./backend/infraestructure/routes/productoRoutes');
 const MySQLCategoriaRepository = require('./backend/infraestructure/repositories/mysql/MySQLCategoriaRepository');
 const ListarCategoriasUseCase = require('./backend/application/ListarCategoriasUseCase');
+const CrearCategoriaUseCase = require('./backend/application/crearCategoriaUseCase');
+const EditarCategoriaUseCase = require('./backend/application/editarCategoriaUseCase');
+const EliminarCategoriaUseCase = require('./backend/application/eliminarCategoriaUseCase');
 const CategoriaController = require('./backend/infraestructure/controllers/CategoriaController');
 const createCategoriaRouter = require('./backend/infraestructure/routes/categoriaRoutes');
 const MySQLBancoRepository = require('./backend/infraestructure/repositories/mysql/MySQLBancoRepository');
@@ -141,10 +144,18 @@ const productoController = new ProductoController(
   obtenerProductoUseCase
 );
 
-// --- Inyección de Dependencias para Categorías (DIP) ---
+// --- Inyección de Dependencias para Categorías (CU-022, DIP) ---
 const categoriaRepository = new MySQLCategoriaRepository();
 const listarCategoriasUseCase = new ListarCategoriasUseCase(categoriaRepository);
-const categoriaController = new CategoriaController(listarCategoriasUseCase);
+const crearCategoriaUseCase = new CrearCategoriaUseCase(categoriaRepository);
+const editarCategoriaUseCase = new EditarCategoriaUseCase(categoriaRepository);
+const eliminarCategoriaUseCase = new EliminarCategoriaUseCase(categoriaRepository);
+const categoriaController = new CategoriaController({
+  listarCategoriasUseCase,
+  crearCategoriaUseCase,
+  editarCategoriaUseCase,
+  eliminarCategoriaUseCase,
+});
 
 // --- Inyección de Dependencias para Bancos (DIP) ---
 const bancoRepository = new MySQLBancoRepository();
@@ -202,7 +213,7 @@ app.use('/api/v1/users', createUserRouter(userController, autenticar));
 app.use('/api/v1/roles', createRolRouter(adminUpdateRolController));
 app.use('/api/v1/auth', createAuthRouter(authController));
 app.use('/api/v1/productos', createProductoRouter(productoController));
-app.use('/api/v1/categorias', createCategoriaRouter(categoriaController));
+app.use('/api/v1/categorias', createCategoriaRouter(categoriaController, autenticar, requerirAdmin));
 app.use('/api/v1/bancos', createBancoRouter(bancoController));
 app.use('/api/v1/analitica', createAnaliticaRouter(analiticaController));
 app.use('/api/v1/carrito', createCarritoRouter(carritoController, autenticar, requerirCliente));
