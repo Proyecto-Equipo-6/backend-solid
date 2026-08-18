@@ -1,12 +1,11 @@
-const PedidoRepartidorRepository = require('../../../domain/ports/PedidoRepartidorRepository');
+const PedidoRepartidorRepository = require('../../../domain/ports/pedidoRepartidorRepository');
 const Pedido = require('../../../domain/models/Pedido');
 const pool = require('../../database/db');
 
 /**
  * Adaptador de Infraestructura: MySQLPedidoRepartidorRepository
  * Persiste el flujo del repartidor (CU-015 a CU-018) en MySQL.
- * Requiere la columna `pedidos.id_repartidor` y la tabla `repartidores`
- * (ver reports/db/2026-08-16_cambios-bd-admin-tickets.md, sección 2.5).
+ * Implementa los 10 métodos del puerto pedidoRepartidorRepository.
  */
 class MySQLPedidoRepartidorRepository extends PedidoRepartidorRepository {
   _mapearFila(fila) {
@@ -30,8 +29,8 @@ class MySQLPedidoRepartidorRepository extends PedidoRepartidorRepository {
     });
   }
 
-  // CU-015: pedidos ASIGNADO del día, ordenados por asignación ascendente (RN-059/RN-060)
-  async obtenerPedidosAsignadosDelDia(repartidorId) {
+  // CU-015: pedidos ASIGNADO del día (RN-059/RN-060)
+  async obtenerPedidosDelDia(repartidorId) {
     const [filas] = await pool.execute(
       `SELECT p.*, u.nombre_apellido AS cliente_nombre, u.telefono AS cliente_telefono
        FROM pedidos p
@@ -45,8 +44,8 @@ class MySQLPedidoRepartidorRepository extends PedidoRepartidorRepository {
     return filas.map((fila) => this._mapearFila(fila));
   }
 
-  // CU-016: detalle de un pedido (sin productos, RN-062)
-  async obtenerPedidoPorId(pedidoId) {
+  // CU-016: detalle de un pedido (RN-062)
+  async obtenerDetallePedido(pedidoId) {
     const [filas] = await pool.execute(
       `SELECT p.*, u.nombre_apellido AS cliente_nombre, u.telefono AS cliente_telefono
        FROM pedidos p
@@ -59,7 +58,7 @@ class MySQLPedidoRepartidorRepository extends PedidoRepartidorRepository {
   }
 
   // CU-017: actualizar estado con validación de concurrencia (RN-065 a RN-070)
-  async actualizarEstadoPedido(pedidoId, nuevoEstado, estadoAnterior, datosAdicionales = {}) {
+  async actualizarEstado(pedidoId, nuevoEstado, estadoAnterior, datosAdicionales = {}) {
     const [resultado] = await pool.execute(
       `UPDATE pedidos
        SET estado = ?, comprobante_url = COALESCE(?, comprobante_url), observaciones = COALESCE(?, observaciones)
@@ -77,7 +76,103 @@ class MySQLPedidoRepartidorRepository extends PedidoRepartidorRepository {
       throw new Error('El pedido fue actualizado por otro proceso. Recargue la información.');
     }
 
-    return this.obtenerPedidoPorId(pedidoId);
+    return this.obtenerDetallePedido(pedidoId);
+  }
+
+  // Listar todos los pedidos con filtros (para admin)
+  async obtenerTodos(filtros = {}) {
+    let sql = `
+      SELECT p.*, u.nombre_apellido AS cliente_nombre, u.telefono AS cliente_telefono
+      FROM pedidos p
+      JOIN usuarios u ON u.id_usuario = p.id_usuario
+      WHERE 1=1`;
+    const params = [];
+
+    if (filtros.estado) {
+      sql += ' AND p.estado = ?';
+      params.push(filtros.estado);
+    }
+    if (filtros.repartidor) {
+      sql += ' AND p.id_repartidor = ?';
+      params.push(filtros.repartidor);
+    }
+
+    sql += ' ORDER BY p.fecha_pedido DESC';
+
+    const page = Number(filtros.page) || 1;
+    const limit = Number(filtros.limit) || 10;
+    const offset = (page - 1) * limit;
+    sql += ' LIMIT ? OFFSET ?';
+    params.push(limit, offset);
+
+    const [filas] = await pool.execute(sql, params);
+    return {
+      data: filas.map((fila) => this._mapearFila(fila)),
+      total: filas.length,
+      page,
+      limit,
+    };
+  }
+
+  // Contar pedidos del día para repartidor
+  async contarPedidosDelDia(repartidorId) {
+    const [filas] = await pool.execute(
+      `SELECT COUNT(*) AS total
+       FROM pedidos
+       WHERE id_repartidor = ?
+         AND estado != 'CANCELADO'
+         AND DATE(fecha_actualizacion) = CURDATE()`,
+      [repartidorId]
+    );
+    return Number(filas[0]?.total) || 0;
+  }
+
+  // Actualización genérica de un pedido
+  async actualizarPedido(idPedido, cambios) {
+    const campos = [];
+    const valores = [];
+
+    if (cambios.estado !== undefined) {
+      campos.push('estado = ?');
+      valores.push(cambios.estado);
+    }
+    if (cambios.comprobante_url !== undefined) {
+      campos.push('comprobante_url = ?');
+      valores.push(cambios.comprobante_url);
+    }
+    if (cambios.observaciones !== undefined) {
+      campos.push('observaciones = ?');
+      valores.push(cambios.observaciones);
+    }
+    if (cambios.id_repartidor !== undefined) {
+      campos.push('id_repartidor = ?');
+      valores.push(cambios.id_repartidor);
+    }
+    if (cambios.motivo_cancelacion !== undefined) {
+      campos.push('motivo_cancelacion = ?');
+      valores.push(cambios.motivo_cancelacion);
+    }
+
+    if (campos.length === 0) return this.obtenerDetallePedido(idPedido);
+
+    valores.push(idPedido);
+    await pool.execute(
+      `UPDATE pedidos SET ${campos.join(', ')} WHERE id_pedido = ?`,
+      valores
+    );
+    return this.obtenerDetallePedido(idPedido);
+  }
+
+  // Detalles de productos de un pedido
+  async obtenerDetallesPorPedido(id_pedido) {
+    const [filas] = await pool.execute(
+      `SELECT pd.*, p.nombre AS producto_nombre, p.imagen_url
+       FROM pedido_detalles pd
+       JOIN productos p ON p.id_producto = pd.id_producto
+       WHERE pd.id_pedido = ?`,
+      [id_pedido]
+    );
+    return filas;
   }
 
   // CU-018: historial de pedidos finalizados (RN-071/RN-072/RN-075)
@@ -121,6 +216,30 @@ class MySQLPedidoRepartidorRepository extends PedidoRepartidorRepository {
       totalMes: Number(filas[0]?.totalMes) || 0,
       totalSemana: Number(filas[0]?.totalSemana) || 0,
     };
+  }
+
+  // Métrica del dashboard
+  async contarPedidosDeHoyParaMetrica(repartidorId) {
+    const [filas] = await pool.execute(
+      `SELECT COUNT(*) AS total
+       FROM pedidos
+       WHERE id_repartidor = ?
+         AND DATE(fecha_actualizacion) = CURDATE()`,
+      [repartidorId]
+    );
+    return Number(filas[0]?.total) || 0;
+  }
+
+  // Pedidos activos en ruta
+  async contarPedidosEnCamino(repartidorId) {
+    const [filas] = await pool.execute(
+      `SELECT COUNT(*) AS total
+       FROM pedidos
+       WHERE id_repartidor = ?
+         AND estado = 'EN_CAMINO'`,
+      [repartidorId]
+    );
+    return Number(filas[0]?.total) || 0;
   }
 }
 
