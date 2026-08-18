@@ -1,4 +1,18 @@
 const express = require('express');
+const multer = require('multer');
+
+// Configuración de multer para subida de imágenes de proveedores
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+  fileFilter: (req, file, cb) => {
+    const formatosPermitidos = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!formatosPermitidos.includes(file.mimetype)) {
+      return cb(new Error('Formato no permitido. Solo se aceptan JPG, PNG o WebP'));
+    }
+    return cb(null, true);
+  }
+}).single('imagen');
 
 /**
  * Función que configura las rutas del CRUD de proveedores (CU-025).
@@ -12,8 +26,8 @@ function createProveedorRouter(proveedorController, autenticar, requerirAdmin) {
   router.use(requerirAdmin);
 
   router.get('/', (req, res) => proveedorController.listarActivos(req, res));
-  router.post('/', (req, res) => proveedorController.crear(req, res));
-  router.put('/:id', (req, res) => proveedorController.editar(req, res));
+  router.post('/', upload, (req, res) => proveedorController.crear(req, res));
+  router.put('/:id', upload, (req, res) => proveedorController.editar(req, res));
   router.delete('/:id', (req, res) => proveedorController.eliminar(req, res));
 
   return router;

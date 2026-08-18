@@ -9,6 +9,7 @@ class Proveedor {
     razon_social,
     telefono,
     email,
+    imagen_url = null,
     estado = 1,
     fecha_creacion = new Date().toISOString()
   } = {}) {
@@ -17,6 +18,7 @@ class Proveedor {
     this.razon_social = razon_social;
     this.telefono = telefono;
     this.email = email;
+    this.imagen_url = imagen_url;
     this.estado = estado; // 1 = Activo, 0 = Inactivo
     this.fecha_creacion = fecha_creacion;
   }

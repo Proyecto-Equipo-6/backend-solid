@@ -3,7 +3,7 @@ class EditarProveedorUseCase {
     this.proveedorRepo = proveedorRepo;
   }
 
-  async ejecutar(id_proveedor, { nit_proveedor, razon_social, telefono, email, estado }) {
+  async ejecutar(id_proveedor, { nit_proveedor, razon_social, telefono, email, imagen_url, estado }) {
     const proveedor = await this.proveedorRepo.buscarPorId(id_proveedor);
     if (!proveedor) {
       throw new Error('Proveedor no encontrado');
@@ -57,6 +57,7 @@ class EditarProveedorUseCase {
       razon_social: razon_social.trim(),
       telefono: telefono.trim(),
       email: email.trim(),
+      imagen_url: imagen_url || null,
       estado: estadoNumerico
     });
   }
