@@ -5,6 +5,7 @@ import ObtenerTodosPedidosUseCase from '../application/obtenerTodosPedidosUseCas
 import AsignarRepartidorUseCase from '../application/asignarRepartidorUseCase.js';
 import CancelarPedidoAdminUseCase from '../application/cancelarPedidoAdminUseCase.js';
 import ActualizarEstadoPedidoAdminUseCase from '../application/actualizarEstadoPedidoAdminUseCase.js';
+import ObtenerDetallePedidoAdminUseCase from '../application/obtenerDetallePedidoAdminUseCase.js';
 import Pedido from '../domain/models/Pedido.js';
 
 const crearPedido = (
@@ -60,22 +61,24 @@ const crearDetallePedido = (id_pedido, id_producto, cantidad) => ({
 
 describe('Módulo administración de pedidos (CU-019, CU-020, CU-027)', () => {
   test('Filtrado multi-criterio de pedidos por estado y fecha - CP-CU-027-03', async () => {
-    const repo = new InMemoryPedidoRepartidorRepository([
-      crearPedido(1, 'PENDIENTE', 100, null, '2026-08-15T08:00:00'),
-      crearPedido(2, 'CONFIRMADO', 101, null, '2026-08-15T09:00:00'),
-      crearPedido(3, 'ENTREGADO', 100, 10, '2026-08-14T10:00:00')
-    ]);
-    const useCase = new ObtenerTodosPedidosUseCase(repo);
+  const repo = new InMemoryPedidoRepartidorRepository([
+    crearPedido(1, 'PENDIENTE', 100, null, '2026-08-15T08:00:00'),
+    crearPedido(2, 'CONFIRMADO', 101, null, '2026-08-15T09:00:00'),
+    crearPedido(3, 'ENTREGADO', 100, 10, '2026-08-14T10:00:00')
+  ]);
+  const useCase = new ObtenerTodosPedidosUseCase(repo);
 
-    const pendientes = await useCase.ejecutar({ estado: 'PENDIENTE' });
-    expect(pendientes).toHaveLength(1);
-    expect(pendientes[0].id_pedido).toBe(1);
+  const resultadoPendientes = await useCase.ejecutar({ estado: 'PENDIENTE' });
+  const pendientes = resultadoPendientes.data;
+  expect(pendientes).toHaveLength(1);
+  expect(pendientes[0].id_pedido).toBe(1);
 
-    const porFecha = await useCase.ejecutar({
-      fechaDesde: '2026-08-15T00:00:00',
-      fechaHasta: '2026-08-15T23:59:59'
-    });
-    expect(porFecha).toHaveLength(2);
+  const resultadoPorFecha = await useCase.ejecutar({
+    fechaDesde: '2026-08-15T00:00:00',
+    fechaHasta: '2026-08-15T23:59:59'
+  });
+  const porFecha = resultadoPorFecha.data;
+  expect(porFecha).toHaveLength(2);
   });
 
   test('CP-CU-027-01: Transición válida PENDIENTE -> CONFIRMADO', async () => {
@@ -267,5 +270,63 @@ describe('Módulo administración de pedidos (CU-019, CU-020, CU-027)', () => {
     const disponible = await repoRepartidores.estaDisponible(10);
     expect(disponible).toBe(true);
     expect(cancelado.estado).toBe('CANCELADO');
+  });
+
+  test('CP-HU008.1-02: Verificar la visualización completa del detalle de una orden administrativa', async () => {
+  // Pedido ficticio
+  const pedido = crearPedido(1, 'CONFIRMADO', 100, null, '2026-08-15T08:00:00');
+  pedido.clienteNombre = 'María Pérez';
+  pedido.clienteTelefono = '3001234567';
+
+  // Detalles del pedido (simula tabla pedido_detalles)
+  const detalles = [
+    crearDetallePedido(1, 1, 2), // producto 1, cantidad 2
+    crearDetallePedido(1, 2, 1)  // producto 2, cantidad 1
+  ];
+
+  const repoPedidos = new InMemoryPedidoRepartidorRepository([pedido], detalles);
+  const useCase = new ObtenerDetallePedidoAdminUseCase(repoPedidos);
+
+  const detalleAdmin = await useCase.ejecutar(1);
+
+  expect(detalleAdmin.id_pedido).toBe(1);
+  expect(detalleAdmin.cliente.nombre).toBe('María Pérez');
+  expect(detalleAdmin.cliente.telefono).toBe('3001234567');
+  expect(detalleAdmin.direccion_entrega).toBe('Calle 123');
+  expect(detalleAdmin.total).toBe(50000);
+  expect(detalleAdmin.estado).toBe('CONFIRMADO');
+  expect(detalleAdmin.productos).toHaveLength(2);
+  expect(detalleAdmin.productos[0]).toMatchObject({
+    id_producto: 1,
+    cantidad: 2
+  });
+  expect(detalleAdmin.productos[1]).toMatchObject({
+    id_producto: 2,
+    cantidad: 1
+  });
+  });
+
+  test('CP-RF-008.1-01: Verificar la consulta de órdenes con paginación y filtrado por estado CONFIRMADO', async () => {
+  const repo = new InMemoryPedidoRepartidorRepository([
+    crearPedido(1, 'CONFIRMADO', 100, null, '2026-08-15T08:00:00'),
+    crearPedido(2, 'CONFIRMADO', 101, null, '2026-08-15T09:00:00'),
+    crearPedido(3, 'CONFIRMADO', 102, null, '2026-08-15T10:00:00'),
+    crearPedido(4, 'PENDIENTE', 103, null, '2026-08-15T11:00:00')
+  ]);
+
+  const useCase = new ObtenerTodosPedidosUseCase(repo);
+
+  const resultado = await useCase.ejecutar({
+    estado: 'CONFIRMADO',
+    page: 1,
+    limit: 2
+  });
+
+  expect(resultado.total).toBe(3);
+  expect(resultado.page).toBe(1);
+  expect(resultado.limit).toBe(2);
+  expect(resultado.data).toHaveLength(2);
+  expect(resultado.data[0].id_pedido).toBe(1);
+  expect(resultado.data[1].id_pedido).toBe(2);
   });
 });

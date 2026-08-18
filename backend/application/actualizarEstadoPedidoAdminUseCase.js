@@ -4,12 +4,11 @@ class ActualizarEstadoPedidoAdminUseCase {
   }
 
   async ejecutar(id_pedido, nuevoEstado) {
-    const pedido = await this.pedidoRepo.obtenerPedidoPorId(id_pedido);
+    const pedido = await this.pedidoRepo.obtenerDetallePedido(id_pedido);
     if (!pedido) {
       throw new Error('Pedido no encontrado');
     }
 
-    // Máquina de estados completa para administrador
     const transicionesValidas = {
       'PENDIENTE': ['CONFIRMADO', 'CANCELADO'],
       'CONFIRMADO': ['ASIGNADO', 'CANCELADO'],
@@ -21,7 +20,6 @@ class ActualizarEstadoPedidoAdminUseCase {
     };
 
     const estadosPermitidos = transicionesValidas[pedido.estado] || [];
-
     if (!estadosPermitidos.includes(nuevoEstado)) {
       throw new Error('No se pudo actualizar el estado del pedido. Transición inválida.');
     }

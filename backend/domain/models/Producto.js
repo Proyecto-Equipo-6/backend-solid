@@ -6,34 +6,36 @@
 class Producto {
   constructor({
     id_producto = null,
-    sku,
-    nombre,
-    descripcion = '',
-    precio,
-    stock,
-    garantia,
-    imagen_url,
-    estado = 1,
-    categoria,
-    proveedor,
+    sku = null,
     id_categoria = null,
+    id_proveedor = null,
+    nombre = '',
+    descripcion = '',
+    precio = 0,
+    stock = 0,
+    garantia = null,
+    imagen_url = null,
+    estado = 1,
+    categoria = null,   // string para catálogo (opcional)
+    proveedor = null,   // string para catálogo (opcional)
     fecha_creacion = new Date().toISOString(),
-    fecha_actualizacion = new Date().toISOString()
+    fecha_actualizacion = null
   } = {}) {
     this.id_producto = id_producto;
-    this.sku = sku || null;
+    this.sku = sku;
+    this.id_categoria = id_categoria;
+    this.id_proveedor = id_proveedor;
     this.nombre = nombre;
     this.descripcion = descripcion;
     this.precio = precio;
     this.stock = stock;
-    this.garantia = garantia || null;
-    this.imagen_url = imagen_url || null;
-    this.estado = estado; // 1 = Activo, 0 = Inactivo
-    this.categoria = categoria || null; // string del nombre (para catálogo)
-    this.proveedor = proveedor || null; // string del nombre (para catálogo)
-    this.id_categoria = id_categoria; // para CRUD admin
+    this.garantia = garantia;
+    this.imagen_url = imagen_url;
+    this.estado = estado;
+    this.categoria = categoria;
+    this.proveedor = proveedor;
     this.fecha_creacion = fecha_creacion;
-    this.fecha_actualizacion = new Date().toISOString();
+    this.fecha_actualizacion = fecha_actualizacion;
   }
 
   esVisiblePublicamente() {
