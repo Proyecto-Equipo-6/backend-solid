@@ -1,4 +1,4 @@
-const PedidoRepartidorRepository = require('../../../domain/ports/PedidoRepartidorRepository');
+const PedidoRepartidorRepository = require('../../../domain/ports/pedidoRepartidorRepository');
 const Pedido = require('../../../domain/models/Pedido');
 
 class InMemoryPedidoRepartidorRepository extends PedidoRepartidorRepository {
