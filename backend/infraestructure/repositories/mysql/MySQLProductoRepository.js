@@ -107,8 +107,62 @@ class MySQLProductoRepository extends ProductoRepository {
   }
 
   async eliminar(id_producto) {
+    // Verificar si el producto tiene ventas en el historial (pedido_detalles)
+    const [historial] = await pool.execute(
+      'SELECT COUNT(*) AS total FROM pedido_detalles WHERE id_producto = ?',
+      [id_producto]
+    );
+    const teniaHistorial = Number(historial[0]?.total) > 0;
+
+    // Borrado lógico (RN-101)
     await pool.execute('UPDATE productos SET estado = 0 WHERE id_producto = ?', [id_producto]);
-    return true;
+
+    return {
+      teniaHistorial
+    };
+  }
+
+  async reintegrarInventario(id_producto, cantidad) {
+    const producto = await this.findById(id_producto);
+    if (!producto) throw new Error('Producto no encontrado');
+
+    const nuevoStock = producto.stock + cantidad;
+    await pool.execute(
+      'UPDATE productos SET stock = ? WHERE id_producto = ?',
+      [nuevoStock, id_producto]
+    );
+    return this.findById(id_producto);
+  }
+
+  async registrarAjusteStock(id_producto, cantidad_nueva, motivo) {
+    const producto = await this.findById(id_producto);
+    if (!producto) throw new Error('Producto no encontrado');
+
+    if (cantidad_nueva === undefined || cantidad_nueva === null || cantidad_nueva < 0) {
+      throw new Error('El stock no puede ser negativo');
+    }
+    if (!motivo || motivo.trim() === '') {
+      throw new Error('El motivo del ajuste es obligatorio');
+    }
+
+    const cantidad_anterior = producto.stock;
+
+    await pool.execute(
+      'UPDATE productos SET stock = ? WHERE id_producto = ?',
+      [cantidad_nueva, id_producto]
+    );
+
+    await pool.execute(
+      'INSERT INTO historial_stock (id_producto, id_admin, cantidad_anterior, cantidad_nueva, motivo) VALUES (?, 1, ?, ?, ?)',
+      [id_producto, cantidad_anterior, cantidad_nueva, motivo.trim()]
+    );
+
+    return {
+      id_producto,
+      cantidad_anterior,
+      cantidad_nueva,
+      motivo: motivo.trim()
+    };
   }
 }
 
