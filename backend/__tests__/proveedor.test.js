@@ -100,6 +100,60 @@ describe('Módulo CRUD proveedores (CU-025)', () => {
     const proveedorDesactivado = await repo.buscarPorId(proveedor.id_proveedor);
     expect(proveedorDesactivado.estado).toBe(0);
   });
+  test('Registrar proveedor con imagen_url', async () => {
+    const repo = new InMemoryProveedorRepository();
+    const useCase = new CrearProveedorUseCase(repo);
+
+    const proveedor = await useCase.ejecutar({
+      nit_proveedor: '900999888-7',
+      razon_social: 'Proveedor Con Imagen S.A.S.',
+      telefono: '6019998877',
+      email: 'imagen@proveedor.com',
+      imagen_url: 'https://cloudinary.com/proveedor_imagen.jpg'
+    });
+
+    expect(proveedor.id_proveedor).toBe(1);
+    expect(proveedor.imagen_url).toBe('https://cloudinary.com/proveedor_imagen.jpg');
+  });
+
+  test('Registrar proveedor sin imagen_url (nullable)', async () => {
+    const repo = new InMemoryProveedorRepository();
+    const useCase = new CrearProveedorUseCase(repo);
+
+    const proveedor = await useCase.ejecutar({
+      nit_proveedor: '900777666-3',
+      razon_social: 'Proveedor Sin Imagen S.A.S.',
+      telefono: '6017776655',
+      email: 'sinimagen@proveedor.com'
+    });
+
+    expect(proveedor.id_proveedor).toBe(1);
+    expect(proveedor.imagen_url).toBeNull();
+  });
+
+  test('Editar proveedor actualiza imagen_url', async () => {
+    const repo = new InMemoryProveedorRepository();
+    const crear = new CrearProveedorUseCase(repo);
+    const editar = new EditarProveedorUseCase(repo);
+
+    const proveedor = await crear.ejecutar({
+      nit_proveedor: '900555444-3',
+      razon_social: 'Proveedor Edit Imagen',
+      telefono: '6015554433',
+      email: 'edit@imagen.com'
+    });
+
+    const editado = await editar.ejecutar(proveedor.id_proveedor, {
+      nit_proveedor: '900555444-3',
+      razon_social: 'Proveedor Edit Imagen Actualizado',
+      telefono: '6015554433',
+      email: 'edit@imagen.com',
+      imagen_url: 'https://cloudinary.com/nueva_imagen.jpg'
+    });
+
+    expect(editado.imagen_url).toBe('https://cloudinary.com/nueva_imagen.jpg');
+  });
+
   test('CP-CU-025-03: Solo proveedores activos aparecen en selectores de productos', async () => {
   const repo = new InMemoryProveedorRepository();
   const crear = new CrearProveedorUseCase(repo);

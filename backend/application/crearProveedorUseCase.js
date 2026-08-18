@@ -3,7 +3,7 @@ class CrearProveedorUseCase {
     this.proveedorRepo = proveedorRepo;
   }
 
-  async ejecutar({ nit_proveedor, razon_social, telefono, email }) {
+  async ejecutar({ nit_proveedor, razon_social, telefono, email, imagen_url }) {
     if (!nit_proveedor || !razon_social || !telefono || !email) {
       throw new Error('Complete los campos obligatorios');
     }
@@ -42,6 +42,7 @@ class CrearProveedorUseCase {
       razon_social: razon_social.trim(),
       telefono: telefono.trim(),
       email: email.trim(),
+      imagen_url: imagen_url || null,
       estado: 1
     });
   }

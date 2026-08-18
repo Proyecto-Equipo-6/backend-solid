@@ -71,8 +71,20 @@ CREATE TABLE proveedores (
     razon_social VARCHAR(100) NOT NULL,
     telefono VARCHAR(10) NOT NULL,
     email VARCHAR(100) NOT NULL,
+    imagen_url VARCHAR(255) NULL,
     estado TINYINT(1) NOT NULL DEFAULT 1,
     fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
+-- 5.1 TABLA: REPARTIDORES
+CREATE TABLE repartidores (
+    id_repartidor INT AUTO_INCREMENT PRIMARY KEY,
+    id_usuario INT NOT NULL UNIQUE,
+    vehiculo VARCHAR(50) NULL,
+    placa VARCHAR(20) NULL,
+    activo TINYINT(1) NOT NULL DEFAULT 1,
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_repartidores_usuarios FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario) ON DELETE RESTRICT
 ) ENGINE=InnoDB;
 
 -- 6. TABLA: METODOS_PAGO
@@ -285,6 +297,10 @@ INSERT INTO usuarios (id_usuario, id_rol, nombre_apellido, tipo_documento, numer
 (3, 2, 'Maria Compra',    'CC', '3030', 'maria@email.com',  '$2b$10$FmvdWkpOie1MECB/paY9a.D1XyitCgIDj1g4XIZGqXvgIR4sVNGh6', '3003000003', 'Carrera 45 # 12-10, Medellín'),
 (4, 2, 'Carlos Venta',    'CC', '4040', 'carlos@email.com', '$2b$10$FmvdWkpOie1MECB/paY9a.D1XyitCgIDj1g4XIZGqXvgIR4sVNGh6', '3004000004', 'Av. El Poblado # 3-15, Medellín'),
 (5, 3, 'Luis Repartidor', 'CC', '6060', 'luis@remate.com',  '$2b$10$FmvdWkpOie1MECB/paY9a.D1XyitCgIDj1g4XIZGqXvgIR4sVNGh6', '3006000006', 'Transversal 39 # 77-50, Medellín');
+
+-- REPARTIDORES (vinculados a usuarios con rol 3)
+INSERT INTO repartidores (id_repartidor, id_usuario, vehiculo, placa, activo) VALUES
+(1, 5, 'Moto Honda CB190', 'ABC123', 1);
 
 -- CATEGORIAS
 INSERT INTO categorias (id_categoria, nombre, descripcion) VALUES

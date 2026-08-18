@@ -1,3 +1,5 @@
+const { subirEvidenciaFotografica } = require('../middlewares/uploadMiddleware');
+
 /**
  * Adaptador de Infraestructura: ProveedorController
  * Traduce HTTP <-> Casos de Uso del CRUD de proveedores (CU-025).
@@ -17,7 +19,23 @@ class ProveedorController {
 
   async crear(req, res) {
     try {
-      const proveedor = await this.crearProveedorUseCase.ejecutar(req.body);
+      let imagen_url = null;
+
+      // Si se subió una imagen, subirla a Cloudinary
+      if (req.file) {
+        const resultado = await subirEvidenciaFotografica(
+          req.file.buffer,
+          'nexbit/proveedores'
+        );
+        imagen_url = resultado.secure_url;
+      }
+
+      const datosProveedor = {
+        ...req.body,
+        imagen_url
+      };
+
+      const proveedor = await this.crearProveedorUseCase.ejecutar(datosProveedor);
       return res.status(201).json(proveedor);
     } catch (error) {
       return res.status(400).json({ error: error.message });
@@ -26,9 +44,25 @@ class ProveedorController {
 
   async editar(req, res) {
     try {
+      let imagen_url = req.body.imagen_url || null;
+
+      // Si se subió una nueva imagen, subirla a Cloudinary
+      if (req.file) {
+        const resultado = await subirEvidenciaFotografica(
+          req.file.buffer,
+          'nexbit/proveedores'
+        );
+        imagen_url = resultado.secure_url;
+      }
+
+      const datosProveedor = {
+        ...req.body,
+        imagen_url
+      };
+
       const proveedor = await this.editarProveedorUseCase.ejecutar(
         Number(req.params.id),
-        req.body
+        datosProveedor
       );
       return res.status(200).json(proveedor);
     } catch (error) {
