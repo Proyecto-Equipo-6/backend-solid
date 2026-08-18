@@ -37,7 +37,7 @@ class MySQLRepartidorRepository extends RepartidorRepository {
 
   async estaDisponible(idRepartidor) {
     const repartidor = await this.buscarPorId(idRepartidor);
-    return repartidor && repartidor.estado === 'DISPONIBLE';
+    return repartidor?.estado === 'DISPONIBLE';
   }
 
   async marcarOcupado(idRepartidor) {

@@ -41,10 +41,6 @@ class Producto {
   esVisiblePublicamente() {
     return this.estado === 1;
   }
-
-  desactivar() {
-    this.estado = 0;
-  }
 }
 
 module.exports = Producto;

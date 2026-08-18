@@ -35,6 +35,14 @@ class ProductoRepository {
   async registrarAjusteStock(id_producto, cantidad_nueva, motivo) {
     throw new Error("Método 'registrarAjusteStock' no implementado");
   }
+
+  async sugerencias(termino, limite = 5) {
+    throw new Error("Método 'sugerencias' no implementado");
+  }
+
+  async buscar(termino, filtros = {}) {
+    throw new Error("Método 'buscar' no implementado");
+  }
 }
 
 module.exports = ProductoRepository;

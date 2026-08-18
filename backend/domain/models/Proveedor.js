@@ -22,14 +22,6 @@ class Proveedor {
     this.estado = estado; // 1 = Activo, 0 = Inactivo
     this.fecha_creacion = fecha_creacion;
   }
-
-  esActivo() {
-    return this.estado === 1;
-  }
-
-  desactivar() {
-    this.estado = 0;
-  }
 }
 
 module.exports = Proveedor;

@@ -165,6 +165,71 @@ class MySQLProductoRepository extends ProductoRepository {
       motivo: motivo.trim()
     };
   }
+
+  async sugerencias(termino, limite = 5) {
+    const [filas] = await pool.execute(
+      `SELECT p.id_producto, p.nombre, p.imagen_url
+       FROM productos p
+       WHERE p.estado = 1 AND p.nombre LIKE ?
+       ORDER BY p.nombre ASC
+       LIMIT ?`,
+      [`%${termino}%`, limite]
+    );
+    return filas;
+  }
+
+  async buscar(termino, filtros = {}) {
+    let sql = `
+      SELECT p.id_producto, p.sku, p.nombre, p.descripcion, p.precio, p.stock,
+             p.garantia, p.imagen_url, p.estado,
+             c.nombre AS categoria, pr.razon_social AS proveedor
+      FROM productos p
+      INNER JOIN categorias c ON p.id_categoria = c.id_categoria
+      INNER JOIN proveedores pr ON p.id_proveedor = pr.id_proveedor
+      WHERE p.estado = 1 AND p.nombre LIKE ?`;
+    const params = [`%${termino}%`];
+
+    if (filtros.categoria) {
+      sql += ' AND p.id_categoria = ?';
+      params.push(filtros.categoria);
+    }
+    if (filtros.precioMin) {
+      sql += ' AND p.precio >= ?';
+      params.push(filtros.precioMin);
+    }
+    if (filtros.precioMax) {
+      sql += ' AND p.precio <= ?';
+      params.push(filtros.precioMax);
+    }
+
+    sql += ' ORDER BY p.nombre ASC';
+
+    const pagina = Number(filtros.pagina) || 1;
+    const limite = Number(filtros.limite) || 12;
+    const offset = (pagina - 1) * limite;
+    sql += ' LIMIT ? OFFSET ?';
+    params.push(limite, offset);
+
+    const [filas] = await pool.execute(sql, params);
+
+    // Contar total
+    let sqlCount = 'SELECT COUNT(*) AS total FROM productos p WHERE p.estado = 1 AND p.nombre LIKE ?';
+    const paramsCount = [`%${termino}%`];
+    if (filtros.categoria) {
+      sqlCount += ' AND p.id_categoria = ?';
+      paramsCount.push(filtros.categoria);
+    }
+    const [countResult] = await pool.execute(sqlCount, paramsCount);
+    const total = Number(countResult[0]?.total) || 0;
+
+    return {
+      items: filas,
+      total,
+      pagina,
+      limite,
+      totalPaginas: Math.ceil(total / limite),
+    };
+  }
 }
 
 module.exports = MySQLProductoRepository;

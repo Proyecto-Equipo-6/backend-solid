@@ -13,6 +13,7 @@ class ProductoController {
     editarProductoUseCase,
     eliminarProductoUseCase,
     ajustarStockProductoUseCase,
+    buscarProductosUseCase,
   }) {
     this.listarProductosUseCase = listarProductosUseCase;
     this.obtenerProductoUseCase = obtenerProductoUseCase;
@@ -20,6 +21,7 @@ class ProductoController {
     this.editarProductoUseCase = editarProductoUseCase;
     this.eliminarProductoUseCase = eliminarProductoUseCase;
     this.ajustarStockProductoUseCase = ajustarStockProductoUseCase;
+    this.buscarProductosUseCase = buscarProductosUseCase;
   }
 
   async listarPublicos(req, res) {

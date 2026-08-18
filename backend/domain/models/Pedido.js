@@ -79,56 +79,6 @@ class Pedido {
   cumpleMontoMinimo() {
     return Number(this.total) >= 200000;
   }
-
-  // RN-045: el pedido nace en PENDIENTE
-  esPendiente() {
-    return this.estado === 'PENDIENTE';
-  }
-
-  // RN-047: el pedido refleja exactamente el carrito confirmado
-  esValido() {
-    return Boolean(
-      this.id_usuario &&
-      this.id_metodo_pago &&
-      this.direccion_entrega &&
-      this.cumpleMontoMinimo()
-    );
-  }
-
-  esAsignado() {
-    return this.estado === 'ASIGNADO';
-  }
-
-  puedeActualizar() {
-    return ['ASIGNADO', 'EN_CAMINO'].includes(this.estado);
-  }
-
-  esFinalizado() {
-    return ['ENTREGADO', 'NO_ENTREGADO', 'CANCELADO'].includes(this.estado);
-  }
-
-  // RN-058/RN-059: solo pertenece al dashboard si el admin lo asignó a este repartidor.
-  perteneceA(repartidorId) {
-    return this.id_repartidor === repartidorId;
-  }
-
-  // FP-004/RN-060: dentro de los pedidos activos, el más antiguo es el "pedido activo".
-  esElActivo(pedidosOrdenados) {
-    return pedidosOrdenados[0]?.id_pedido === this.id_pedido;
-  }
-
-  /**
-   * Valida (sin persistir) si el pedido puede pasar de su estado actual a `estadoNuevo`.
-   * Lanza TransicionEstadoInvalidaError si la transición no está permitida (RN-065/RN-070).
-   */
-  validarTransicionA(estadoNuevo) {
-    const permitidos = TRANSICIONES_VALIDAS[this.estado] || [];
-    if (!permitidos.includes(estadoNuevo)) {
-      throw new TransicionEstadoInvalidaError(
-        `Transición inválida de "${this.estado}" a "${estadoNuevo}".`
-      );
-    }
-  }
 }
 
 module.exports = Pedido;

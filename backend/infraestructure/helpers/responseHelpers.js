@@ -11,7 +11,7 @@ const MENSAJES = {
  * @returns {boolean}
  */
 function esNoEncontrado(mensaje) {
-  return mensaje && mensaje.includes(MENSAJES.NO_ENCONTRADO);
+  return mensaje?.includes(MENSAJES.NO_ENCONTRADO);
 }
 
 module.exports = { MENSAJES, esNoEncontrado };
