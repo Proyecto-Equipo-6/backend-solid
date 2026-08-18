@@ -53,8 +53,8 @@ class ObtenerResumenAnaliticaUseCase {
 
 function calcularDelta(serie) {
   if (!Array.isArray(serie) || serie.length < 2) return 0;
-  const anterior = serie[serie.length - 2].valor;
-  const actual = serie[serie.length - 1].valor;
+  const anterior = serie.at(-2).valor;
+  const actual = serie.at(-1).valor;
   if (anterior === 0) return actual > 0 ? 100 : 0;
   return Math.round(((actual - anterior) / anterior) * 100);
 }

@@ -2,6 +2,8 @@
 -- ARCHIVO: queries.sql
 -- DESCRIPCIÓN: Consultas de Reportes, Métricas y Logs
 -- BASE DE DATOS: sistema_comercial
+-- NOTA: Los strings duplicados (ej. 'Cliente Eliminado') son
+--       literales SQL que no pueden usar constantes en SQL puro.
 -- =====================================================
 
 USE sistema_comercial;
