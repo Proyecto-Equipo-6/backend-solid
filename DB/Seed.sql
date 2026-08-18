@@ -4,16 +4,7 @@ USE sistema_comercial;
 -- METODOS DE PAGO
 -- =====================================================
 INSERT INTO metodos_pago (id_metodo_pago, nombre, descripcion, requiere_comprobante, activo) VALUES
-(1, 'Efectivo / Contraentrega', 'Pago en efectivo al momento de recibir el pedido', 0, 1),
-(2, 'Transferencia / Nequi / Daviplata', 'Pago mediante transferencia bancaria o monedero virtual', 1, 1);
-
--- =====================================================
--- BANCOS (asociados al método de pago de transferencia)
--- =====================================================
-INSERT INTO bancos (id_banco, id_metodo_pago, nombre, descripcion, numero_cuenta) VALUES
-(1, 2, 'Nequi',       'Monedero virtual',            '3001234567'),
-(2, 2, 'Daviplata',   'Monedero virtual (llave)',    '3001234567'),
-(3, 2, 'Bancolombia', 'Cuenta de ahorros',           '123456789');
+(1, 'Efectivo / Contraentrega', 'Pago en efectivo al momento de recibir el pedido', 0, 1);
 
 -- =====================================================
 -- 1. ROLES
@@ -25,10 +16,14 @@ INSERT INTO roles (id_rol, nombre, descripcion) VALUES
 
 -- =====================================================
 -- 2. USUARIOS
+-- NOTA: Todos los usuarios usan la misma contraseña de prueba: "123456"
+-- El hash bcrypt se genera una sola vez y se reutiliza para el seed.
+-- SonarQube S8215: hash es de prueba, no es un secreto real.
 -- =====================================================
+-- NOSONAR
 INSERT INTO usuarios (id_usuario, id_rol, nombre_apellido, tipo_documento, numero_documento, email, password, telefono, direccion) VALUES
 (1, 1, 'Sebastian Admin', 'CC', '1010', 'admin@remate.com', '$2b$10$FmvdWkpOie1MECB/paY9a.D1XyitCgIDj1g4XIZGqXvgIR4sVNGh6', '3001000001', 'Calle 100 #15-20, Medellín'),
-(2, 2, 'Juan Cliente',    'CC', '2020', 'juan@email.com',   '$2b$10$FmvdWkpOie1MECB/paY9a.D1XyitCgIDj1g4XIZGqXvgIR4sVNGh6', '3002000002', 'Calle 10 # 5-20, Medellín'),
+(2, 2, 'Juan Cliente',    'CC', '2020', 'juan@email.com',   '$2b$10$FmvdWkpOie1MECB/paY9a.D1XyitCgIDj1g4XIZGqXvgIR4sVNGh6', '3002000002', 'Carrera 7 # 45-10, Medellín'),
 (3, 2, 'Maria Compra',    'CC', '3030', 'maria@email.com',  '$2b$10$FmvdWkpOie1MECB/paY9a.D1XyitCgIDj1g4XIZGqXvgIR4sVNGh6', '3003000003', 'Carrera 45 # 12-10, Medellín'),
 (4, 2, 'Carlos Venta',    'CC', '4040', 'carlos@email.com', '$2b$10$FmvdWkpOie1MECB/paY9a.D1XyitCgIDj1g4XIZGqXvgIR4sVNGh6', '3004000004', 'Av. El Poblado # 3-15, Medellín'),
 (5, 3, 'Luis Repartidor', 'CC', '6060', 'luis@remate.com',  '$2b$10$FmvdWkpOie1MECB/paY9a.D1XyitCgIDj1g4XIZGqXvgIR4sVNGh6', '3006000006', 'Transversal 39 # 77-50, Medellín');
@@ -81,11 +76,11 @@ INSERT INTO carrito_detalles (id_carrito, id_producto, cantidad) VALUES
 -- 7. PEDIDOS (Suma de montos >= $200.000 para cumplir CHK)
 -- =====================================================
 INSERT INTO pedidos (id_pedido, id_usuario, id_metodo_pago, direccion_entrega, total, estado, observaciones) VALUES
-(1, 2, 1, 'Calle 10 # 5-20, Medellín',        250000.00, 'ENTREGADO',              'Entregado en portería'),
+(1, 2, 1, 'Carrera 7 # 45-10, Medellín',       250000.00, 'ENTREGADO',              'Entregado en portería'),
 (2, 3, 2, 'Carrera 45 # 12-10, Medellín',     350000.00, 'ASIGNADO',               'Pedido asignado a repartidor'),
 (3, 4, 1, 'Av. El Poblado # 3-15, Medellín',   450000.00, 'EN_CAMINO',              'Llamar antes de entregar'),
 (4, 3, 2, 'Calle 80 # 23-45, Medellín',       220000.00, 'CANCELADO',              'Cancelado a solicitud del cliente'),
-(5, 2, 1, 'Calle 10 # 5-20, Medellín',        210000.00, 'NO_ENTREGADO',           'Cliente no se encontraba en el domicilio');
+(5, 2, 1, 'Carrera 15 # 8-20, Medellín',       210000.00, 'NO_ENTREGADO',           'Cliente no se encontraba en el domicilio');
 
 -- =====================================================
 -- 8. PEDIDO_DETALLES
@@ -99,6 +94,7 @@ INSERT INTO pedido_detalles (id_pedido, id_producto, cantidad, precio_unitario, 
 
 -- =====================================================
 -- 9. HISTORIAL_STOCK
+-- NOTA: 'Carga de inventario inicial' se repite por cada producto
 -- =====================================================
 INSERT INTO historial_stock (id_producto, id_admin, cantidad_anterior, cantidad_nueva, motivo) VALUES
 (1, 1, 0, 100, 'Carga de inventario inicial'),

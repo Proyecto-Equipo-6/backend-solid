@@ -1,3 +1,6 @@
 node_modules/
 .env
 reports/
+.agents/
+.opencode/
+DB/sistema_comercial_completo.sql

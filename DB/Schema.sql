@@ -69,8 +69,22 @@ CREATE TABLE proveedores (
     razon_social VARCHAR(100) NOT NULL,
     telefono VARCHAR(10) NOT NULL,
     email VARCHAR(100) NOT NULL,
+    imagen_url VARCHAR(255) NULL,
     estado TINYINT(1) NOT NULL DEFAULT 1,
     fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
+-- =============================================================================
+-- 5.1 TABLA: REPARTIDORES
+-- =============================================================================
+CREATE TABLE repartidores (
+    id_repartidor INT AUTO_INCREMENT PRIMARY KEY,
+    id_usuario INT NOT NULL UNIQUE,
+    vehiculo VARCHAR(50) NULL,
+    placa VARCHAR(20) NULL,
+    activo TINYINT(1) NOT NULL DEFAULT 1,
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_repartidores_usuarios FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario) ON DELETE RESTRICT
 ) ENGINE=InnoDB;
 
 -- =============================================================================
@@ -86,21 +100,7 @@ CREATE TABLE metodos_pago (
 ) ENGINE=InnoDB;
 
 -- =============================================================================
--- 7. TABLA: BANCOS
--- =============================================================================
-CREATE TABLE bancos (
-    id_banco INT AUTO_INCREMENT PRIMARY KEY,
-    id_metodo_pago INT NOT NULL,
-    nombre VARCHAR(50) NOT NULL UNIQUE,
-    descripcion VARCHAR(255) NULL,
-    numero_cuenta VARCHAR(30) NULL,
-    activo TINYINT(1) NOT NULL DEFAULT 1,
-    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_bancos_metodos_pago FOREIGN KEY (id_metodo_pago) REFERENCES metodos_pago(id_metodo_pago) ON DELETE RESTRICT
-) ENGINE=InnoDB;
-
--- =============================================================================
--- 8. TABLA: PRODUCTOS
+-- 7. TABLA: PRODUCTOS
 -- =============================================================================
 CREATE TABLE productos (
     id_producto INT AUTO_INCREMENT PRIMARY KEY,

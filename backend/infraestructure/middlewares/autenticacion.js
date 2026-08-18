@@ -41,5 +41,37 @@ function crearRequerirCliente(idRolCliente = 2) {
   };
 }
 
+/**
+ * Adaptador de Infraestructura: crearRequerirRepartidor
+ * Factory que crea un middleware que restringe el acceso a usuarios con
+ * rol Repartidor (RN-058). Se inyecta el id del rol Repartidor para no
+ * acoplarse a un valor fijo (id_rol = 3 en Seed.sql).
+ */
+function crearRequerirRepartidor(idRolRepartidor = 3) {
+  return function requerirRepartidor(req, res, next) {
+    if (!req.usuario || Number(req.usuario.id_rol) !== Number(idRolRepartidor)) {
+      return res.status(403).json({ error: 'Debes iniciar sesión como Repartidor' });
+    }
+    return next();
+  };
+}
+
+/**
+ * Adaptador de Infraestructura: crearRequerirAdmin
+ * Factory que crea un middleware que restringe el acceso a usuarios con
+ * rol Administrador (CU-025). Se inyecta el id del rol Administrador para
+ * no acoplarse a un valor fijo (id_rol = 1 en Seed.sql).
+ */
+function crearRequerirAdmin(idRolAdmin = 1) {
+  return function requerirAdmin(req, res, next) {
+    if (!req.usuario || Number(req.usuario.id_rol) !== Number(idRolAdmin)) {
+      return res.status(403).json({ error: 'Debes iniciar sesión como Administrador' });
+    }
+    return next();
+  };
+}
+
 module.exports = crearAutenticador;
 module.exports.crearRequerirCliente = crearRequerirCliente;
+module.exports.crearRequerirRepartidor = crearRequerirRepartidor;
+module.exports.crearRequerirAdmin = crearRequerirAdmin;
