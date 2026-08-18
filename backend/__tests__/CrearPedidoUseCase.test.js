@@ -82,4 +82,34 @@ describe('CrearPedidoUseCase', () => {
     expect(error.status).toBe(400);
     expect(error.message).toContain('iniciar sesión');
   });
+
+  it('usa Efectivo / Contraentrega por defecto (id_metodo_pago = 1)', async () => {
+    const carritoRepository = crearCarritoConProducto(PRODUCTO, 1);
+    const pedidoRepository = new InMemoryPedidoRepository();
+    const casoUso = new CrearPedidoUseCase(carritoRepository, pedidoRepository);
+
+    await casoUso.execute(CLIENTE, { direccionEntrega: 'Calle 10' });
+
+    expect(pedidoRepository.pedidos[0].id_metodo_pago).toBe(1);
+  });
+
+  it('permite seleccionar método de pago Nequi (id_metodo_pago = 2)', async () => {
+    const carritoRepository = crearCarritoConProducto(PRODUCTO, 1);
+    const pedidoRepository = new InMemoryPedidoRepository();
+    const casoUso = new CrearPedidoUseCase(carritoRepository, pedidoRepository);
+
+    await casoUso.execute(CLIENTE, { direccionEntrega: 'Calle 10', idMetodoPago: 2 });
+
+    expect(pedidoRepository.pedidos[0].id_metodo_pago).toBe(2);
+  });
+
+  it('rechaza método de pago no válido', async () => {
+    const carritoRepository = crearCarritoConProducto(PRODUCTO, 1);
+    const casoUso = new CrearPedidoUseCase(carritoRepository, new InMemoryPedidoRepository());
+
+    const error = await casoUso.execute(CLIENTE, { direccionEntrega: 'Calle 10', idMetodoPago: 99 }).catch((e) => e);
+
+    expect(error.status).toBe(400);
+    expect(error.message).toContain('Método de pago');
+  });
 });

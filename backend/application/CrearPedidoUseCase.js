@@ -5,8 +5,9 @@ const ErrorStockInsuficiente = require('./errors/ErrorStockInsuficiente');
 /**
  * Caso de Uso: CrearPedidoUseCase
  * Genera un pedido a partir del carrito del cliente (CU-012 / RF-005.1).
- * Flujo SOLO CONTRA ENTREGA: el pedido nace en PENDIENTE sin comprobante
- * y se notifica al administrador.
+ * El cliente selecciona el método de pago: 1 = Efectivo / Contraentrega,
+ * 2 = Nequi. El pedido nace en PENDIENTE sin comprobante y se notifica
+ * al administrador.
  *
  * RN-041: transacción ACID (si falla el descuento de stock, se revierte).
  * RN-042: el pedido refleja exactamente el carrito confirmado.
@@ -21,13 +22,19 @@ class CrearPedidoUseCase {
     this.pedidoRepository = pedidoRepository;
   }
 
-  async execute(usuario, { direccionEntrega, observaciones = null } = {}) {
+  async execute(usuario, { direccionEntrega, observaciones = null, idMetodoPago = 1 } = {}) {
     if (!usuario?.id_usuario) {
       throw new ErrorValidacion('Debes iniciar sesión para generar un pedido');
     }
 
     if (!direccionEntrega || typeof direccionEntrega !== 'string' || direccionEntrega.trim() === '') {
       throw new ErrorValidacion('Debes indicar la dirección de entrega');
+    }
+
+    // Validar método de pago (1 = Efectivo / Contraentrega, 2 = Nequi)
+    const metodoPago = Number(idMetodoPago);
+    if (![1, 2].includes(metodoPago)) {
+      throw new ErrorValidacion('Método de pago no válido');
     }
 
     // RN-047: el pedido se genera a partir del carrito completo (no parcial)
@@ -40,7 +47,7 @@ class CrearPedidoUseCase {
     const total = Number(carrito.total);
     const pedido = new Pedido({
       id_usuario: usuario.id_usuario,
-      id_metodo_pago: 1, // Efectivo / Contraentrega
+      id_metodo_pago: metodoPago,
       direccion_entrega: direccionEntrega.trim(),
       total,
       observaciones: observaciones ? String(observaciones).trim() : null,
