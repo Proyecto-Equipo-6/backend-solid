@@ -210,10 +210,13 @@ const verPedidosUseCase = new VerPedidosUseCase(pedidoRepository);
 const cancelarPedidoUseCase = new CancelarPedidoUseCase(pedidoRepository);
 const pedidoController = new PedidoController({ crearPedidoUseCase, verPedidosUseCase, cancelarPedidoUseCase });
 
+// --- Constantes del sistema ---
+const { ROL_ADMIN, ROL_CLIENTE, ROL_REPARTIDOR } = require('./backend/constants');
+
 // --- Middlewares de autorización (DIP) ---
-const requerirCliente = crearRequerirCliente(2);
-const requerirRepartidor = crearRequerirRepartidor(3);
-const requerirAdmin = crearRequerirAdmin(1);
+const requerirCliente = crearRequerirCliente(ROL_CLIENTE);
+const requerirRepartidor = crearRequerirRepartidor(ROL_REPARTIDOR);
+const requerirAdmin = crearRequerirAdmin(ROL_ADMIN);
 
 // --- Inyección de Dependencias para Repartidor (DIP) ---
 const pedidoRepartidorRepository = new MySQLPedidoRepartidorRepository();

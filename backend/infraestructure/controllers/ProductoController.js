@@ -63,7 +63,7 @@ class ProductoController {
       );
       return res.status(200).json(producto);
     } catch (error) {
-      const status = error.message === 'Producto no encontrado' ? 404 : 400;
+      const status = esNoEncontrado(error.message) ? 404 : 400;
       return res.status(status).json({ error: error.message });
     }
   }
@@ -73,7 +73,7 @@ class ProductoController {
       const resultado = await this.eliminarProductoUseCase.ejecutar(Number(req.params.id));
       return res.status(200).json(resultado);
     } catch (error) {
-      const status = error.message === 'Producto no encontrado' ? 404 : 400;
+      const status = esNoEncontrado(error.message) ? 404 : 400;
       return res.status(status).json({ error: error.message });
     }
   }

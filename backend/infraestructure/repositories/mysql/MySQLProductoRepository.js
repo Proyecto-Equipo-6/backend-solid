@@ -1,5 +1,6 @@
 const ProductoRepository = require('../../../domain/ports/ProductoRepository');
 const pool = require('../../database/db');
+const { ROL_ADMIN } = require('../../../constants');
 
 const SELECT_BASE = `
   SELECT
@@ -153,8 +154,8 @@ class MySQLProductoRepository extends ProductoRepository {
     );
 
     await pool.execute(
-      'INSERT INTO historial_stock (id_producto, id_admin, cantidad_anterior, cantidad_nueva, motivo) VALUES (?, 1, ?, ?, ?)',
-      [id_producto, cantidad_anterior, cantidad_nueva, motivo.trim()]
+      'INSERT INTO historial_stock (id_producto, id_admin, cantidad_anterior, cantidad_nueva, motivo) VALUES (?, ?, ?, ?, ?)',
+      [id_producto, ROL_ADMIN, cantidad_anterior, cantidad_nueva, motivo.trim()]
     );
 
     return {
