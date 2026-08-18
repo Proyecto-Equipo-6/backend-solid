@@ -10,7 +10,7 @@ class ActualizarEstadoPedidoUseCase {
       throw new Error('Pedido no encontrado');
     }
 
-    // Validación de transición de estados (RN-060)
+    // Validación de transición de estados
     const transicionesValidas = {
       'ASIGNADO': ['EN_CAMINO'],
       'EN_CAMINO': ['ENTREGADO', 'NO_ENTREGADO']
@@ -21,7 +21,7 @@ class ActualizarEstadoPedidoUseCase {
       throw new Error(`Transición inválida de ${pedido.estado} a ${nuevoEstado}`);
     }
 
-    // Validación de foto obligatoria para ENTREGADO (RN-061)
+    // Validación de foto obligatoria para ENTREGADO
     if (nuevoEstado === 'ENTREGADO') {
       const foto = datosAdicionales.foto;
       if (!foto) {
@@ -34,20 +34,19 @@ class ActualizarEstadoPedidoUseCase {
       }
 
       const tamano = foto.tamano ?? foto.size;
-      const tamanoMaximo = 3 * 1024 * 1024; // 3MB
+      const tamanoMaximo = 3 * 1024 * 1024;
       if (tamano === undefined || tamano > tamanoMaximo) {
         throw new Error('La foto no debe superar los 3MB');
       }
     }
 
-    // Validación de observación obligatoria para NO_ENTREGADO (RN-062)
+    // Validación de observación obligatoria para NO_ENTREGADO
     if (nuevoEstado === 'NO_ENTREGADO') {
       if (!datosAdicionales.observacion || datosAdicionales.observacion.trim() === '') {
         throw new Error('La observación es obligatoria para marcar No Entregado');
       }
     }
 
-    // Delegar al repositorio la actualización y asignación de comprobante_url
     return await this.pedidoRepo.actualizarEstado(
       pedidoId,
       nuevoEstado,

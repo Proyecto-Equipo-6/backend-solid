@@ -20,10 +20,16 @@ const SmtpEmailSender = require('./backend/infraestructure/services/SmtpEmailSen
 const MySQLProductoRepository = require('./backend/infraestructure/repositories/mysql/MySQLProductoRepository');
 const ListarProductosPublicosUseCase = require('./backend/application/ListarProductosPublicosUseCase');
 const ObtenerProductoPublicoUseCase = require('./backend/application/ObtenerProductoPublicoUseCase');
+const CrearProductoUseCase = require('./backend/application/crearProductoUseCase');
+const EditarProductoUseCase = require('./backend/application/editarProductoUseCase');
+const EliminarProductoUseCase = require('./backend/application/eliminarProductoUseCase');
 const ProductoController = require('./backend/infraestructure/controllers/ProductoController');
 const createProductoRouter = require('./backend/infraestructure/routes/productoRoutes');
 const MySQLCategoriaRepository = require('./backend/infraestructure/repositories/mysql/MySQLCategoriaRepository');
 const ListarCategoriasUseCase = require('./backend/application/ListarCategoriasUseCase');
+const CrearCategoriaUseCase = require('./backend/application/crearCategoriaUseCase');
+const EditarCategoriaUseCase = require('./backend/application/editarCategoriaUseCase');
+const EliminarCategoriaUseCase = require('./backend/application/eliminarCategoriaUseCase');
 const CategoriaController = require('./backend/infraestructure/controllers/CategoriaController');
 const createCategoriaRouter = require('./backend/infraestructure/routes/categoriaRoutes');
 const ObtenerPerfilUseCase = require('./backend/application/ObtenerPerfilUseCase');
@@ -35,6 +41,7 @@ const createAnaliticaRouter = require('./backend/infraestructure/routes/analitic
 const crearAutenticador = require('./backend/infraestructure/middlewares/autenticacion');
 const { crearRequerirCliente } = require('./backend/infraestructure/middlewares/autenticacion');
 const { crearRequerirRepartidor } = require('./backend/infraestructure/middlewares/autenticacion');
+const { crearRequerirAdmin } = require('./backend/infraestructure/middlewares/autenticacion');
 
 // --- Módulos de Carrito (Fase 3) ---
 const MySQLCarritoRepository = require('./backend/infraestructure/repositories/mysql/MySQLCarritoRepository');
@@ -56,6 +63,15 @@ const createPedidoRouter = require('./backend/infraestructure/routes/pedidoRoute
 // --- Módulos de Repartidor (CU-015 a CU-018) ---
 const MySQLPedidoRepartidorRepository = require('./backend/infraestructure/repositories/mysql/MySQLPedidoRepartidorRepository');
 const createPedidosRepartidorRouter = require('./backend/infraestructure/routes/pedidosRepartidorRoutes');
+
+// --- Módulos de Proveedores (CU-025) ---
+const MySQLProveedorRepository = require('./backend/infraestructure/repositories/mysql/MySQLProveedorRepository');
+const CrearProveedorUseCase = require('./backend/application/crearProveedorUseCase');
+const EditarProveedorUseCase = require('./backend/application/editarProveedorUseCase');
+const EliminarProveedorUseCase = require('./backend/application/eliminarProveedorUseCase');
+const ListarProveedoresActivosUseCase = require('./backend/application/listarProveedoresActivosUseCase');
+const ProveedorController = require('./backend/infraestructure/controllers/ProveedorController');
+const createProveedorRouter = require('./backend/infraestructure/routes/proveedorRoutes');
 
 const app = express();
 app.disable('x-powered-by');
@@ -118,19 +134,33 @@ const authController = new AuthController(
   restablecerContrasenaUseCase
 );
 
-// --- Inyección de Dependencias para el Catálogo de Productos (DIP) ---
+// --- Inyección de Dependencias para Categorías (CU-022, DIP) ---
+const categoriaRepository = new MySQLCategoriaRepository();
+const listarCategoriasUseCase = new ListarCategoriasUseCase(categoriaRepository);
+const crearCategoriaUseCase = new CrearCategoriaUseCase(categoriaRepository);
+const editarCategoriaUseCase = new EditarCategoriaUseCase(categoriaRepository);
+const eliminarCategoriaUseCase = new EliminarCategoriaUseCase(categoriaRepository);
+const categoriaController = new CategoriaController({
+  listarCategoriasUseCase,
+  crearCategoriaUseCase,
+  editarCategoriaUseCase,
+  eliminarCategoriaUseCase,
+});
+
+// --- Inyección de Dependencias para Productos (CU-023, DIP) ---
 const productoRepository = new MySQLProductoRepository();
 const listarProductosUseCase = new ListarProductosPublicosUseCase(productoRepository);
 const obtenerProductoUseCase = new ObtenerProductoPublicoUseCase(productoRepository);
-const productoController = new ProductoController(
+const crearProductoUseCase = new CrearProductoUseCase(productoRepository, categoriaRepository);
+const editarProductoUseCase = new EditarProductoUseCase(productoRepository, categoriaRepository);
+const eliminarProductoUseCase = new EliminarProductoUseCase(productoRepository);
+const productoController = new ProductoController({
   listarProductosUseCase,
-  obtenerProductoUseCase
-);
-
-// --- Inyección de Dependencias para Categorías (DIP) ---
-const categoriaRepository = new MySQLCategoriaRepository();
-const listarCategoriasUseCase = new ListarCategoriasUseCase(categoriaRepository);
-const categoriaController = new CategoriaController(listarCategoriasUseCase);
+  obtenerProductoUseCase,
+  crearProductoUseCase,
+  editarProductoUseCase,
+  eliminarProductoUseCase,
+});
 
 // --- Inyección de Dependencias para Reportes del Panel (DIP) ---
 const analiticaRepository = new MySQLAnaliticaRepository();
@@ -160,20 +190,35 @@ const pedidoController = new PedidoController({ crearPedidoUseCase, verPedidosUs
 // --- Middlewares de autorización (DIP) ---
 const requerirCliente = crearRequerirCliente(2);
 const requerirRepartidor = crearRequerirRepartidor(3);
+const requerirAdmin = crearRequerirAdmin(1);
 
 // --- Inyección de Dependencias para Repartidor (DIP) ---
 const pedidoRepartidorRepository = new MySQLPedidoRepartidorRepository();
+
+// --- Inyección de Dependencias para Proveedores (CU-025, DIP) ---
+const proveedorRepository = new MySQLProveedorRepository();
+const crearProveedorUseCase = new CrearProveedorUseCase(proveedorRepository);
+const editarProveedorUseCase = new EditarProveedorUseCase(proveedorRepository);
+const eliminarProveedorUseCase = new EliminarProveedorUseCase(proveedorRepository);
+const listarProveedoresActivosUseCase = new ListarProveedoresActivosUseCase(proveedorRepository);
+const proveedorController = new ProveedorController({
+  crearProveedorUseCase,
+  editarProveedorUseCase,
+  eliminarProveedorUseCase,
+  listarProveedoresActivosUseCase,
+});
 
 // --- Rutas (Cargadas como Middleware) ---
 app.use('/api/v1/users', createUserRouter(userController, autenticar));
 app.use('/api/v1/roles', createRolRouter(adminUpdateRolController));
 app.use('/api/v1/auth', createAuthRouter(authController));
-app.use('/api/v1/productos', createProductoRouter(productoController));
-app.use('/api/v1/categorias', createCategoriaRouter(categoriaController));
+app.use('/api/v1/productos', createProductoRouter(productoController, autenticar, requerirAdmin));
+app.use('/api/v1/categorias', createCategoriaRouter(categoriaController, autenticar, requerirAdmin));
 app.use('/api/v1/analitica', createAnaliticaRouter(analiticaController));
 app.use('/api/v1/carrito', createCarritoRouter(carritoController, autenticar, requerirCliente));
 app.use('/api/v1/pedidos', createPedidoRouter(pedidoController, autenticar, requerirCliente));
 app.use('/api/v1/repartidor', createPedidosRepartidorRouter(pedidoRepartidorRepository, autenticar, requerirRepartidor));
+app.use('/api/v1/proveedores', createProveedorRouter(proveedorController, autenticar, requerirAdmin));
 
 // --- 404 ---
 app.use((req, res) => {
