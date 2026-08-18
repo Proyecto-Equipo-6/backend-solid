@@ -44,7 +44,7 @@ class LoginUseCase {
 
     const token = jwt.sign(payload, this.jwtSecret, { expiresIn: this.jwtExpiresIn });
 
-    const { password: _password, ...datosPublicos } = usuario;
+    const { password: _, ...datosPublicos } = usuario;
     return { token, usuario: { ...datosPublicos, id_usuario: idUsuario } };
   }
 }

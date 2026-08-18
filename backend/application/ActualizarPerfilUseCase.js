@@ -3,7 +3,7 @@ const ErrorSesionExpirada = require('./errors/ErrorSesionExpirada');
 const ErrorNoAutorizado = require('./errors/ErrorNoAutorizado');
 const ErrorConflicto = require('./errors/ErrorConflicto');
 
-const REGEX_EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const REGEX_EMAIL = /^[^\s@]+@[^\s@]+\.\w+$/;
 const REGEX_TELEFONO = /^\d{10}$/;
 
 /**
@@ -71,7 +71,7 @@ class ActualizarPerfilUseCase {
 
   camposSensiblesCambiados(datos, usuario) {
     return ['nombre_apellido', 'email', 'telefono'].filter((campo) => {
-      if (!Object.prototype.hasOwnProperty.call(datos, campo)) return false;
+      if (!Object.hasOwn(datos, campo)) return false;
       return String(datos[campo] ?? '').trim() !== String(usuario[campo] ?? '').trim();
     });
   }

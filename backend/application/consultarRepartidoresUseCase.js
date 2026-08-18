@@ -42,6 +42,7 @@ class ConsultarRepartidoresUseCase {
           pedidos_mes: periodo.totalMes
         });
       } catch (error) {
+        console.error(`Error obteniendo métricas del repartidor ${repartidor.id_usuario}:`, error.message);
         resultado.push({
           id_repartidor: repartidor.id_usuario,
           nombre: `${repartidor.nombre} ${repartidor.apellidos}`.trim(),
