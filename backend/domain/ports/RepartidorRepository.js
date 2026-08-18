@@ -22,6 +22,10 @@ class RepartidorRepository {
   async marcarDisponible(idRepartidor) {
     throw new Error('Método marcarDisponible no implementado');
   }
+
+  async actualizar(idRepartidor, datos) {
+    throw new Error('Método actualizar no implementado');
+  }
 }
 
 module.exports = RepartidorRepository;

@@ -256,11 +256,11 @@ const ajustarStockProductoUseCase = new AjustarStockProductoUseCase(productoRepo
 
 // --- Rutas (Cargadas como Middleware) ---
 app.use('/api/v1/users', createUserRouter(userController, autenticar));
-app.use('/api/v1/roles', createRolRouter(adminUpdateRolController));
+app.use('/api/v1/roles', createRolRouter(adminUpdateRolController, autenticar, requerirAdmin));
 app.use('/api/v1/auth', createAuthRouter(authController));
 app.use('/api/v1/productos', createProductoRouter(productoController, autenticar, requerirAdmin));
 app.use('/api/v1/categorias', createCategoriaRouter(categoriaController, autenticar, requerirAdmin));
-app.use('/api/v1/analitica', createAnaliticaRouter(analiticaController));
+app.use('/api/v1/analitica', createAnaliticaRouter(analiticaController, autenticar, requerirAdmin));
 app.use('/api/v1/carrito', createCarritoRouter(carritoController, autenticar, requerirCliente));
 app.use('/api/v1/pedidos', createPedidoRouter(pedidoController, autenticar, requerirCliente));
 app.use('/api/v1/repartidor', createPedidosRepartidorRouter(pedidoRepartidorRepository, autenticar, requerirRepartidor));
