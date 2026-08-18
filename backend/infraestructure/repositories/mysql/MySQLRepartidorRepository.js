@@ -42,7 +42,7 @@ class MySQLRepartidorRepository extends RepartidorRepository {
 
   async marcarOcupado(idRepartidor) {
     await pool.execute(
-      'UPDATE repartidores SET activo = 1 WHERE id_repartidor = ?',
+      'UPDATE repartidores SET activo = 0 WHERE id_repartidor = ?',
       [idRepartidor]
     );
   }

@@ -1,3 +1,5 @@
+const { esNoEncontrado } = require('../helpers/responseHelpers');
+
 /**
  * Adaptador de Infraestructura: PedidoAdminController
  * Administra pedidos (CU-027): listar, ver detalle, actualizar estado, cancelar, asignar repartidor.
@@ -39,7 +41,7 @@ class PedidoAdminController {
       const pedido = await this.obtenerDetallePedidoAdminUseCase.ejecutar(id_pedido);
       return res.status(200).json(pedido);
     } catch (error) {
-      const status = error.message.includes('no encontrado') ? 404 : 400;
+      const status = esNoEncontrado(error.message) ? 404 : 400;
       return res.status(status).json({ error: error.message });
     }
   }
@@ -56,7 +58,7 @@ class PedidoAdminController {
       const pedido = await this.actualizarEstadoPedidoAdminUseCase.ejecutar(id_pedido, estado);
       return res.status(200).json(pedido);
     } catch (error) {
-      const status = error.message.includes('no encontrado') ? 404 : 400;
+      const status = esNoEncontrado(error.message) ? 404 : 400;
       return res.status(status).json({ error: error.message });
     }
   }
@@ -76,7 +78,7 @@ class PedidoAdminController {
       });
       return res.status(200).json(pedido);
     } catch (error) {
-      const status = error.message.includes('no encontrado') ? 404 : 400;
+      const status = esNoEncontrado(error.message) ? 404 : 400;
       return res.status(status).json({ error: error.message });
     }
   }
@@ -93,7 +95,7 @@ class PedidoAdminController {
       const pedido = await this.asignarRepartidorUseCase.ejecutar(id_pedido, Number(id_repartidor));
       return res.status(200).json(pedido);
     } catch (error) {
-      const status = error.message.includes('no encontrado') ? 404 : 400;
+      const status = esNoEncontrado(error.message) ? 404 : 400;
       return res.status(status).json({ error: error.message });
     }
   }

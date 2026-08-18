@@ -1,3 +1,5 @@
+const { esNoEncontrado } = require('../helpers/responseHelpers');
+
 /**
  * Adaptador de Infraestructura: RepartidorAdminController
  * Administra repartidores (CU-021): consultar lista y cambiar estado operativo.
@@ -33,7 +35,7 @@ class RepartidorAdminController {
       const repartidor = await this.cambiarEstadoOperativoRepartidorUseCase.ejecutar(idRepartidor, estado);
       return res.status(200).json(repartidor);
     } catch (error) {
-      const status = error.message.includes('no encontrado') ? 404 : 400;
+      const status = esNoEncontrado(error.message) ? 404 : 400;
       return res.status(status).json({ error: error.message });
     }
   }
