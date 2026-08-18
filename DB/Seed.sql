@@ -4,16 +4,7 @@ USE sistema_comercial;
 -- METODOS DE PAGO
 -- =====================================================
 INSERT INTO metodos_pago (id_metodo_pago, nombre, descripcion, requiere_comprobante, activo) VALUES
-(1, 'Efectivo / Contraentrega', 'Pago en efectivo al momento de recibir el pedido', 0, 1),
-(2, 'Transferencia / Nequi / Daviplata', 'Pago mediante transferencia bancaria o monedero virtual', 1, 1);
-
--- =====================================================
--- BANCOS (asociados al método de pago de transferencia)
--- =====================================================
-INSERT INTO bancos (id_banco, id_metodo_pago, nombre, descripcion, numero_cuenta) VALUES
-(1, 2, 'Nequi',       'Monedero virtual',            '3001234567'),
-(2, 2, 'Daviplata',   'Monedero virtual (llave)',    '3001234567'),
-(3, 2, 'Bancolombia', 'Cuenta de ahorros',           '123456789');
+(1, 'Efectivo / Contraentrega', 'Pago en efectivo al momento de recibir el pedido', 0, 1);
 
 -- =====================================================
 -- 1. ROLES
