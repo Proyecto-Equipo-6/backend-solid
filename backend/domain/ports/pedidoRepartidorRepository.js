@@ -42,6 +42,10 @@ class PedidoRepartidorRepository {
   async contarPedidosDeHoyParaMetrica(repartidorId) {
     throw new Error('Método contarPedidosDeHoyParaMetrica no implementado');
   }
+
+  async contarPedidosEnCamino(repartidorId) {
+    throw new Error('Método contarPedidosEnCamino no implementado');
+  }
 }
 
 module.exports = PedidoRepartidorRepository;

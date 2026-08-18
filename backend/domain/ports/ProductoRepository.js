@@ -27,6 +27,14 @@ class ProductoRepository {
   async eliminar(id_producto) {
     throw new Error("Método 'eliminar' no implementado");
   }
+
+  async reintegrarInventario(id_producto, cantidad) {
+    throw new Error("Método 'reintegrarInventario' no implementado");
+  }
+
+  async registrarAjusteStock(id_producto, cantidad_nueva, motivo) {
+    throw new Error("Método 'registrarAjusteStock' no implementado");
+  }
 }
 
 module.exports = ProductoRepository;
