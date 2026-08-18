@@ -37,12 +37,12 @@ class MySQLRepartidorRepository extends RepartidorRepository {
 
   async estaDisponible(idRepartidor) {
     const repartidor = await this.buscarPorId(idRepartidor);
-    return repartidor && repartidor.estado === 'DISPONIBLE';
+    return repartidor?.estado === 'DISPONIBLE';
   }
 
   async marcarOcupado(idRepartidor) {
     await pool.execute(
-      'UPDATE repartidores SET activo = 1 WHERE id_repartidor = ?',
+      'UPDATE repartidores SET activo = 0 WHERE id_repartidor = ?',
       [idRepartidor]
     );
   }

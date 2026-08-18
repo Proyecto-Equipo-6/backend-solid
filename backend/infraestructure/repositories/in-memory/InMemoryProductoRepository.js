@@ -125,6 +125,40 @@ class InMemoryProductoRepository extends ProductoRepository {
   tieneHistorial(idProducto) {
     return this.productosConHistorial.has(idProducto);
   }
+
+  async sugerencias(termino, limite = 5) {
+    return this.productos
+      .filter(p => p.estado === 1 && p.nombre.toLowerCase().includes(termino.toLowerCase()))
+      .slice(0, limite)
+      .map(p => ({ id_producto: p.id_producto, nombre: p.nombre, imagen_url: p.imagen_url }));
+  }
+
+  async buscar(termino, filtros = {}) {
+    let resultados = this.productos.filter(p => p.estado === 1 && p.nombre.toLowerCase().includes(termino.toLowerCase()));
+
+    if (filtros.categoria) {
+      resultados = resultados.filter(p => p.id_categoria === Number(filtros.categoria));
+    }
+    if (filtros.precioMin) {
+      resultados = resultados.filter(p => p.precio >= Number(filtros.precioMin));
+    }
+    if (filtros.precioMax) {
+      resultados = resultados.filter(p => p.precio <= Number(filtros.precioMax));
+    }
+
+    const total = resultados.length;
+    const pagina = Number(filtros.pagina) || 1;
+    const limite = Number(filtros.limite) || 12;
+    const start = (pagina - 1) * limite;
+
+    return {
+      items: resultados.slice(start, start + limite),
+      total,
+      pagina,
+      limite,
+      totalPaginas: Math.ceil(total / limite),
+    };
+  }
 }
 
 module.exports = InMemoryProductoRepository;

@@ -23,6 +23,7 @@ const ObtenerProductoPublicoUseCase = require('./backend/application/ObtenerProd
 const CrearProductoUseCase = require('./backend/application/crearProductoUseCase');
 const EditarProductoUseCase = require('./backend/application/editarProductoUseCase');
 const EliminarProductoUseCase = require('./backend/application/eliminarProductoUseCase');
+const BuscarProductosUseCase = require('./backend/application/BuscarProductosUseCase');
 const ProductoController = require('./backend/infraestructure/controllers/ProductoController');
 const createProductoRouter = require('./backend/infraestructure/routes/productoRoutes');
 const MySQLCategoriaRepository = require('./backend/infraestructure/repositories/mysql/MySQLCategoriaRepository');
@@ -170,9 +171,10 @@ const categoriaController = new CategoriaController({
 const productoRepository = new MySQLProductoRepository();
 const listarProductosUseCase = new ListarProductosPublicosUseCase(productoRepository);
 const obtenerProductoUseCase = new ObtenerProductoPublicoUseCase(productoRepository);
-const crearProductoUseCase = new CrearProductoUseCase(productoRepository, categoriaRepository);
-const editarProductoUseCase = new EditarProductoUseCase(productoRepository, categoriaRepository);
+const crearProductoUseCase = new CrearProductoUseCase(productoRepository, categoriaRepository, proveedorRepository);
+const editarProductoUseCase = new EditarProductoUseCase(productoRepository, categoriaRepository, proveedorRepository);
 const eliminarProductoUseCase = new EliminarProductoUseCase(productoRepository);
+const buscarProductosUseCase = new BuscarProductosUseCase(productoRepository);
 const productoController = new ProductoController({
   listarProductosUseCase,
   obtenerProductoUseCase,
@@ -180,6 +182,7 @@ const productoController = new ProductoController({
   editarProductoUseCase,
   eliminarProductoUseCase,
   ajustarStockProductoUseCase,
+  buscarProductosUseCase,
 });
 
 // --- Inyección de Dependencias para Reportes del Panel (DIP) ---

@@ -11,17 +11,6 @@ class Categoria {
     this.estado = estado;
     this.fecha_creacion = fecha_creacion;
   }
-
-  esActivo() {
-    return this.estado === 1;
-  }
-
-  cambiarEstado(nuevoEstado) {
-    if (nuevoEstado === 'Activo') this.estado = 1;
-    else if (nuevoEstado === 'Inactivo') this.estado = 0;
-    else if ([0, 1].includes(nuevoEstado)) this.estado = nuevoEstado;
-    else throw new Error('Estado inválido');
-  }
 }
 
 module.exports = Categoria;

@@ -4,10 +4,6 @@ class Repartidor {
     this.nombre = nombre;
     this.estado = estado; // DISPONIBLE, OCUPADO, INACTIVO
   }
-
-  estaDisponible() {
-    return this.estado === 'DISPONIBLE';
-  }
 }
 
 module.exports = Repartidor;

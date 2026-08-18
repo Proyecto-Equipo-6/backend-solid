@@ -1,3 +1,5 @@
+const { esNoEncontrado } = require('../helpers/responseHelpers');
+
 /**
  * Adaptador de Infraestructura: ProductoController
  * Maneja las peticiones HTTP de productos y las delega a los Casos de Uso.
@@ -11,6 +13,7 @@ class ProductoController {
     editarProductoUseCase,
     eliminarProductoUseCase,
     ajustarStockProductoUseCase,
+    buscarProductosUseCase,
   }) {
     this.listarProductosUseCase = listarProductosUseCase;
     this.obtenerProductoUseCase = obtenerProductoUseCase;
@@ -18,6 +21,7 @@ class ProductoController {
     this.editarProductoUseCase = editarProductoUseCase;
     this.eliminarProductoUseCase = eliminarProductoUseCase;
     this.ajustarStockProductoUseCase = ajustarStockProductoUseCase;
+    this.buscarProductosUseCase = buscarProductosUseCase;
   }
 
   async listarPublicos(req, res) {
@@ -89,7 +93,7 @@ class ProductoController {
       const resultado = await this.ajustarStockProductoUseCase.ejecutar(id_producto, Number(cantidad_nueva), motivo);
       return res.status(200).json(resultado);
     } catch (error) {
-      const status = error.message.includes('no encontrado') ? 404 : 400;
+      const status = esNoEncontrado(error.message) ? 404 : 400;
       return res.status(status).json({ error: error.message });
     }
   }
