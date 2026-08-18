@@ -14,6 +14,7 @@ function createProductoRouter(productoController, autenticar, requerirAdmin) {
   router.post('/', autenticar, requerirAdmin, (req, res) => productoController.crear(req, res));
   router.put('/:id', autenticar, requerirAdmin, (req, res) => productoController.editar(req, res));
   router.delete('/:id', autenticar, requerirAdmin, (req, res) => productoController.eliminar(req, res));
+  router.put('/:id/ajustar-stock', autenticar, requerirAdmin, (req, res) => productoController.ajustarStock(req, res));
 
   return router;
 }

@@ -73,6 +73,25 @@ const ListarProveedoresActivosUseCase = require('./backend/application/listarPro
 const ProveedorController = require('./backend/infraestructure/controllers/ProveedorController');
 const createProveedorRouter = require('./backend/infraestructure/routes/proveedorRoutes');
 
+// --- Módulos de Repartidores Admin (CU-021) ---
+const MySQLRepartidorRepository = require('./backend/infraestructure/repositories/mysql/MySQLRepartidorRepository');
+const ConsultarRepartidoresUseCase = require('./backend/application/consultarRepartidoresUseCase');
+const CambiarEstadoOperativoRepartidorUseCase = require('./backend/application/cambiarEstadoOperativoRepartidorUseCase');
+const RepartidorAdminController = require('./backend/infraestructure/controllers/RepartidorAdminController');
+const createRepartidorAdminRouter = require('./backend/infraestructure/routes/repartidorAdminRoutes');
+
+// --- Módulos de Pedidos Admin (CU-027) ---
+const ObtenerTodosPedidosUseCase = require('./backend/application/obtenerTodosPedidosUseCase');
+const ObtenerDetallePedidoAdminUseCase = require('./backend/application/obtenerDetallePedidoAdminUseCase');
+const ActualizarEstadoPedidoAdminUseCase = require('./backend/application/actualizarEstadoPedidoAdminUseCase');
+const CancelarPedidoAdminUseCase = require('./backend/application/cancelarPedidoAdminUseCase');
+const AsignarRepartidorUseCase = require('./backend/application/asignarRepartidorUseCase');
+const PedidoAdminController = require('./backend/infraestructure/controllers/PedidoAdminController');
+const createPedidoAdminRouter = require('./backend/infraestructure/routes/pedidoAdminRoutes');
+
+// --- Módulos de Stock Admin (CU-023) ---
+const AjustarStockProductoUseCase = require('./backend/application/ajustarStockProductoUseCase');
+
 const app = express();
 app.disable('x-powered-by');
 app.use(
@@ -160,6 +179,7 @@ const productoController = new ProductoController({
   crearProductoUseCase,
   editarProductoUseCase,
   eliminarProductoUseCase,
+  ajustarStockProductoUseCase,
 });
 
 // --- Inyección de Dependencias para Reportes del Panel (DIP) ---
@@ -208,6 +228,32 @@ const proveedorController = new ProveedorController({
   listarProveedoresActivosUseCase,
 });
 
+// --- Inyección de Dependencias para Repartidores Admin (CU-021, DIP) ---
+const repartidorRepository = new MySQLRepartidorRepository();
+const consultarRepartidoresUseCase = new ConsultarRepartidoresUseCase(repartidorRepository, pedidoRepartidorRepository);
+const cambiarEstadoOperativoRepartidorUseCase = new CambiarEstadoOperativoRepartidorUseCase(repartidorRepository, pedidoRepartidorRepository);
+const repartidorAdminController = new RepartidorAdminController({
+  consultarRepartidoresUseCase,
+  cambiarEstadoOperativoRepartidorUseCase,
+});
+
+// --- Inyección de Dependencias para Pedidos Admin (CU-027, DIP) ---
+const obtenerTodosPedidosUseCase = new ObtenerTodosPedidosUseCase(pedidoRepartidorRepository);
+const obtenerDetallePedidoAdminUseCase = new ObtenerDetallePedidoAdminUseCase(pedidoRepartidorRepository);
+const actualizarEstadoPedidoAdminUseCase = new ActualizarEstadoPedidoAdminUseCase(pedidoRepartidorRepository);
+const cancelarPedidoAdminUseCase = new CancelarPedidoAdminUseCase(pedidoRepartidorRepository, productoRepository, repartidorRepository);
+const asignarRepartidorUseCase = new AsignarRepartidorUseCase(pedidoRepartidorRepository, repartidorRepository);
+const pedidoAdminController = new PedidoAdminController({
+  obtenerTodosPedidosUseCase,
+  obtenerDetallePedidoAdminUseCase,
+  actualizarEstadoPedidoAdminUseCase,
+  cancelarPedidoAdminUseCase,
+  asignarRepartidorUseCase,
+});
+
+// --- Inyección de Dependencias para Stock Admin (CU-023, DIP) ---
+const ajustarStockProductoUseCase = new AjustarStockProductoUseCase(productoRepository);
+
 // --- Rutas (Cargadas como Middleware) ---
 app.use('/api/v1/users', createUserRouter(userController, autenticar));
 app.use('/api/v1/roles', createRolRouter(adminUpdateRolController));
@@ -219,6 +265,8 @@ app.use('/api/v1/carrito', createCarritoRouter(carritoController, autenticar, re
 app.use('/api/v1/pedidos', createPedidoRouter(pedidoController, autenticar, requerirCliente));
 app.use('/api/v1/repartidor', createPedidosRepartidorRouter(pedidoRepartidorRepository, autenticar, requerirRepartidor));
 app.use('/api/v1/proveedores', createProveedorRouter(proveedorController, autenticar, requerirAdmin));
+app.use('/api/v1/admin/repartidores', createRepartidorAdminRouter(repartidorAdminController, autenticar, requerirAdmin));
+app.use('/api/v1/admin/pedidos', createPedidoAdminRouter(pedidoAdminController, autenticar, requerirAdmin));
 
 // --- 404 ---
 app.use((req, res) => {

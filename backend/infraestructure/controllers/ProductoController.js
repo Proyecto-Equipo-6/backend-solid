@@ -1,7 +1,7 @@
 /**
  * Adaptador de Infraestructura: ProductoController
  * Maneja las peticiones HTTP de productos y las delega a los Casos de Uso.
- * Incluye el catálogo público y el CRUD administrativo (CU-023).
+ * Incluye el catálogo público, el CRUD administrativo (CU-023) y ajuste de stock.
  */
 class ProductoController {
   constructor({
@@ -10,12 +10,14 @@ class ProductoController {
     crearProductoUseCase,
     editarProductoUseCase,
     eliminarProductoUseCase,
+    ajustarStockProductoUseCase,
   }) {
     this.listarProductosUseCase = listarProductosUseCase;
     this.obtenerProductoUseCase = obtenerProductoUseCase;
     this.crearProductoUseCase = crearProductoUseCase;
     this.editarProductoUseCase = editarProductoUseCase;
     this.eliminarProductoUseCase = eliminarProductoUseCase;
+    this.ajustarStockProductoUseCase = ajustarStockProductoUseCase;
   }
 
   async listarPublicos(req, res) {
@@ -68,6 +70,26 @@ class ProductoController {
       return res.status(200).json(resultado);
     } catch (error) {
       const status = error.message === 'Producto no encontrado' ? 404 : 400;
+      return res.status(status).json({ error: error.message });
+    }
+  }
+
+  async ajustarStock(req, res) {
+    try {
+      const id_producto = Number(req.params.id);
+      const { cantidad_nueva, motivo } = req.body;
+
+      if (cantidad_nueva === undefined || cantidad_nueva === null) {
+        return res.status(400).json({ error: 'El campo cantidad_nueva es obligatorio' });
+      }
+      if (!motivo) {
+        return res.status(400).json({ error: 'El campo motivo es obligatorio' });
+      }
+
+      const resultado = await this.ajustarStockProductoUseCase.ejecutar(id_producto, Number(cantidad_nueva), motivo);
+      return res.status(200).json(resultado);
+    } catch (error) {
+      const status = error.message.includes('no encontrado') ? 404 : 400;
       return res.status(status).json({ error: error.message });
     }
   }
