@@ -1,8 +1,8 @@
 const bcrypt = require('bcrypt');
-const SolicitarRecuperacionUseCase = require('../application/SolicitarRecuperacionUseCase');
-const RestablecerContrasenaUseCase = require('../application/RestablecerContrasenaUseCase');
-const InMemoryUserRepository = require('../infraestructure/repositories/in-memory/InMemoryUserRepository');
-const InMemoryTokensRecuperacionRepository = require('../infraestructure/repositories/in-memory/InMemoryTokensRecuperacionRepository');
+const SolicitarRecuperacionUseCase = require('../../application/SolicitarRecuperacionUseCase');
+const RestablecerContrasenaUseCase = require('../../application/RestablecerContrasenaUseCase');
+const InMemoryUserRepository = require('../../infraestructure/repositories/in-memory/InMemoryUserRepository');
+const InMemoryTokensRecuperacionRepository = require('../../infraestructure/repositories/in-memory/InMemoryTokensRecuperacionRepository');
 
 const MENSAJE_GENERICO =
   'Recibirá un enlace de recuperación a su correo electrónico';
@@ -23,7 +23,7 @@ async function crearUsuario(repositorio, { email = 'ana@example.com', password =
   return repositorio.save(usuario);
 }
 
-describe('SolicitarRecuperacionUseCase', () => {
+describe('CU-006 Recuperar contraseña (SolicitarRecuperacionUseCase)', () => {
   let repositorio;
   let tokensRepositorio;
   let emailSender;
@@ -71,7 +71,7 @@ describe('SolicitarRecuperacionUseCase', () => {
   });
 });
 
-describe('RestablecerContrasenaUseCase', () => {
+describe('CU-006 Recuperar contraseña (RestablecerContrasenaUseCase)', () => {
   let repositorio;
   let tokensRepositorio;
   let casoUso;

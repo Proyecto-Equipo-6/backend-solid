@@ -1,8 +1,8 @@
 const bcrypt = require('bcrypt');
-const ActualizarPerfilUseCase = require('../application/ActualizarPerfilUseCase');
-const InMemoryUserRepository = require('../infraestructure/repositories/in-memory/InMemoryUserRepository');
+const ActualizarPerfilUseCase = require('../../application/ActualizarPerfilUseCase');
+const InMemoryUserRepository = require('../../infraestructure/repositories/in-memory/InMemoryUserRepository');
 
-describe('ActualizarPerfilUseCase', () => {
+describe('CU-005 Editar perfil (ActualizarPerfilUseCase)', () => {
   let repositorio;
   let casoUso;
 

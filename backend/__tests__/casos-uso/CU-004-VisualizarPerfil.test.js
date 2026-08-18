@@ -1,8 +1,8 @@
 const bcrypt = require('bcrypt');
-const ObtenerPerfilUseCase = require('../application/ObtenerPerfilUseCase');
-const InMemoryUserRepository = require('../infraestructure/repositories/in-memory/InMemoryUserRepository');
+const ObtenerPerfilUseCase = require('../../application/ObtenerPerfilUseCase');
+const InMemoryUserRepository = require('../../infraestructure/repositories/in-memory/InMemoryUserRepository');
 
-describe('ObtenerPerfilUseCase', () => {
+describe('CU-004 Visualizar perfil (ObtenerPerfilUseCase)', () => {
   let repositorio;
   let casoUso;
 

@@ -1,6 +1,6 @@
 const bcrypt = require('bcrypt');
-const LoginUseCase = require('../application/LoginUseCase');
-const InMemoryUserRepository = require('../infraestructure/repositories/in-memory/InMemoryUserRepository');
+const LoginUseCase = require('../../application/LoginUseCase');
+const InMemoryUserRepository = require('../../infraestructure/repositories/in-memory/InMemoryUserRepository');
 
 const JWT_SECRET_PRUEBA = 'secreto-de-prueba';
 
@@ -20,7 +20,7 @@ async function crearUsuario(repositorio, { email, password, activo = 1, id_rol =
   return repositorio.save(usuario);
 }
 
-describe('LoginUseCase', () => {
+describe('CU-003 Iniciar sesión (LoginUseCase)', () => {
   let repositorio;
   let casoUso;
 

@@ -1,8 +1,8 @@
-const ListarProductosPublicosUseCase = require('../application/ListarProductosPublicosUseCase');
-const ObtenerProductoPublicoUseCase = require('../application/ObtenerProductoPublicoUseCase');
-const ListarCategoriasUseCase = require('../application/ListarCategoriasUseCase');
-const InMemoryProductoRepository = require('../infraestructure/repositories/in-memory/InMemoryProductoRepository');
-const InMemoryCategoriaRepository = require('../infraestructure/repositories/in-memory/InMemoryCategoriaRepository');
+const ListarProductosPublicosUseCase = require('../../application/ListarProductosPublicosUseCase');
+const ObtenerProductoPublicoUseCase = require('../../application/ObtenerProductoPublicoUseCase');
+const ListarCategoriasUseCase = require('../../application/ListarCategoriasUseCase');
+const InMemoryProductoRepository = require('../../infraestructure/repositories/in-memory/InMemoryProductoRepository');
+const InMemoryCategoriaRepository = require('../../infraestructure/repositories/in-memory/InMemoryCategoriaRepository');
 
 const PRODUCTO_ACTIVO = {
   id_producto: 1,
@@ -24,7 +24,7 @@ function crearRepositorioConProductos(productos) {
   return repositorio;
 }
 
-describe('ListarProductosPublicosUseCase', () => {
+describe('CU-001 Visualizar catálogo (ListarProductosPublicosUseCase)', () => {
   it('devuelve solo los productos activos (RN-001) en orden de registro', async () => {
     const repositorio = crearRepositorioConProductos([
       PRODUCTO_ACTIVO,
@@ -53,7 +53,7 @@ describe('ListarProductosPublicosUseCase', () => {
   });
 });
 
-describe('ObtenerProductoPublicoUseCase', () => {
+describe('CU-001 Visualizar catálogo (ObtenerProductoPublicoUseCase)', () => {
   it('devuelve el producto activo con su ficha técnica', async () => {
     const repositorio = crearRepositorioConProductos([PRODUCTO_ACTIVO]);
     const casoUso = new ObtenerProductoPublicoUseCase(repositorio);
@@ -85,7 +85,7 @@ describe('ObtenerProductoPublicoUseCase', () => {
   });
 });
 
-describe('ListarCategoriasUseCase', () => {
+describe('CU-001 Visualizar catálogo (ListarCategoriasUseCase)', () => {
   it('devuelve solo las categorías activas', async () => {
     const repositorio = new InMemoryCategoriaRepository();
     repositorio.categorias.push(
