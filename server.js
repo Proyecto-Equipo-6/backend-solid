@@ -174,6 +174,9 @@ const categoriaController = new CategoriaController({
   eliminarCategoriaUseCase,
 });
 
+// --- Inyección de Dependencias para Proveedores (CU-025, DIP) ---
+const proveedorRepository = new MySQLProveedorRepository();
+
 // --- Inyección de Dependencias para Productos (CU-023, DIP) ---
 const productoRepository = new MySQLProductoRepository();
 const listarProductosUseCase = new ListarProductosPublicosUseCase(productoRepository);
@@ -182,6 +185,7 @@ const crearProductoUseCase = new CrearProductoUseCase(productoRepository, catego
 const editarProductoUseCase = new EditarProductoUseCase(productoRepository, categoriaRepository, proveedorRepository);
 const eliminarProductoUseCase = new EliminarProductoUseCase(productoRepository);
 const buscarProductosUseCase = new BuscarProductosUseCase(productoRepository);
+const ajustarStockProductoUseCase = new AjustarStockProductoUseCase(productoRepository);
 const productoController = new ProductoController({
   listarProductosUseCase,
   obtenerProductoUseCase,
@@ -229,7 +233,6 @@ const requerirAdmin = crearRequerirAdmin(ROL_ADMIN);
 const pedidoRepartidorRepository = new MySQLPedidoRepartidorRepository();
 
 // --- Inyección de Dependencias para Proveedores (CU-025, DIP) ---
-const proveedorRepository = new MySQLProveedorRepository();
 const crearProveedorUseCase = new CrearProveedorUseCase(proveedorRepository);
 const editarProveedorUseCase = new EditarProveedorUseCase(proveedorRepository);
 const eliminarProveedorUseCase = new EliminarProveedorUseCase(proveedorRepository);
@@ -265,9 +268,6 @@ const pedidoAdminController = new PedidoAdminController({
   asignarRepartidorUseCase,
   generarTicketPedidoUseCase,
 });
-
-// --- Inyección de Dependencias para Stock Admin (CU-023, DIP) ---
-const ajustarStockProductoUseCase = new AjustarStockProductoUseCase(productoRepository);
 
 // --- Inyección de Dependencias para Usuarios Admin (CU-026, DIP) ---
 const listarUsuariosAdminUseCase = new ListarUsuariosAdminUseCase(userRepository);
