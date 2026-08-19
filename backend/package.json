@@ -8,7 +8,7 @@
     "dev": "nodemon server.js",
     "test": "jest --passWithNoTests",
     "test:jest": "jest --passWithNoTests",
-    "test:selenium": "node ../selenium/login.test.js && node ../selenium/registroFlujo.test.js && node ../selenium/flujoCompra.test.js && node ../selenium/test.test.js"
+    "test:selenium": "jest --config jest.selenium.config.js"
   },
   "jest": {
     "testPathIgnorePatterns": [

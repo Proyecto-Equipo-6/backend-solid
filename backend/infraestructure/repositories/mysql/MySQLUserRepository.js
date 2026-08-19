@@ -102,6 +102,38 @@ class MySQLUserRepository extends UserRepository {
     }
     return { id_usuario: id, activo: activo ? 1 : 0 };
   }
+
+  async actualizar(id, datos) {
+    const campos = [];
+    const valores = [];
+    const permitidos = ['id_rol', 'nombre_apellido', 'tipo_documento', 'numero_documento', 'email', 'telefono', 'direccion', 'activo'];
+
+    for (const campo of permitidos) {
+      if (datos[campo] !== undefined) {
+        campos.push(`${campo} = ?`);
+        valores.push(datos[campo]);
+      }
+    }
+
+    if (campos.length === 0) {
+      return this.findById(id);
+    }
+
+    valores.push(id);
+    const [result] = await pool.execute(
+      `UPDATE usuarios SET ${campos.join(', ')} WHERE id_usuario = ?`,
+      valores
+    );
+    if (result.affectedRows === 0) {
+      throw new Error('Usuario no encontrado');
+    }
+    return this.findById(id);
+  }
+
+  async contarPorRol(idRol) {
+    const [rows] = await pool.execute('SELECT COUNT(*) AS total FROM usuarios WHERE id_rol = ?', [idRol]);
+    return Number(rows[0]?.total) || 0;
+  }
 }
 
 module.exports = MySQLUserRepository;

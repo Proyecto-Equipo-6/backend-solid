@@ -4,6 +4,14 @@ class RolesRepository {
         throw new Error("Method not implemented");
     }
 
+    async crear(rol) {
+        throw new Error("Method not implemented");
+    }
+
+    async eliminar(id) {
+        throw new Error("Method not implemented");
+    }
+
     async findAll() {
         throw new Error("Method not implemented");
     }

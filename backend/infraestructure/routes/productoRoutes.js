@@ -11,6 +11,7 @@ function createProductoRouter(productoController, autenticar, requerirAdmin) {
   router.get('/publico', (req, res) => productoController.listarPublicos(req, res));
   router.get('/:id', (req, res) => productoController.obtenerPorId(req, res));
 
+  router.get('/', autenticar, requerirAdmin, (req, res) => productoController.listarTodos(req, res));
   router.post('/', autenticar, requerirAdmin, (req, res) => productoController.crear(req, res));
   router.put('/:id', autenticar, requerirAdmin, (req, res) => productoController.editar(req, res));
   router.delete('/:id', autenticar, requerirAdmin, (req, res) => productoController.eliminar(req, res));

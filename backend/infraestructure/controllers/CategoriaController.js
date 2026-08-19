@@ -6,11 +6,13 @@
 class CategoriaController {
   constructor({
     listarCategoriasUseCase,
+    listarTodasCategoriasUseCase,
     crearCategoriaUseCase,
     editarCategoriaUseCase,
     eliminarCategoriaUseCase,
   }) {
     this.listarCategoriasUseCase = listarCategoriasUseCase;
+    this.listarTodasCategoriasUseCase = listarTodasCategoriasUseCase;
     this.crearCategoriaUseCase = crearCategoriaUseCase;
     this.editarCategoriaUseCase = editarCategoriaUseCase;
     this.eliminarCategoriaUseCase = eliminarCategoriaUseCase;
@@ -23,6 +25,15 @@ class CategoriaController {
     } catch (error) {
       const status = error.status || 500;
       return res.status(status).json({ error: error.message });
+    }
+  }
+
+  async listarTodas(req, res) {
+    try {
+      const categorias = await this.listarTodasCategoriasUseCase.execute();
+      return res.status(200).json(categorias);
+    } catch (error) {
+      return res.status(500).json({ error: error.message });
     }
   }
 

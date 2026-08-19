@@ -26,6 +26,14 @@ class RepartidorRepository {
   async actualizar(idRepartidor, datos) {
     throw new Error('Método actualizar no implementado');
   }
+
+  async crear(datos) {
+    throw new Error('Método crear no implementado');
+  }
+
+  async eliminar(idRepartidor) {
+    throw new Error('Método eliminar no implementado');
+  }
 }
 
 module.exports = RepartidorRepository;
