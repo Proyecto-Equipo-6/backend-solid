@@ -134,9 +134,18 @@ const userController = new UserController(
 );
 
 // --- Inyección de Dependencias para Roles (DIP) ---
+const CrearRolUseCase = require('./backend/application/crearRolUseCase');
+const EliminarRolUseCase = require('./backend/application/eliminarRolUseCase');
 const rolesRepository = new MySQLRolesRepository();
 const updateRolUseCase = new UpdateRolUseCase(rolesRepository);
-const adminUpdateRolController = new AdminUpdateRolController(updateRolUseCase, rolesRepository);
+const crearRolUseCase = new CrearRolUseCase(rolesRepository);
+const eliminarRolUseCase = new EliminarRolUseCase(rolesRepository, userRepository);
+const adminUpdateRolController = new AdminUpdateRolController(
+  updateRolUseCase,
+  rolesRepository,
+  crearRolUseCase,
+  eliminarRolUseCase
+);
 
 // --- Inyección de Dependencias para Autenticación (DIP) ---
 const loginUseCase = new LoginUseCase(
@@ -252,12 +261,21 @@ const requerirAdmin = crearRequerirAdmin(ROL_ADMIN);
 const pedidoRepartidorRepository = new MySQLPedidoRepartidorRepository();
 
 // --- Inyección de Dependencias para Repartidores Admin (CU-021, DIP) ---
+const CrearRepartidorAdminUseCase = require('./backend/application/crearRepartidorAdminUseCase');
+const ActualizarRepartidorAdminUseCase = require('./backend/application/actualizarRepartidorAdminUseCase');
+const EliminarRepartidorAdminUseCase = require('./backend/application/eliminarRepartidorAdminUseCase');
 const repartidorRepository = new MySQLRepartidorRepository();
 const consultarRepartidoresUseCase = new ConsultarRepartidoresUseCase(repartidorRepository, pedidoRepartidorRepository);
 const cambiarEstadoOperativoRepartidorUseCase = new CambiarEstadoOperativoRepartidorUseCase(repartidorRepository, pedidoRepartidorRepository);
+const crearRepartidorAdminUseCase = new CrearRepartidorAdminUseCase(userRepository, repartidorRepository);
+const actualizarRepartidorAdminUseCase = new ActualizarRepartidorAdminUseCase(userRepository, repartidorRepository);
+const eliminarRepartidorAdminUseCase = new EliminarRepartidorAdminUseCase(userRepository, repartidorRepository);
 const repartidorAdminController = new RepartidorAdminController({
   consultarRepartidoresUseCase,
   cambiarEstadoOperativoRepartidorUseCase,
+  crearRepartidorAdminUseCase,
+  actualizarRepartidorAdminUseCase,
+  eliminarRepartidorAdminUseCase,
 });
 
 // --- Inyección de Dependencias para Pedidos Admin (CU-027, DIP) ---
@@ -277,11 +295,20 @@ const pedidoAdminController = new PedidoAdminController({
 });
 
 // --- Inyección de Dependencias para Usuarios Admin (CU-026, DIP) ---
+const CrearUsuarioAdminUseCase = require('./backend/application/crearUsuarioAdminUseCase');
+const ActualizarUsuarioAdminUseCase = require('./backend/application/actualizarUsuarioAdminUseCase');
+const EliminarUsuarioAdminUseCase = require('./backend/application/eliminarUsuarioAdminUseCase');
 const listarUsuariosAdminUseCase = new ListarUsuariosAdminUseCase(userRepository);
 const actualizarEstadoUsuarioUseCase = new ActualizarEstadoUsuarioUseCase(userRepository);
+const crearUsuarioAdminUseCase = new CrearUsuarioAdminUseCase(userRepository);
+const actualizarUsuarioAdminUseCase = new ActualizarUsuarioAdminUseCase(userRepository);
+const eliminarUsuarioAdminUseCase = new EliminarUsuarioAdminUseCase(userRepository);
 const adminUsuarioController = new AdminUsuarioController({
   listarUsuariosAdminUseCase,
   actualizarEstadoUsuarioUseCase,
+  crearUsuarioAdminUseCase,
+  actualizarUsuarioAdminUseCase,
+  eliminarUsuarioAdminUseCase,
 });
 
 // --- Rutas (Cargadas como Middleware) ---

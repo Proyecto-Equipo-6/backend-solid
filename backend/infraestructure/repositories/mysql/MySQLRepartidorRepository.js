@@ -9,9 +9,10 @@ const pool = require('../../database/db');
 class MySQLRepartidorRepository extends RepartidorRepository {
   async findAll() {
     const [filas] = await pool.execute(
-      `SELECT r.id_repartidor, r.id_usuario, r.activo,
+      `SELECT r.id_repartidor, r.id_usuario, r.activo, r.vehiculo, r.placa,
               u.nombre_apellido AS nombre, '' AS apellidos,
-              u.telefono, u.email,
+              u.nombre_apellido AS nombre_apellido,
+              u.telefono, u.email, u.direccion,
               CASE WHEN r.activo = 1 THEN 'DISPONIBLE' ELSE 'INACTIVO' END AS estado
        FROM repartidores r
        INNER JOIN usuarios u ON u.id_usuario = r.id_usuario
@@ -22,9 +23,10 @@ class MySQLRepartidorRepository extends RepartidorRepository {
 
   async buscarPorId(idRepartidor) {
     const [filas] = await pool.execute(
-      `SELECT r.id_repartidor, r.id_usuario, r.activo,
+      `SELECT r.id_repartidor, r.id_usuario, r.activo, r.vehiculo, r.placa,
               u.nombre_apellido AS nombre, '' AS apellidos,
-              u.telefono, u.email,
+              u.nombre_apellido AS nombre_apellido,
+              u.telefono, u.email, u.direccion,
               CASE WHEN r.activo = 1 THEN 'DISPONIBLE' ELSE 'INACTIVO' END AS estado
        FROM repartidores r
        INNER JOIN usuarios u ON u.id_usuario = r.id_usuario
