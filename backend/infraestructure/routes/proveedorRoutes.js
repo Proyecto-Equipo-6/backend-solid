@@ -26,6 +26,7 @@ function createProveedorRouter(proveedorController, autenticar, requerirAdmin) {
   router.use(requerirAdmin);
 
   router.get('/', (req, res) => proveedorController.listarActivos(req, res));
+  router.get('/todos', (req, res) => proveedorController.listarTodos(req, res));
   router.post('/', upload, (req, res) => proveedorController.crear(req, res));
   router.put('/:id', upload, (req, res) => proveedorController.editar(req, res));
   router.delete('/:id', (req, res) => proveedorController.eliminar(req, res));

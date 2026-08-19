@@ -8,6 +8,10 @@ class ProductoRepository {
     throw new Error("Método 'findActivos' no implementado");
   }
 
+  async findAll() {
+    throw new Error("Método 'findAll' no implementado");
+  }
+
   async findById(id) {
     throw new Error("Método 'findById' no implementado");
   }

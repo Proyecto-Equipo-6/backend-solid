@@ -8,6 +8,10 @@ class CategoriaRepository {
     throw new Error("Método 'findActivos' no implementado");
   }
 
+  async findAll() {
+    throw new Error("Método 'findAll' no implementado");
+  }
+
   async guardar(categoriaData) {
     throw new Error("Método 'guardar' no implementado");
   }

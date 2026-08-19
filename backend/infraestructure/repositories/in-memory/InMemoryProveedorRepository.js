@@ -62,6 +62,10 @@ class InMemoryProveedorRepository extends ProveedorRepository {
   async findActivos() {
     return this.proveedores.filter((p) => p.estado === 1);
   }
+
+  async findAll() {
+    return [...this.proveedores];
+  }
 }
 
 module.exports = InMemoryProveedorRepository;

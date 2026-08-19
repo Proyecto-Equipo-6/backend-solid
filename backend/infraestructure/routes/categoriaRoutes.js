@@ -9,6 +9,7 @@ function createCategoriaRouter(categoriaController, autenticar, requerirAdmin) {
   const router = express.Router();
 
   router.get('/', (req, res) => categoriaController.listarPublicas(req, res));
+  router.get('/todas', autenticar, requerirAdmin, (req, res) => categoriaController.listarTodas(req, res));
 
   router.post('/', autenticar, requerirAdmin, (req, res) => categoriaController.crear(req, res));
   router.put('/:id', autenticar, requerirAdmin, (req, res) => categoriaController.editar(req, res));

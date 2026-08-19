@@ -1,4 +1,4 @@
-const { esNoEncontrado } = require('../helpers/responseHelpers');
+const { esNoEncontrado, esConflicto } = require('../helpers/responseHelpers');
 
 /**
  * Adaptador de Infraestructura: RepartidorAdminController
@@ -8,9 +8,15 @@ class RepartidorAdminController {
   constructor({
     consultarRepartidoresUseCase,
     cambiarEstadoOperativoRepartidorUseCase,
+    crearRepartidorAdminUseCase,
+    actualizarRepartidorAdminUseCase,
+    eliminarRepartidorAdminUseCase,
   }) {
     this.consultarRepartidoresUseCase = consultarRepartidoresUseCase;
     this.cambiarEstadoOperativoRepartidorUseCase = cambiarEstadoOperativoRepartidorUseCase;
+    this.crearRepartidorAdminUseCase = crearRepartidorAdminUseCase;
+    this.actualizarRepartidorAdminUseCase = actualizarRepartidorAdminUseCase;
+    this.eliminarRepartidorAdminUseCase = eliminarRepartidorAdminUseCase;
   }
 
   async listar(req, res) {
@@ -20,6 +26,39 @@ class RepartidorAdminController {
       return res.status(200).json(repartidores);
     } catch (error) {
       return res.status(500).json({ error: error.message });
+    }
+  }
+
+  async crear(req, res) {
+    try {
+      const resultado = await this.crearRepartidorAdminUseCase.execute(req.body);
+      return res.status(201).json(resultado);
+    } catch (error) {
+      const status = esConflicto(error.message) ? 409 : 400;
+      return res.status(status).json({ error: error.message });
+    }
+  }
+
+  async actualizar(req, res) {
+    try {
+      const resultado = await this.actualizarRepartidorAdminUseCase.execute({
+        id: req.params.id,
+        ...req.body,
+      });
+      return res.status(200).json(resultado);
+    } catch (error) {
+      const status = esNoEncontrado(error.message) ? 404 : 400;
+      return res.status(status).json({ error: error.message });
+    }
+  }
+
+  async eliminar(req, res) {
+    try {
+      const resultado = await this.eliminarRepartidorAdminUseCase.execute({ id: req.params.id });
+      return res.status(200).json(resultado);
+    } catch (error) {
+      const status = esNoEncontrado(error.message) ? 404 : 400;
+      return res.status(status).json({ error: error.message });
     }
   }
 

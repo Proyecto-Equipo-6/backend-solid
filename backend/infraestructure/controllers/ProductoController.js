@@ -8,6 +8,7 @@ const { esNoEncontrado } = require('../helpers/responseHelpers');
 class ProductoController {
   constructor({
     listarProductosUseCase,
+    listarTodosProductosUseCase,
     obtenerProductoUseCase,
     crearProductoUseCase,
     editarProductoUseCase,
@@ -16,6 +17,7 @@ class ProductoController {
     buscarProductosUseCase,
   }) {
     this.listarProductosUseCase = listarProductosUseCase;
+    this.listarTodosProductosUseCase = listarTodosProductosUseCase;
     this.obtenerProductoUseCase = obtenerProductoUseCase;
     this.crearProductoUseCase = crearProductoUseCase;
     this.editarProductoUseCase = editarProductoUseCase;
@@ -31,6 +33,15 @@ class ProductoController {
     } catch (error) {
       const status = error.status || 500;
       return res.status(status).json({ error: error.message });
+    }
+  }
+
+  async listarTodos(req, res) {
+    try {
+      const productos = await this.listarTodosProductosUseCase.execute();
+      return res.status(200).json(productos);
+    } catch (error) {
+      return res.status(500).json({ error: error.message });
     }
   }
 

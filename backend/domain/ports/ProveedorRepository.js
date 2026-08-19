@@ -30,6 +30,14 @@ class ProveedorRepository {
   async findActivos() {
     throw new Error("Método 'findActivos' no implementado");
   }
+
+  /**
+   * CU-025 admin: lista todos los proveedores (activos e inactivos).
+   * @returns {Promise<Array>}
+   */
+  async findAll() {
+    throw new Error("Método 'findAll' no implementado");
+  }
 }
 
 module.exports = ProveedorRepository;
