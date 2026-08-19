@@ -17,6 +17,15 @@ class ActualizarUsuarioAdminUseCase {
       throw new ErrorNoEncontrado('Usuario no encontrado');
     }
 
+    await this.validarDatos(datos, idUsuario);
+
+    const campos = this.construirCamposUsuario(datos);
+    const actualizado = await this.userRepository.actualizar(idUsuario, campos);
+    const { password: _omitida, ...datosPublicos } = actualizado;
+    return { usuario: datosPublicos, mensaje: 'Usuario actualizado correctamente.' };
+  }
+
+  async validarDatos(datos, idUsuario) {
     if (datos.nombre_apellido !== undefined && !String(datos.nombre_apellido).trim()) {
       throw new ErrorValidacion('El nombre es obligatorio');
     }
@@ -32,7 +41,9 @@ class ActualizarUsuarioAdminUseCase {
         throw new ErrorValidacion('El correo electrónico ya se encuentra registrado');
       }
     }
+  }
 
+  construirCamposUsuario(datos) {
     const campos = {};
     if (datos.nombre_apellido !== undefined) campos.nombre_apellido = String(datos.nombre_apellido).trim();
     if (datos.email !== undefined) campos.email = String(datos.email).trim();
@@ -42,10 +53,7 @@ class ActualizarUsuarioAdminUseCase {
     if (datos.numero_documento !== undefined) campos.numero_documento = datos.numero_documento || null;
     if (datos.id_rol !== undefined) campos.id_rol = Number(datos.id_rol);
     if (datos.activo !== undefined) campos.activo = datos.activo ? 1 : 0;
-
-    const actualizado = await this.userRepository.actualizar(idUsuario, campos);
-    const { password: _omitida, ...datosPublicos } = actualizado;
-    return { usuario: datosPublicos, mensaje: 'Usuario actualizado correctamente.' };
+    return campos;
   }
 }
 

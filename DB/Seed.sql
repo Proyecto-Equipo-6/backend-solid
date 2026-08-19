@@ -20,13 +20,13 @@ INSERT INTO roles (id_rol, nombre, descripcion) VALUES
 -- El hash bcrypt se genera una sola vez y se reutiliza para el seed.
 -- SonarQube S8215: hash es de prueba, no es un secreto real.
 -- =====================================================
--- NOSONAR
+SET @PASSWORD_SEED = '$2b$10$U7YUBuLdLuOd9BQxrziLwOLirD8zRE4eShDeW4BboMwtRSN2bRll.'; -- NOSONAR
 INSERT INTO usuarios (id_usuario, id_rol, nombre_apellido, tipo_documento, numero_documento, email, password, telefono, direccion) VALUES
-(1, 1, 'Sebastian Admin', 'CC', '1010', 'admin@remate.com', '$2b$10$U7YUBuLdLuOd9BQxrziLwOLirD8zRE4eShDeW4BboMwtRSN2bRll.', '3001000001', 'Calle 100 #15-20, Medellín'),
-(2, 2, 'Juan Cliente',    'CC', '2020', 'juan@email.com',   '$2b$10$U7YUBuLdLuOd9BQxrziLwOLirD8zRE4eShDeW4BboMwtRSN2bRll.', '3002000002', 'Carrera 7 # 45-10, Medellín'),
-(3, 2, 'Maria Compra',    'CC', '3030', 'maria@email.com',  '$2b$10$U7YUBuLdLuOd9BQxrziLwOLirD8zRE4eShDeW4BboMwtRSN2bRll.', '3003000003', 'Carrera 45 # 12-10, Medellín'),
-(4, 2, 'Carlos Venta',    'CC', '4040', 'carlos@email.com', '$2b$10$U7YUBuLdLuOd9BQxrziLwOLirD8zRE4eShDeW4BboMwtRSN2bRll.', '3004000004', 'Av. El Poblado # 3-15, Medellín'),
-(5, 3, 'Luis Repartidor', 'CC', '6060', 'luis@remate.com',  '$2b$10$U7YUBuLdLuOd9BQxrziLwOLirD8zRE4eShDeW4BboMwtRSN2bRll.', '3006000006', 'Transversal 39 # 77-50, Medellín');
+(1, 1, 'Sebastian Admin', 'CC', '1010', 'admin@remate.com', @PASSWORD_SEED, '3001000001', 'Calle 100 #15-20, Medellín'),
+(2, 2, 'Juan Cliente',    'CC', '2020', 'juan@email.com',   @PASSWORD_SEED, '3002000002', 'Carrera 7 # 45-10, Medellín'),
+(3, 2, 'Maria Compra',    'CC', '3030', 'maria@email.com',  @PASSWORD_SEED, '3003000003', 'Carrera 45 # 12-10, Medellín'),
+(4, 2, 'Carlos Venta',    'CC', '4040', 'carlos@email.com', @PASSWORD_SEED, '3004000004', 'Av. El Poblado # 3-15, Medellín'),
+(5, 3, 'Luis Repartidor', 'CC', '6060', 'luis@remate.com',  @PASSWORD_SEED, '3006000006', 'Transversal 39 # 77-50, Medellín');
 
 -- =====================================================
 -- 2.1. REPARTIDORES (vinculados a usuarios con rol 3)
@@ -100,11 +100,12 @@ INSERT INTO pedido_detalles (id_pedido, id_producto, cantidad, precio_unitario, 
 
 -- =====================================================
 -- 9. HISTORIAL_STOCK
--- NOTA: 'Carga de inventario inicial' se repite por cada producto
+-- NOTA: El motivo se centraliza en una variable de sesión
 -- =====================================================
+SET @MOTIVO_INVENTARIO_INICIAL = 'Carga de inventario inicial';
 INSERT INTO historial_stock (id_producto, id_admin, cantidad_anterior, cantidad_nueva, motivo) VALUES
-(1, 1, 0, 100, 'Carga de inventario inicial'),
-(2, 1, 0,  50, 'Carga de inventario inicial'),
-(3, 1, 0,  30, 'Carga de inventario inicial'),
-(4, 1, 0,  20, 'Carga de inventario inicial'),
-(5, 1, 0,  80, 'Carga de inventario inicial');
+(1, 1, 0, 100, @MOTIVO_INVENTARIO_INICIAL),
+(2, 1, 0,  50, @MOTIVO_INVENTARIO_INICIAL),
+(3, 1, 0,  30, @MOTIVO_INVENTARIO_INICIAL),
+(4, 1, 0,  20, @MOTIVO_INVENTARIO_INICIAL),
+(5, 1, 0,  80, @MOTIVO_INVENTARIO_INICIAL);
