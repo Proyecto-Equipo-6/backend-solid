@@ -82,4 +82,42 @@ describe('CrearPedidoUseCase', () => {
     expect(error.status).toBe(400);
     expect(error.message).toContain('iniciar sesión');
   });
+<<<<<<< Updated upstream
+=======
+
+  it('usa Efectivo / Contraentrega por defecto (id_metodo_pago = 1)', async () => {
+    const carritoRepository = crearCarritoConProducto(PRODUCTO, 1);
+    const pedidoRepository = new InMemoryPedidoRepository();
+    const casoUso = new CrearPedidoUseCase(carritoRepository, pedidoRepository);
+
+    await casoUso.execute(CLIENTE, { direccionEntrega: 'Calle 10' });
+
+    expect(pedidoRepository.pedidos[0].id_metodo_pago).toBe(1);
+  });
+
+  it('el pedido refleja exactamente los productos y cantidades del carrito (CP-CU-012-08)', async () => {
+  const carritoRepository = crearCarritoConProducto(PRODUCTO, 2); // 2 unidades
+  const pedidoRepository = new InMemoryPedidoRepository();
+  const casoUso = new CrearPedidoUseCase(carritoRepository, pedidoRepository);
+
+  await casoUso.execute(CLIENTE, { direccionEntrega: 'Calle 10' });
+
+  // El pedido se guardó en el repositorio con sus items
+  const pedidoGuardado = pedidoRepository.pedidos[0];
+
+  expect(pedidoGuardado).toMatchObject({
+    id_pedido: 1,
+    estado: 'PENDIENTE',
+    total: 500000, // 250000 * 2
+  });
+
+  expect(pedidoGuardado.items).toHaveLength(1);
+  expect(pedidoGuardado.items[0]).toMatchObject({
+    idProducto: 1,
+    cantidad: 2,
+    precio: 250000,
+    subtotal: 500000,
+  });
+  });
+>>>>>>> Stashed changes
 });

@@ -16,6 +16,12 @@ class InMemoryProductoRepository extends ProductoRepository {
     return this.productos.filter(p => p.estado === 1);
   }
 
+  async findActivosPorCategoria(id_categoria) {
+  return this.productos.filter(
+    p => p.estado === 1 && p.id_categoria === Number(id_categoria)
+  ).map(p => new Producto({ ...p }));
+  }
+
   async findById(id) {
     return this.productos.find(p => p.id_producto === id) || null;
   }

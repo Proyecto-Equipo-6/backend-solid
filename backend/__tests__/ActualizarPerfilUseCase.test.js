@@ -8,7 +8,7 @@ describe('ActualizarPerfilUseCase', () => {
 
   beforeEach(async () => {
     repositorio = new InMemoryUserRepository();
-    const password = await bcrypt.hash('abcd1234', 4);
+    const password = await bcrypt.hash('Abcd1234', 4);
     await repositorio.save({
       id: 1,
       id_rol: 2,
@@ -46,7 +46,7 @@ describe('ActualizarPerfilUseCase', () => {
   it('actualiza los datos editables y retorna el perfil sin la contraseña (CU-005, RN-015)', async () => {
     const resultado = await casoUso.execute({
       id_usuario: 1,
-      password: 'abcd1234',
+      password: 'Abcd1234',
       datos: datosValidos,
     });
 
@@ -69,7 +69,7 @@ describe('ActualizarPerfilUseCase', () => {
     const error = await casoUso
       .execute({
         id_usuario: 1,
-        password: 'abcd1234',
+        password: 'Abcd1234',
         datos: { ...datosValidos, email: 'luis@example.com' },
       })
       .catch((e) => e);
@@ -81,7 +81,7 @@ describe('ActualizarPerfilUseCase', () => {
   it('permite conservar el propio correo sin marcarlo como duplicado', async () => {
     const resultado = await casoUso.execute({
       id_usuario: 1,
-      password: 'abcd1234',
+      password: 'Abcd1234',
       datos: { ...datosValidos, email: 'ana@example.com' },
     });
 
@@ -92,7 +92,7 @@ describe('ActualizarPerfilUseCase', () => {
   it('notifica cuando no hay cambios que guardar (FA-003)', async () => {
     const resultado = await casoUso.execute({
       id_usuario: 1,
-      password: 'abcd1234',
+      password: 'Abcd1234',
       datos: {
         nombre_apellido: 'Ana Torres',
         email: 'ana@example.com',
@@ -108,7 +108,7 @@ describe('ActualizarPerfilUseCase', () => {
     const error = await casoUso
       .execute({
         id_usuario: 1,
-        password: 'abcd1234',
+        password: 'Abcd1234',
         datos: { ...datosValidos, direccion: '' },
       })
       .catch((e) => e);
@@ -129,7 +129,7 @@ describe('ActualizarPerfilUseCase', () => {
 
   it('lanza 401 si el usuario autenticado ya no existe', async () => {
     const error = await casoUso
-      .execute({ id_usuario: 999, password: 'abcd1234', datos: datosValidos })
+      .execute({ id_usuario: 999, password: 'Abcd1234', datos: datosValidos })
       .catch((e) => e);
 
     expect(error.status).toBe(401);

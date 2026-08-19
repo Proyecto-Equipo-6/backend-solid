@@ -8,6 +8,10 @@ class ProductoRepository {
     throw new Error("Método 'findActivos' no implementado");
   }
 
+  async findActivosPorCategoria(id_categoria) {
+  throw new Error("Método 'findActivosPorCategoria' no implementado");
+  }
+  
   async findById(id) {
     throw new Error("Método 'findById' no implementado");
   }
@@ -27,6 +31,26 @@ class ProductoRepository {
   async eliminar(id_producto) {
     throw new Error("Método 'eliminar' no implementado");
   }
+<<<<<<< Updated upstream
+=======
+
+  async reintegrarInventario(id_producto, cantidad) {
+    throw new Error("Método 'reintegrarInventario' no implementado");
+  }
+
+  async registrarAjusteStock(id_producto, cantidad_nueva, motivo) {
+    throw new Error("Método 'registrarAjusteStock' no implementado");
+  }
+
+  async sugerencias(termino, limite = 5) {
+    throw new Error("Método 'sugerencias' no implementado");
+  }
+
+  async buscar(termino, filtros = {}) {
+    throw new Error("Método 'buscar' no implementado");
+  }
+  
+>>>>>>> Stashed changes
 }
 
 module.exports = ProductoRepository;
