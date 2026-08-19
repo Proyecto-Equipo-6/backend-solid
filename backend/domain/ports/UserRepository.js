@@ -27,6 +27,14 @@ class UserRepository {
   async updatePerfil(id, datos) {
     throw new Error("Método 'updatePerfil' no implementado");
   }
+
+  async findAll(filtros = {}) {
+    throw new Error("Método 'findAll' no implementado");
+  }
+
+  async updateEstado(id, activo) {
+    throw new Error("Método 'updateEstado' no implementado");
+  }
 }
 
 module.exports = UserRepository;

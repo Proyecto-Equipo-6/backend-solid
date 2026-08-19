@@ -1,6 +1,7 @@
 class AdminUpdateRolController {
-    constructor(updateAdminRoleUseCase) {
+    constructor(updateAdminRoleUseCase, rolesRepository) {
         this.updateAdminRoleUseCase = updateAdminRoleUseCase;
+        this.rolesRepository = rolesRepository;
     }
 
     async update(req, res) {
@@ -10,6 +11,15 @@ class AdminUpdateRolController {
             return res.status(200).json(adminRole);
         } catch (error) {
             return res.status(400).json({ error: error.message });
+        }
+    }
+
+    async listar(req, res) {
+        try {
+            const roles = await this.rolesRepository.findAll();
+            return res.status(200).json(roles);
+        } catch (error) {
+            return res.status(500).json({ error: error.message });
         }
     }
 }

@@ -87,11 +87,18 @@ const ObtenerDetallePedidoAdminUseCase = require('./backend/application/obtenerD
 const ActualizarEstadoPedidoAdminUseCase = require('./backend/application/actualizarEstadoPedidoAdminUseCase');
 const CancelarPedidoAdminUseCase = require('./backend/application/cancelarPedidoAdminUseCase');
 const AsignarRepartidorUseCase = require('./backend/application/asignarRepartidorUseCase');
+const GenerarTicketPedidoUseCase = require('./backend/application/GenerarTicketPedidoUseCase');
 const PedidoAdminController = require('./backend/infraestructure/controllers/PedidoAdminController');
 const createPedidoAdminRouter = require('./backend/infraestructure/routes/pedidoAdminRoutes');
 
 // --- Módulos de Stock Admin (CU-023) ---
 const AjustarStockProductoUseCase = require('./backend/application/ajustarStockProductoUseCase');
+
+// --- Módulos de Usuarios Admin (CU-026) ---
+const ListarUsuariosAdminUseCase = require('./backend/application/ListarUsuariosAdminUseCase');
+const ActualizarEstadoUsuarioUseCase = require('./backend/application/ActualizarEstadoUsuarioUseCase');
+const AdminUsuarioController = require('./backend/infraestructure/controllers/AdminUsuarioController');
+const createUsuarioAdminRouter = require('./backend/infraestructure/routes/usuarioAdminRoutes');
 
 const app = express();
 app.disable('x-powered-by');
@@ -126,7 +133,7 @@ const userController = new UserController(
 // --- Inyección de Dependencias para Roles (DIP) ---
 const rolesRepository = new MySQLRolesRepository();
 const updateRolUseCase = new UpdateRolUseCase(rolesRepository);
-const adminUpdateRolController = new AdminUpdateRolController(updateRolUseCase);
+const adminUpdateRolController = new AdminUpdateRolController(updateRolUseCase, rolesRepository);
 
 // --- Inyección de Dependencias para Autenticación (DIP) ---
 const loginUseCase = new LoginUseCase(
@@ -249,16 +256,26 @@ const obtenerDetallePedidoAdminUseCase = new ObtenerDetallePedidoAdminUseCase(pe
 const actualizarEstadoPedidoAdminUseCase = new ActualizarEstadoPedidoAdminUseCase(pedidoRepartidorRepository);
 const cancelarPedidoAdminUseCase = new CancelarPedidoAdminUseCase(pedidoRepartidorRepository, productoRepository, repartidorRepository);
 const asignarRepartidorUseCase = new AsignarRepartidorUseCase(pedidoRepartidorRepository, repartidorRepository);
+const generarTicketPedidoUseCase = new GenerarTicketPedidoUseCase(pedidoRepartidorRepository);
 const pedidoAdminController = new PedidoAdminController({
   obtenerTodosPedidosUseCase,
   obtenerDetallePedidoAdminUseCase,
   actualizarEstadoPedidoAdminUseCase,
   cancelarPedidoAdminUseCase,
   asignarRepartidorUseCase,
+  generarTicketPedidoUseCase,
 });
 
 // --- Inyección de Dependencias para Stock Admin (CU-023, DIP) ---
 const ajustarStockProductoUseCase = new AjustarStockProductoUseCase(productoRepository);
+
+// --- Inyección de Dependencias para Usuarios Admin (CU-026, DIP) ---
+const listarUsuariosAdminUseCase = new ListarUsuariosAdminUseCase(userRepository);
+const actualizarEstadoUsuarioUseCase = new ActualizarEstadoUsuarioUseCase(userRepository);
+const adminUsuarioController = new AdminUsuarioController({
+  listarUsuariosAdminUseCase,
+  actualizarEstadoUsuarioUseCase,
+});
 
 // --- Rutas (Cargadas como Middleware) ---
 app.use('/api/v1/users', createUserRouter(userController, autenticar));
@@ -273,6 +290,7 @@ app.use('/api/v1/repartidor', createPedidosRepartidorRouter(pedidoRepartidorRepo
 app.use('/api/v1/proveedores', createProveedorRouter(proveedorController, autenticar, requerirAdmin));
 app.use('/api/v1/admin/repartidores', createRepartidorAdminRouter(repartidorAdminController, autenticar, requerirAdmin));
 app.use('/api/v1/admin/pedidos', createPedidoAdminRouter(pedidoAdminController, autenticar, requerirAdmin));
+app.use('/api/v1/admin/usuarios', createUsuarioAdminRouter(adminUsuarioController, autenticar, requerirAdmin));
 
 // --- 404 ---
 app.use((req, res) => {
