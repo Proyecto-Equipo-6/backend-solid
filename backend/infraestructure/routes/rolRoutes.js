@@ -6,6 +6,7 @@ function createRolRouter(adminUpdateRolController, autenticar, requerirAdmin) {
   router.use(autenticar);
   router.use(requerirAdmin);
 
+  router.get('/', (req, res) => adminUpdateRolController.listar(req, res));
   router.put('/', (req, res) => adminUpdateRolController.update(req, res));
 
   return router;

@@ -10,6 +10,11 @@ class MySQLRolesRepository extends RolesRepository {
     }
     return { id: rol.id, name: rol.name, description: rol.description };
   }
+
+  async findAll() {
+    const [rows] = await pool.execute('SELECT id_rol AS id, nombre AS name, descripcion AS description FROM roles ORDER BY id_rol ASC');
+    return rows;
+  }
 }
 
 module.exports = MySQLRolesRepository;

@@ -6,13 +6,9 @@
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
-<<<<<<< HEAD:package.json
-    "test": "jest"
-=======
     "test": "jest --passWithNoTests",
     "test:jest": "jest --passWithNoTests",
     "test:selenium": "node ../selenium/login.test.js && node ../selenium/registroFlujo.test.js && node ../selenium/flujoCompra.test.js && node ../selenium/test.test.js"
->>>>>>> 864c4ba3d06d27326b692cc7d5dd3355db202c50:backend/package.json
   },
   "jest": {
     "testPathIgnorePatterns": [

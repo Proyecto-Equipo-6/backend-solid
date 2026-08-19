@@ -11,12 +11,14 @@ class PedidoAdminController {
     actualizarEstadoPedidoAdminUseCase,
     cancelarPedidoAdminUseCase,
     asignarRepartidorUseCase,
+    generarTicketPedidoUseCase,
   }) {
     this.obtenerTodosPedidosUseCase = obtenerTodosPedidosUseCase;
     this.obtenerDetallePedidoAdminUseCase = obtenerDetallePedidoAdminUseCase;
     this.actualizarEstadoPedidoAdminUseCase = actualizarEstadoPedidoAdminUseCase;
     this.cancelarPedidoAdminUseCase = cancelarPedidoAdminUseCase;
     this.asignarRepartidorUseCase = asignarRepartidorUseCase;
+    this.generarTicketPedidoUseCase = generarTicketPedidoUseCase;
   }
 
   async listar(req, res) {
@@ -94,6 +96,17 @@ class PedidoAdminController {
 
       const pedido = await this.asignarRepartidorUseCase.ejecutar(id_pedido, Number(id_repartidor));
       return res.status(200).json(pedido);
+    } catch (error) {
+      const status = esNoEncontrado(error.message) ? 404 : 400;
+      return res.status(status).json({ error: error.message });
+    }
+  }
+
+  async ticket(req, res) {
+    try {
+      const id_pedido = Number(req.params.id);
+      const ticket = await this.generarTicketPedidoUseCase.execute(id_pedido);
+      return res.status(200).json(ticket);
     } catch (error) {
       const status = esNoEncontrado(error.message) ? 404 : 400;
       return res.status(status).json({ error: error.message });
