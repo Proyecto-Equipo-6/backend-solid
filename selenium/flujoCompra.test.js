@@ -1,4 +1,5 @@
 const { Builder, By, until } = require('selenium-webdriver');
+const { describe, test, expect, afterEach } = require('@jest/globals');
 
 const BASE_URL = 'http://localhost:5173';
 
