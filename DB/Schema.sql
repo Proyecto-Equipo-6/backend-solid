@@ -80,8 +80,6 @@ CREATE TABLE proveedores (
 CREATE TABLE repartidores (
     id_repartidor INT AUTO_INCREMENT PRIMARY KEY,
     id_usuario INT NOT NULL UNIQUE,
-    vehiculo VARCHAR(50) NULL,
-    placa VARCHAR(20) NULL,
     activo TINYINT(1) NOT NULL DEFAULT 1,
     fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_repartidores_usuarios FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario) ON DELETE RESTRICT
