@@ -1,5 +1,3 @@
-const PedidoRepartidorRepository = require('../domain/ports/PedidoRepartidorRepository');
-
 class VerDashboardPedidosUseCase {
   constructor(pedidoRepo) {
     this.pedidoRepo = pedidoRepo;

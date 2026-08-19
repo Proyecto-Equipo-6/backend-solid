@@ -97,6 +97,17 @@ class MySQLPedidoRepartidorRepository extends PedidoRepartidorRepository {
       params.push(filtros.repartidor);
     }
 
+    let sqlCount = 'SELECT COUNT(*) AS total FROM pedidos p WHERE 1=1';
+    const paramsCount = [];
+    if (filtros.estado) {
+      sqlCount += ' AND p.estado = ?';
+      paramsCount.push(filtros.estado);
+    }
+    if (filtros.repartidor) {
+      sqlCount += ' AND p.id_repartidor = ?';
+      paramsCount.push(filtros.repartidor);
+    }
+
     sql += ' ORDER BY p.fecha_pedido DESC';
 
     const page = Number(filtros.page) || 1;
@@ -106,9 +117,12 @@ class MySQLPedidoRepartidorRepository extends PedidoRepartidorRepository {
     params.push(limit, offset);
 
     const [filas] = await pool.execute(sql, params);
+    const [countRows] = await pool.execute(sqlCount, paramsCount);
+    const total = Number(countRows[0]?.total) || 0;
+
     return {
       data: filas.map((fila) => this._mapearFila(fila)),
-      total: filas.length,
+      total,
       page,
       limit,
     };

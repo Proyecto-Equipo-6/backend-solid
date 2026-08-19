@@ -90,7 +90,7 @@ class ProductoController {
         return res.status(400).json({ error: 'El campo motivo es obligatorio' });
       }
 
-      const resultado = await this.ajustarStockProductoUseCase.ejecutar(id_producto, Number(cantidad_nueva), motivo);
+      const resultado = await this.ajustarStockProductoUseCase.ejecutar(id_producto, Number(cantidad_nueva), motivo, req.usuario?.id_usuario);
       return res.status(200).json(resultado);
     } catch (error) {
       const status = esNoEncontrado(error.message) ? 404 : 400;

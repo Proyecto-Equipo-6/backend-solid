@@ -163,12 +163,14 @@ CREATE TABLE pedidos (
     total DECIMAL(10, 2) NOT NULL,
     estado ENUM(
         'PENDIENTE',
+        'CONFIRMADO',
         'ASIGNADO',
         'EN_CAMINO',
         'ENTREGADO',
         'NO_ENTREGADO',
         'CANCELADO'
     ) NOT NULL DEFAULT 'PENDIENTE',
+    id_repartidor INT NULL,
     comprobante_url VARCHAR(255) NULL,
     observaciones TEXT NULL,
     motivo_cancelacion VARCHAR(255) NULL,
@@ -176,6 +178,7 @@ CREATE TABLE pedidos (
     fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     CONSTRAINT fk_pedidos_usuario FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario) ON DELETE RESTRICT,
     CONSTRAINT fk_pedidos_metodo_pago FOREIGN KEY (id_metodo_pago) REFERENCES metodos_pago(id_metodo_pago) ON DELETE RESTRICT,
+    CONSTRAINT fk_pedidos_repartidor FOREIGN KEY (id_repartidor) REFERENCES usuarios(id_usuario) ON DELETE SET NULL,
     CONSTRAINT chk_pedido_monto_minimo CHECK (total >= 200000.00)
 ) ENGINE=InnoDB;
 
