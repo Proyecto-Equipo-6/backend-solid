@@ -38,6 +38,27 @@ class Producto {
     this.fecha_actualizacion = fecha_actualizacion;
   }
 
+
+  toDTO() {
+    return{
+  
+    id_producto: this.id_producto,
+    sku: this.sku,
+    id_categoria: this.id_categoria,
+    id_proveedor: this.id_proveedor,
+    nombre: this.nombre,
+    descripcion: this.descripcion,
+    precio: this.precio,
+    stock: this.stock,
+    garantia: this.garantia,
+    imagen_url: this.imagen_url,
+    estado: this.estado,
+    categoria: this.categoria,
+    proveedor: this.proveedor,
+    fecha_creacion: this.fecha_creacion,
+    fecha_actualizacion: this.fecha_actualizacion
+  };
+}
   esVisiblePublicamente() {
     return this.estado === 1;
   }
