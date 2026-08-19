@@ -139,18 +139,18 @@ describe('CU-006 Recuperar contraseña (RestablecerContrasenaUseCase)', () => {
     expect(error.message).toBe('El token de recuperación ha expirado. Solicitelo nuevamente');
   });
 
-  it('rechaza una contraseña fuera del rango de 4 a 8 caracteres', async () => {
+  it('rechaza una contraseña fuera del rango de 8 a 20 caracteres', async () => {
     await guardarToken();
 
     const corta = await casoUso
       .execute({ token: 'token-valido-123', nueva_password: '123' })
       .catch((e) => e);
     const larga = await casoUso
-      .execute({ token: 'token-valido-123', nueva_password: '123456789' })
+      .execute({ token: 'token-valido-123', nueva_password: '123456789012345678901' })
       .catch((e) => e);
 
-    expect(corta.message).toBe('La contraseña debe tener entre 4 y 8 caracteres.');
-    expect(larga.message).toBe('La contraseña debe tener entre 4 y 8 caracteres.');
+    expect(corta.message).toBe('La contraseña debe tener entre 8 y 20 caracteres.');
+    expect(larga.message).toBe('La contraseña debe tener entre 8 y 20 caracteres.');
     expect(repositorio.users[0].password).toBe(usuario.password);
   });
 });
