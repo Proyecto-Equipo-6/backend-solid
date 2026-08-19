@@ -286,7 +286,7 @@ describe('Módulo CRUD productos - Aseo (CU-023)', () => {
 
     const useCase = new AjustarStockProductoUseCase(repoProductos);
 
-    const resultado = await useCase.ejecutar(1, 80, 'Ingreso de mercancía');
+    const resultado = await useCase.ejecutar(1, 80, 'Ingreso de mercancía', 1);
 
     expect(resultado.cantidad_anterior).toBe(50);
     expect(resultado.cantidad_nueva).toBe(80);

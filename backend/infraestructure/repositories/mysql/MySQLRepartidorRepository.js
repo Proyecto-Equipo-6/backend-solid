@@ -28,7 +28,7 @@ class MySQLRepartidorRepository extends RepartidorRepository {
               CASE WHEN r.activo = 1 THEN 'DISPONIBLE' ELSE 'INACTIVO' END AS estado
        FROM repartidores r
        INNER JOIN usuarios u ON u.id_usuario = r.id_usuario
-       WHERE r.id_repartidor = ?
+       WHERE r.id_usuario = ?
        LIMIT 1`,
       [idRepartidor]
     );
@@ -42,14 +42,14 @@ class MySQLRepartidorRepository extends RepartidorRepository {
 
   async marcarOcupado(idRepartidor) {
     await pool.execute(
-      'UPDATE repartidores SET activo = 0 WHERE id_repartidor = ?',
+      'UPDATE repartidores SET activo = 0 WHERE id_usuario = ?',
       [idRepartidor]
     );
   }
 
   async marcarDisponible(idRepartidor) {
     await pool.execute(
-      'UPDATE repartidores SET activo = 1 WHERE id_repartidor = ?',
+      'UPDATE repartidores SET activo = 1 WHERE id_usuario = ?',
       [idRepartidor]
     );
   }
@@ -57,12 +57,12 @@ class MySQLRepartidorRepository extends RepartidorRepository {
   async actualizar(idRepartidor, datos) {
     if (datos.estado === 'INACTIVO') {
       await pool.execute(
-        'UPDATE repartidores SET activo = 0 WHERE id_repartidor = ?',
+        'UPDATE repartidores SET activo = 0 WHERE id_usuario = ?',
         [idRepartidor]
       );
     } else if (datos.estado === 'DISPONIBLE') {
       await pool.execute(
-        'UPDATE repartidores SET activo = 1 WHERE id_repartidor = ?',
+        'UPDATE repartidores SET activo = 1 WHERE id_usuario = ?',
         [idRepartidor]
       );
     }

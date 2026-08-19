@@ -163,12 +163,14 @@ CREATE TABLE pedidos (
     total DECIMAL(10, 2) NOT NULL,
     estado ENUM(
         'PENDIENTE',
+        'CONFIRMADO',
         'ASIGNADO',
         'EN_CAMINO',
         'ENTREGADO',
         'NO_ENTREGADO',
         'CANCELADO'
     ) NOT NULL DEFAULT 'PENDIENTE',
+    id_repartidor INT NULL,
     comprobante_url VARCHAR(255) NULL,
     observaciones TEXT NULL,
     motivo_cancelacion VARCHAR(255) NULL,
@@ -176,6 +178,7 @@ CREATE TABLE pedidos (
     fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     CONSTRAINT fk_pedidos_usuario FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario) ON DELETE RESTRICT,
     CONSTRAINT fk_pedidos_metodo_pago FOREIGN KEY (id_metodo_pago) REFERENCES metodos_pago(id_metodo_pago) ON DELETE RESTRICT,
+    CONSTRAINT fk_pedidos_repartidor FOREIGN KEY (id_repartidor) REFERENCES usuarios(id_usuario) ON DELETE SET NULL,
     CONSTRAINT chk_pedido_monto_minimo CHECK (total >= 200000.00)
 ) ENGINE=InnoDB;
 
@@ -292,11 +295,11 @@ INSERT INTO roles (id_rol, nombre, descripcion) VALUES
 
 -- USUARIOS
 INSERT INTO usuarios (id_usuario, id_rol, nombre_apellido, tipo_documento, numero_documento, email, password, telefono, direccion) VALUES
-(1, 1, 'Sebastian Admin', 'CC', '1010', 'admin@remate.com', '$2b$10$FmvdWkpOie1MECB/paY9a.D1XyitCgIDj1g4XIZGqXvgIR4sVNGh6', '3001000001', 'Calle 100 #15-20, Medellín'),
-(2, 2, 'Juan Cliente',    'CC', '2020', 'juan@email.com',   '$2b$10$FmvdWkpOie1MECB/paY9a.D1XyitCgIDj1g4XIZGqXvgIR4sVNGh6', '3002000002', 'Calle 10 # 5-20, Medellín'),
-(3, 2, 'Maria Compra',    'CC', '3030', 'maria@email.com',  '$2b$10$FmvdWkpOie1MECB/paY9a.D1XyitCgIDj1g4XIZGqXvgIR4sVNGh6', '3003000003', 'Carrera 45 # 12-10, Medellín'),
-(4, 2, 'Carlos Venta',    'CC', '4040', 'carlos@email.com', '$2b$10$FmvdWkpOie1MECB/paY9a.D1XyitCgIDj1g4XIZGqXvgIR4sVNGh6', '3004000004', 'Av. El Poblado # 3-15, Medellín'),
-(5, 3, 'Luis Repartidor', 'CC', '6060', 'luis@remate.com',  '$2b$10$FmvdWkpOie1MECB/paY9a.D1XyitCgIDj1g4XIZGqXvgIR4sVNGh6', '3006000006', 'Transversal 39 # 77-50, Medellín');
+(1, 1, 'Sebastian Admin', 'CC', '1010', 'admin@remate.com', '$2b$10$U7YUBuLdLuOd9BQxrziLwOLirD8zRE4eShDeW4BboMwtRSN2bRll.', '3001000001', 'Calle 100 #15-20, Medellín'),
+(2, 2, 'Juan Cliente',    'CC', '2020', 'juan@email.com',   '$2b$10$U7YUBuLdLuOd9BQxrziLwOLirD8zRE4eShDeW4BboMwtRSN2bRll.', '3002000002', 'Calle 10 # 5-20, Medellín'),
+(3, 2, 'Maria Compra',    'CC', '3030', 'maria@email.com',  '$2b$10$U7YUBuLdLuOd9BQxrziLwOLirD8zRE4eShDeW4BboMwtRSN2bRll.', '3003000003', 'Carrera 45 # 12-10, Medellín'),
+(4, 2, 'Carlos Venta',    'CC', '4040', 'carlos@email.com', '$2b$10$U7YUBuLdLuOd9BQxrziLwOLirD8zRE4eShDeW4BboMwtRSN2bRll.', '3004000004', 'Av. El Poblado # 3-15, Medellín'),
+(5, 3, 'Luis Repartidor', 'CC', '6060', 'luis@remate.com',  '$2b$10$U7YUBuLdLuOd9BQxrziLwOLirD8zRE4eShDeW4BboMwtRSN2bRll.', '3006000006', 'Transversal 39 # 77-50, Medellín');
 
 -- REPARTIDORES (vinculados a usuarios con rol 3)
 INSERT INTO repartidores (id_repartidor, id_usuario, vehiculo, placa, activo) VALUES
@@ -339,12 +342,12 @@ INSERT INTO carrito_detalles (id_carrito, id_producto, cantidad) VALUES
 (3, 3, 1);
 
 -- PEDIDOS (todos con id_metodo_pago = 1: Efectivo / Contraentrega)
-INSERT INTO pedidos (id_pedido, id_usuario, id_metodo_pago, direccion_entrega, total, estado, observaciones) VALUES
-(1, 2, 1, 'Calle 10 # 5-20, Medellín',        250000.00, 'ENTREGADO',              'Entregado en portería'),
-(2, 3, 1, 'Carrera 45 # 12-10, Medellín',     350000.00, 'ASIGNADO',               'Pedido asignado a repartidor'),
-(3, 4, 1, 'Av. El Poblado # 3-15, Medellín',   450000.00, 'EN_CAMINO',              'Llamar antes de entregar'),
-(4, 3, 1, 'Calle 80 # 23-45, Medellín',       220000.00, 'CANCELADO',              'Cancelado a solicitud del cliente'),
-(5, 2, 1, 'Calle 10 # 5-20, Medellín',        210000.00, 'NO_ENTREGADO',           'Cliente no se encontraba en el domicilio');
+INSERT INTO pedidos (id_pedido, id_usuario, id_metodo_pago, direccion_entrega, total, estado, id_repartidor, observaciones) VALUES
+(1, 2, 1, 'Calle 10 # 5-20, Medellín',        250000.00, 'ENTREGADO',              NULL, 'Entregado en portería'),
+(2, 3, 1, 'Carrera 45 # 12-10, Medellín',     350000.00, 'ASIGNADO',               5,    'Pedido asignado a repartidor'),
+(3, 4, 1, 'Av. El Poblado # 3-15, Medellín',   450000.00, 'EN_CAMINO',              5,    'Llamar antes de entregar'),
+(4, 3, 1, 'Calle 80 # 23-45, Medellín',       220000.00, 'CANCELADO',              NULL, 'Cancelado a solicitud del cliente'),
+(5, 2, 1, 'Calle 10 # 5-20, Medellín',        210000.00, 'NO_ENTREGADO',           NULL, 'Cliente no se encontraba en el domicilio');
 
 -- PEDIDO_DETALLES
 INSERT INTO pedido_detalles (id_pedido, id_producto, cantidad, precio_unitario, subtotal) VALUES

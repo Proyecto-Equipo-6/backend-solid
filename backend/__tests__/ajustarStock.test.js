@@ -21,7 +21,7 @@ describe('Módulo Ajuste de Stock (CU-023)', () => {
     const repo = new InMemoryProductoRepository([crearProducto(1, 50)]);
     const useCase = new AjustarStockProductoUseCase(repo);
 
-    const resultado = await useCase.ejecutar(1, 75, 'Reposición de inventario');
+    const resultado = await useCase.ejecutar(1, 75, 'Reposición de inventario', 1);
 
     expect(resultado.id_producto).toBe(1);
     expect(resultado.cantidad_anterior).toBe(50);
@@ -34,7 +34,7 @@ describe('Módulo Ajuste de Stock (CU-023)', () => {
     const useCase = new AjustarStockProductoUseCase(repo);
 
     await expect(
-      useCase.ejecutar(1, 'no-es-numero', 'Motivo')
+      useCase.ejecutar(1, 'no-es-numero', 'Motivo', 1)
     ).rejects.toThrow('La cantidad nueva debe ser un número válido');
   });
 
@@ -43,7 +43,7 @@ describe('Módulo Ajuste de Stock (CU-023)', () => {
     const useCase = new AjustarStockProductoUseCase(repo);
 
     await expect(
-      useCase.ejecutar(1, 75, '')
+      useCase.ejecutar(1, 75, '', 1)
     ).rejects.toThrow('El motivo del ajuste es obligatorio');
   });
 
@@ -52,7 +52,7 @@ describe('Módulo Ajuste de Stock (CU-023)', () => {
     const useCase = new AjustarStockProductoUseCase(repo);
 
     await expect(
-      useCase.ejecutar(999, 75, 'Motivo')
+      useCase.ejecutar(999, 75, 'Motivo', 1)
     ).rejects.toThrow('Producto no encontrado');
   });
 
@@ -60,7 +60,7 @@ describe('Módulo Ajuste de Stock (CU-023)', () => {
     const repo = new InMemoryProductoRepository([crearProducto(1, 50)]);
     const useCase = new AjustarStockProductoUseCase(repo);
 
-    const resultado = await useCase.ejecutar(1, 0, 'Merma total');
+    const resultado = await useCase.ejecutar(1, 0, 'Merma total', 1);
 
     expect(resultado.cantidad_nueva).toBe(0);
 

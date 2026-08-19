@@ -32,12 +32,12 @@ class AgregarAlCarritoUseCase {
       throw new ErrorNoEncontrado('Producto no encontrado');
     }
 
-    const item = new CarritoItem({ ...producto, idProducto: producto.id, cantidad: cantidadNumero });
+    const item = new CarritoItem({ ...producto, idProducto: producto.id_producto, cantidad: cantidadNumero });
     if (!item.isValid()) {
       throw new ErrorValidacion('Datos de carrito inválidos');
     }
 
-    const cantidadActual = await this.carritoRepository.obtenerCantidad(usuario.id_usuario, producto.id);
+    const cantidadActual = await this.carritoRepository.obtenerCantidad(usuario.id_usuario, producto.id_producto);
     const cantidadTotal = cantidadActual + cantidadNumero;
 
     if (cantidadTotal > producto.stock) {
@@ -47,7 +47,6 @@ class AgregarAlCarritoUseCase {
     const yaExiste = cantidadActual > 0;
 
     const carrito = await this.carritoRepository.agregarProducto(usuario.id_usuario, producto, cantidadNumero);
-
     return {
       mensaje: yaExiste
         ? 'Producto actualizado en tu carrito'

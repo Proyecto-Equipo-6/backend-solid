@@ -3,7 +3,7 @@ const VerHistorialPedidosUseCase = require('../../application/verHistorialPedido
 function crearHistorialPedidosController(pedidoRepo) {
   return async function historialPedidosController(req, res) {
     try {
-      const repartidorId = Number(req.user?.id_usuario || req.user?.id || req.user?.userId);
+      const repartidorId = Number(req.usuario?.id_usuario || req.usuario?.id);
 
       if (!repartidorId) {
         return res.status(401).json({ message: 'Usuario no autenticado' });

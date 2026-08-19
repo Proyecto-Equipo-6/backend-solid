@@ -53,7 +53,7 @@ class MySQLCarritoRepository extends CarritoRepository {
     await pool.execute(
       `INSERT INTO carrito_detalles (id_carrito, id_producto, cantidad) VALUES (?, ?, ?)
        ON DUPLICATE KEY UPDATE cantidad = cantidad + VALUES(cantidad)`,
-      [idCarrito, producto.id, cantidad]
+      [idCarrito, producto.id_producto, cantidad]
     );
     return this.obtenerCarrito(idUsuario);
   }

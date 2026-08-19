@@ -1,6 +1,5 @@
 const ProductoRepository = require('../../../domain/ports/ProductoRepository');
 const pool = require('../../database/db');
-const { ROL_ADMIN } = require('../../../constants');
 
 const SELECT_BASE = `
   SELECT
@@ -91,18 +90,29 @@ class MySQLProductoRepository extends ProductoRepository {
     return rows[0] || null;
   }
 
+  async buscarPorSKU(sku) {
+    const query = `${SELECT_BASE} WHERE p.sku = ? LIMIT 1`;
+    const [rows] = await pool.execute(query, [sku]);
+    return rows[0] || null;
+  }
+
   async actualizar(id_producto, datos) {
     const { id_categoria, id_proveedor, nombre, descripcion, precio, stock, estado } = datos;
     const actual = await this.findById(id_producto);
     if (!actual) throw new Error('Producto no encontrado');
 
     const proveedorFinal = id_proveedor ?? actual.id_proveedor;
+    const skuFinal = datos.sku !== undefined ? datos.sku.trim() : actual.sku;
+    const imagenFinal =
+      datos.imagen_url !== undefined && datos.imagen_url !== null
+        ? datos.imagen_url
+        : actual.imagen_url;
 
     await pool.execute(
       `UPDATE productos
-       SET id_categoria = ?, id_proveedor = ?, nombre = ?, descripcion = ?, precio = ?, stock = ?, estado = ?
+       SET sku = ?, id_categoria = ?, id_proveedor = ?, nombre = ?, descripcion = ?, precio = ?, stock = ?, estado = ?, imagen_url = ?
        WHERE id_producto = ?`,
-      [id_categoria, proveedorFinal, nombre, descripcion, precio, stock, estado, id_producto]
+      [skuFinal, id_categoria, proveedorFinal, nombre, descripcion, precio, stock, estado, imagenFinal, id_producto]
     );
     return this.findById(id_producto);
   }
@@ -135,7 +145,7 @@ class MySQLProductoRepository extends ProductoRepository {
     return this.findById(id_producto);
   }
 
-  async registrarAjusteStock(id_producto, cantidad_nueva, motivo) {
+  async registrarAjusteStock(id_producto, cantidad_nueva, motivo, id_admin) {
     const producto = await this.findById(id_producto);
     if (!producto) throw new Error('Producto no encontrado');
 
@@ -144,6 +154,9 @@ class MySQLProductoRepository extends ProductoRepository {
     }
     if (!motivo || motivo.trim() === '') {
       throw new Error('El motivo del ajuste es obligatorio');
+    }
+    if (id_admin === null || id_admin === undefined) {
+      throw new Error('Debes iniciar sesión como administrador para ajustar el stock');
     }
 
     const cantidad_anterior = producto.stock;
@@ -155,7 +168,7 @@ class MySQLProductoRepository extends ProductoRepository {
 
     await pool.execute(
       'INSERT INTO historial_stock (id_producto, id_admin, cantidad_anterior, cantidad_nueva, motivo) VALUES (?, ?, ?, ?, ?)',
-      [id_producto, ROL_ADMIN, cantidad_anterior, cantidad_nueva, motivo.trim()]
+      [id_producto, id_admin, cantidad_anterior, cantidad_nueva, motivo.trim()]
     );
 
     return {

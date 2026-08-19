@@ -22,11 +22,17 @@ INSERT INTO roles (id_rol, nombre, descripcion) VALUES
 -- =====================================================
 -- NOSONAR
 INSERT INTO usuarios (id_usuario, id_rol, nombre_apellido, tipo_documento, numero_documento, email, password, telefono, direccion) VALUES
-(1, 1, 'Sebastian Admin', 'CC', '1010', 'admin@remate.com', '$2b$10$FmvdWkpOie1MECB/paY9a.D1XyitCgIDj1g4XIZGqXvgIR4sVNGh6', '3001000001', 'Calle 100 #15-20, Medellín'),
-(2, 2, 'Juan Cliente',    'CC', '2020', 'juan@email.com',   '$2b$10$FmvdWkpOie1MECB/paY9a.D1XyitCgIDj1g4XIZGqXvgIR4sVNGh6', '3002000002', 'Carrera 7 # 45-10, Medellín'),
-(3, 2, 'Maria Compra',    'CC', '3030', 'maria@email.com',  '$2b$10$FmvdWkpOie1MECB/paY9a.D1XyitCgIDj1g4XIZGqXvgIR4sVNGh6', '3003000003', 'Carrera 45 # 12-10, Medellín'),
-(4, 2, 'Carlos Venta',    'CC', '4040', 'carlos@email.com', '$2b$10$FmvdWkpOie1MECB/paY9a.D1XyitCgIDj1g4XIZGqXvgIR4sVNGh6', '3004000004', 'Av. El Poblado # 3-15, Medellín'),
-(5, 3, 'Luis Repartidor', 'CC', '6060', 'luis@remate.com',  '$2b$10$FmvdWkpOie1MECB/paY9a.D1XyitCgIDj1g4XIZGqXvgIR4sVNGh6', '3006000006', 'Transversal 39 # 77-50, Medellín');
+(1, 1, 'Sebastian Admin', 'CC', '1010', 'admin@remate.com', '$2b$10$U7YUBuLdLuOd9BQxrziLwOLirD8zRE4eShDeW4BboMwtRSN2bRll.', '3001000001', 'Calle 100 #15-20, Medellín'),
+(2, 2, 'Juan Cliente',    'CC', '2020', 'juan@email.com',   '$2b$10$U7YUBuLdLuOd9BQxrziLwOLirD8zRE4eShDeW4BboMwtRSN2bRll.', '3002000002', 'Carrera 7 # 45-10, Medellín'),
+(3, 2, 'Maria Compra',    'CC', '3030', 'maria@email.com',  '$2b$10$U7YUBuLdLuOd9BQxrziLwOLirD8zRE4eShDeW4BboMwtRSN2bRll.', '3003000003', 'Carrera 45 # 12-10, Medellín'),
+(4, 2, 'Carlos Venta',    'CC', '4040', 'carlos@email.com', '$2b$10$U7YUBuLdLuOd9BQxrziLwOLirD8zRE4eShDeW4BboMwtRSN2bRll.', '3004000004', 'Av. El Poblado # 3-15, Medellín'),
+(5, 3, 'Luis Repartidor', 'CC', '6060', 'luis@remate.com',  '$2b$10$U7YUBuLdLuOd9BQxrziLwOLirD8zRE4eShDeW4BboMwtRSN2bRll.', '3006000006', 'Transversal 39 # 77-50, Medellín');
+
+-- =====================================================
+-- 2.1. REPARTIDORES (vinculados a usuarios con rol 3)
+-- =====================================================
+INSERT INTO repartidores (id_repartidor, id_usuario, vehiculo, placa, activo) VALUES
+(1, 5, 'Moto Honda CB190', 'ABC123', 1);
 
 -- =====================================================
 -- 3. CATEGORIAS
@@ -75,12 +81,12 @@ INSERT INTO carrito_detalles (id_carrito, id_producto, cantidad) VALUES
 -- =====================================================
 -- 7. PEDIDOS (Suma de montos >= $200.000 para cumplir CHK)
 -- =====================================================
-INSERT INTO pedidos (id_pedido, id_usuario, id_metodo_pago, direccion_entrega, total, estado, observaciones) VALUES
-(1, 2, 1, 'Carrera 7 # 45-10, Medellín',       250000.00, 'ENTREGADO',              'Entregado en portería'),
-(2, 3, 2, 'Carrera 45 # 12-10, Medellín',     350000.00, 'ASIGNADO',               'Pedido asignado a repartidor'),
-(3, 4, 1, 'Av. El Poblado # 3-15, Medellín',   450000.00, 'EN_CAMINO',              'Llamar antes de entregar'),
-(4, 3, 2, 'Calle 80 # 23-45, Medellín',       220000.00, 'CANCELADO',              'Cancelado a solicitud del cliente'),
-(5, 2, 1, 'Carrera 15 # 8-20, Medellín',       210000.00, 'NO_ENTREGADO',           'Cliente no se encontraba en el domicilio');
+INSERT INTO pedidos (id_pedido, id_usuario, id_metodo_pago, direccion_entrega, total, estado, id_repartidor, observaciones) VALUES
+(1, 2, 1, 'Carrera 7 # 45-10, Medellín',       250000.00, 'ENTREGADO',              NULL, 'Entregado en portería'),
+(2, 3, 2, 'Carrera 45 # 12-10, Medellín',     350000.00, 'ASIGNADO',               5,    'Pedido asignado a repartidor'),
+(3, 4, 1, 'Av. El Poblado # 3-15, Medellín',   450000.00, 'EN_CAMINO',              5,    'Llamar antes de entregar'),
+(4, 3, 2, 'Calle 80 # 23-45, Medellín',       220000.00, 'CANCELADO',              NULL, 'Cancelado a solicitud del cliente'),
+(5, 2, 1, 'Carrera 15 # 8-20, Medellín',       210000.00, 'NO_ENTREGADO',           NULL, 'Cliente no se encontraba en el domicilio');
 
 -- =====================================================
 -- 8. PEDIDO_DETALLES
