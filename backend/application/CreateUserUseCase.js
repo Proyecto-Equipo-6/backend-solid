@@ -15,7 +15,17 @@ class CreateUserUseCase {
   }
 
   async execute(userData) {
-    const user = new User(userData);
+    // Sanitizar: solo campos permitidos, ignorar id_rol del body
+    const allowedFields = {
+      nombre_apellido: userData.nombre_apellido,
+      tipo_documento: userData.tipo_documento,
+      numero_documento: userData.numero_documento,
+      email: userData.email,
+      password: userData.password,
+      telefono: userData.telefono,
+      direccion: userData.direccion,
+    };
+    const user = new User(allowedFields);
 
     if (!user.isValid()) {
       throw new Error('Por favor verifique los campos del formulario');

@@ -31,8 +31,8 @@ INSERT INTO usuarios (id_usuario, id_rol, nombre_apellido, tipo_documento, numer
 -- =====================================================
 -- 2.1. REPARTIDORES (vinculados a usuarios con rol 3)
 -- =====================================================
-INSERT INTO repartidores (id_repartidor, id_usuario, vehiculo, placa, activo) VALUES
-(1, 5, 'Moto Honda CB190', 'ABC123', 1);
+INSERT INTO repartidores (id_repartidor, id_usuario, activo) VALUES
+(1, 5, 1);
 
 -- =====================================================
 -- 3. CATEGORIAS
