@@ -88,7 +88,7 @@ class MySQLRepartidorRepository extends RepartidorRepository {
   }
 
   async crear({ id_usuario, vehiculo = '', placa = '' }) {
-    const [result] = await pool.execute(
+    await pool.execute(
       'INSERT INTO repartidores (id_usuario, vehiculo, placa, activo) VALUES (?, ?, ?, 1)',
       [id_usuario, vehiculo, placa]
     );

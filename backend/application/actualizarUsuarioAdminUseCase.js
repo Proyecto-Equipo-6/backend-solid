@@ -21,7 +21,8 @@ class ActualizarUsuarioAdminUseCase {
 
     const campos = this.construirCamposUsuario(datos);
     const actualizado = await this.userRepository.actualizar(idUsuario, campos);
-    const { password: _omitida, ...datosPublicos } = actualizado;
+    const datosPublicos = { ...actualizado };
+    delete datosPublicos.password;
     return { usuario: datosPublicos, mensaje: 'Usuario actualizado correctamente.' };
   }
 

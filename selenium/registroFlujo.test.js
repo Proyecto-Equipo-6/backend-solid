@@ -132,10 +132,9 @@ describe('Selenium - Registro y Flujo Completo', () => {
 
       // 11. Cerrar sesión
       await driver.findElement(By.xpath("//button[contains(text(),'Cerrar sesión')]")).click();
-      await driver.wait(until.elementLocated(By.css('.barra__boton--texto')), 8000);
+      const botonIniciarSesion = await driver.wait(until.elementLocated(By.css('.barra__boton--texto')), 8000);
+      expect(await botonIniciarSesion.isDisplayed()).toBe(true);
       console.log('11. Sesión cerrada');
-
-      expect(true).toBe(true);
     } catch (err) {
       console.error('Falló el flujo:', err.message);
       throw err;

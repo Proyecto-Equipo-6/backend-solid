@@ -18,9 +18,9 @@ INSERT INTO roles (id_rol, nombre, descripcion) VALUES
 -- 2. USUARIOS
 -- NOTA: Todos los usuarios usan la misma contraseña de prueba: "123456"
 -- El hash bcrypt se genera una sola vez y se reutiliza para el seed.
--- SonarQube S8215: hash es de prueba, no es un secreto real.
+-- El hash anterior se revocó por estar expuesto; se reemplazó por uno recién generado.
 -- =====================================================
-SET @PASSWORD_SEED = '$2b$10$U7YUBuLdLuOd9BQxrziLwOLirD8zRE4eShDeW4BboMwtRSN2bRll.'; -- NOSONAR
+SET @PASSWORD_SEED = '$2b$10$HynxUcn1MN8/orky.Ee94uiiDC/xyw22U4x0C7ew75nJ/4fJIswnW';
 INSERT INTO usuarios (id_usuario, id_rol, nombre_apellido, tipo_documento, numero_documento, email, password, telefono, direccion) VALUES
 (1, 1, 'Sebastian Admin', 'CC', '1010', 'admin@remate.com', @PASSWORD_SEED, '3001000001', 'Calle 100 #15-20, Medellín'),
 (2, 2, 'Juan Cliente',    'CC', '2020', 'juan@email.com',   @PASSWORD_SEED, '3002000002', 'Carrera 7 # 45-10, Medellín'),

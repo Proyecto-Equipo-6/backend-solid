@@ -13,8 +13,10 @@ SET @FORMATO_FECHA_HORA = '%d/%m/%Y %H:%i';
 
 -- =====================================================
 -- 1. REPORTE DE VENTAS Y PEDIDOS DETALLADO
--- (Alineado con pedidos, pedido_detalles y metodos_pago)
+-- (Separado en 2 consultas para respetar el límite de 3 tablas
+--  por consulta de SonarQube. 1A: encabezado. 1B: detalle de ítems.)
 -- =====================================================
+-- 1A. ENCABEZADO DE PEDIDOS
 SELECT 
     p.id_pedido                                             AS Pedido_No,
     DATE_FORMAT(p.fecha_pedido, @FORMATO_FECHA_HORA)        AS Fecha_Pedido,
@@ -23,21 +25,26 @@ SELECT
     u.numero_documento                                      AS Documento,
     p.direccion_entrega                                     AS Direccion,
     mp.nombre                                               AS Metodo_Pago,
-    IFNULL(cat.nombre, 'Sin Categoría')                     AS Categoria,
-    IFNULL(prod.nombre, 'Producto Eliminado')               AS Producto,
-    prod.sku                                                AS SKU,
-    IFNULL(pd.cantidad, 0)                                  AS Cantidad,
-    IFNULL(pd.precio_unitario, 0)                           AS Precio_Unitario,
-    IFNULL(pd.subtotal, 0)                                  AS Subtotal_Item,
     p.total                                                 AS Total_Pedido,
     p.estado                                                AS Estado_Pedido
 FROM pedidos p
 INNER JOIN usuarios u           ON p.id_usuario = u.id_usuario
 INNER JOIN metodos_pago mp      ON p.id_metodo_pago = mp.id_metodo_pago
-LEFT JOIN pedido_detalles pd    ON p.id_pedido = pd.id_pedido
-LEFT JOIN productos prod        ON pd.id_producto = prod.id_producto
-LEFT JOIN categorias cat        ON prod.id_categoria = cat.id_categoria
 ORDER BY p.fecha_pedido DESC;
+
+-- 1B. DETALLE DE ÍTEMS POR PEDIDO
+SELECT 
+    pd.id_pedido                                            AS Pedido_No,
+    IFNULL(cat.nombre, 'Sin Categoría')                     AS Categoria,
+    IFNULL(prod.nombre, 'Producto Eliminado')               AS Producto,
+    prod.sku                                                AS SKU,
+    IFNULL(pd.cantidad, 0)                                  AS Cantidad,
+    IFNULL(pd.precio_unitario, 0)                           AS Precio_Unitario,
+    IFNULL(pd.subtotal, 0)                                  AS Subtotal_Item
+FROM pedido_detalles pd
+INNER JOIN productos prod       ON pd.id_producto = prod.id_producto
+LEFT JOIN categorias cat        ON prod.id_categoria = cat.id_categoria
+ORDER BY pd.id_pedido DESC;
 
 
 -- =====================================================
