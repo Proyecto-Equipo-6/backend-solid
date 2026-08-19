@@ -49,7 +49,8 @@ class MySQLCategoriaRepository extends CategoriaRepository {
   }
 
   async eliminar(id_categoria) {
-    await pool.execute('DELETE FROM categorias WHERE id_categoria = ?', [id_categoria]);
+    // Borrado lógico: desactiva la categoría sin eliminar el registro.
+    await pool.execute('UPDATE categorias SET estado = 0 WHERE id_categoria = ?', [id_categoria]);
     return true;
   }
 

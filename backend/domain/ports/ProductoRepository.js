@@ -20,6 +20,10 @@ class ProductoRepository {
     throw new Error("Método 'buscarPorNombre' no implementado");
   }
 
+  async buscarPorSKU(sku) {
+    throw new Error("Método 'buscarPorSKU' no implementado");
+  }
+
   async actualizar(id_producto, datos) {
     throw new Error("Método 'actualizar' no implementado");
   }
