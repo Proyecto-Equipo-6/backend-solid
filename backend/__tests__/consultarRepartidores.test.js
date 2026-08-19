@@ -102,7 +102,7 @@ describe('Módulo Consultar Repartidores (CU-021)', () => {
 
     // Mocks simulando fallas críticas del servidor de base de datos
     const pedidoRepoFalso = {
-      contarPedidosDelDia: () => { throw new Error('Fallo crítico simulado'); },
+      contarPedidosDeHoyParaMetrica: () => { throw new Error('Fallo crítico simulado'); },
       contarPedidosDelPeriodo: () => { throw new Error('Fallo crítico simulado'); }
     };
 

@@ -9,7 +9,7 @@ const pool = require('../../database/db');
 class MySQLRepartidorRepository extends RepartidorRepository {
   async findAll() {
     const [filas] = await pool.execute(
-      `SELECT r.id_repartidor, r.id_usuario, r.vehiculo, r.placa, r.activo,
+      `SELECT r.id_repartidor, r.id_usuario, r.activo,
               u.nombre_apellido AS nombre, '' AS apellidos,
               u.telefono, u.email,
               CASE WHEN r.activo = 1 THEN 'DISPONIBLE' ELSE 'INACTIVO' END AS estado
@@ -22,7 +22,7 @@ class MySQLRepartidorRepository extends RepartidorRepository {
 
   async buscarPorId(idRepartidor) {
     const [filas] = await pool.execute(
-      `SELECT r.id_repartidor, r.id_usuario, r.vehiculo, r.placa, r.activo,
+      `SELECT r.id_repartidor, r.id_usuario, r.activo,
               u.nombre_apellido AS nombre, '' AS apellidos,
               u.telefono, u.email,
               CASE WHEN r.activo = 1 THEN 'DISPONIBLE' ELSE 'INACTIVO' END AS estado

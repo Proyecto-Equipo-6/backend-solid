@@ -5,7 +5,7 @@ function crearDetallePedidoController(pedidoRepo) {
   return async function detallePedidoController(req, res) {
     try {
       const pedidoId = Number(req.params.pedidoId);
-      const repartidorId = Number(req.usuario?.id_usuario || req.usuario?.id);
+      const repartidorId = Number(req.usuario?.id_usuario);
 
       if (!repartidorId) {
         return res.status(401).json({ message: 'Usuario no autenticado' });

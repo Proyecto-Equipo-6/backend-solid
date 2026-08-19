@@ -21,8 +21,8 @@ const LIMITE_USUARIOS_ADMIN = 10;
 const MAX_TAMANO_FOTO_BYTES = 5 * 1024 * 1024; // 5MB
 
 // Contraseña
-const MIN_PASSWORD_LENGTH = 4;
-const MAX_PASSWORD_LENGTH = 8;
+const MIN_PASSWORD_LENGTH = 8;
+const MAX_PASSWORD_LENGTH = 20;
 
 module.exports = {
   ROL_ADMIN,
