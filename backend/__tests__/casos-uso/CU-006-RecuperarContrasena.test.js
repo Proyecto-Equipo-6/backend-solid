@@ -7,7 +7,7 @@ const InMemoryTokensRecuperacionRepository = require('../../infraestructure/repo
 const MENSAJE_GENERICO =
   'Recibirá un enlace de recuperación a su correo electrónico';
 
-async function crearUsuario(repositorio, { email = 'ana@example.com', password = 'abcd1234' } = {}) {
+async function crearUsuario(repositorio, { email = 'ana@example.com', password = 'Abcd1234' } = {}) {
   const usuario = {
     id: repositorio.users.length + 1,
     id_rol: 2,
@@ -69,6 +69,16 @@ describe('CU-006 Recuperar contraseña (SolicitarRecuperacionUseCase)', () => {
     expect(tokensRepositorio.tokens).toHaveLength(0);
     expect(emailSender.enviarRecuperacion).not.toHaveBeenCalled();
   });
+
+  it('lanza error cuando el envío del correo falla (CP-006-05)', async () => {
+    await crearUsuario(repositorio, { email: 'ana@example.com' });
+
+    emailSender.enviarRecuperacion = jest.fn().mockRejectedValue(new Error('Fallo SMTP'));
+
+    const error = await casoUso.execute({ email: 'ana@example.com' }).catch((e) => e);
+
+    expect(error.message).toBe('No se pudo enviar el correo de recuperación. Inténtalo de nuevo más tarde.');
+  });
 });
 
 describe('CU-006 Recuperar contraseña (RestablecerContrasenaUseCase)', () => {
@@ -81,7 +91,7 @@ describe('CU-006 Recuperar contraseña (RestablecerContrasenaUseCase)', () => {
     repositorio = new InMemoryUserRepository();
     tokensRepositorio = new InMemoryTokensRecuperacionRepository();
     casoUso = new RestablecerContrasenaUseCase(repositorio, tokensRepositorio);
-    usuario = await crearUsuario(repositorio);
+    usuario = await crearUsuario(repositorio, { email: 'ana@example.com', password: 'Abcd1234' });
   });
 
   async function guardarToken(token = 'token-valido-123', expiraEn = null) {
@@ -96,21 +106,21 @@ describe('CU-006 Recuperar contraseña (RestablecerContrasenaUseCase)', () => {
     const passwordOriginal = usuario.password;
     await guardarToken();
 
-    const resultado = await casoUso.execute({ token: 'token-valido-123', nueva_password: 'nueva123' });
+    const resultado = await casoUso.execute({ token: 'token-valido-123', nueva_password: 'Nueva1234' });
 
     expect(resultado.mensaje).toBe(
       'Contraseña actualizada correctamente. Por favor inicie sesión'
     );
     expect((await tokensRepositorio.findByToken('token-valido-123')).usado).toBe(1);
     expect(repositorio.users[0].password).not.toBe(passwordOriginal);
-    expect(await bcrypt.compare('nueva123', repositorio.users[0].password)).toBe(true);
+    expect(await bcrypt.compare('Nueva1234', repositorio.users[0].password)).toBe(true);
   });
 
   it('rechaza con 400 un token expirado', async () => {
     await guardarToken('token-expirado', new Date(Date.now() - 1000));
 
     const error = await casoUso
-      .execute({ token: 'token-expirado', nueva_password: 'nueva123' })
+      .execute({ token: 'token-expirado', nueva_password: 'Nueva1234' })
       .catch((e) => e);
 
     expect(error.status).toBe(400);
@@ -123,7 +133,7 @@ describe('CU-006 Recuperar contraseña (RestablecerContrasenaUseCase)', () => {
     await tokensRepositorio.marcarUsado('token-usado');
 
     const error = await casoUso
-      .execute({ token: 'token-usado', nueva_password: 'nueva123' })
+      .execute({ token: 'token-usado', nueva_password: 'Nueva1234' })
       .catch((e) => e);
 
     expect(error.status).toBe(400);
@@ -132,25 +142,30 @@ describe('CU-006 Recuperar contraseña (RestablecerContrasenaUseCase)', () => {
 
   it('rechaza con 400 un token inexistente', async () => {
     const error = await casoUso
-      .execute({ token: 'no-existe', nueva_password: 'nueva123' })
+      .execute({ token: 'no-existe', nueva_password: 'Nueva1234' })
       .catch((e) => e);
 
     expect(error.status).toBe(400);
     expect(error.message).toBe('El token de recuperación ha expirado. Solicitelo nuevamente');
   });
 
-  it('rechaza una contraseña fuera del rango de 8 a 20 caracteres', async () => {
+  it('rechaza una contraseña débil (sin mayúscula, sin número o menor a 8 caracteres)', async () => {
     await guardarToken();
 
-    const corta = await casoUso
-      .execute({ token: 'token-valido-123', nueva_password: '123' })
-      .catch((e) => e);
-    const larga = await casoUso
-      .execute({ token: 'token-valido-123', nueva_password: '123456789012345678901' })
+    const sinMayuscula = await casoUso
+      .execute({ token: 'token-valido-123', nueva_password: 'abcdefg1' })
       .catch((e) => e);
 
-    expect(corta.message).toBe('La contraseña debe tener entre 8 y 20 caracteres.');
-    expect(larga.message).toBe('La contraseña debe tener entre 8 y 20 caracteres.');
-    expect(repositorio.users[0].password).toBe(usuario.password);
+    const sinNumero = await casoUso
+      .execute({ token: 'token-valido-123', nueva_password: 'Abcdefgh' })
+      .catch((e) => e);
+
+    const corta = await casoUso
+      .execute({ token: 'token-valido-123', nueva_password: 'Ab1' })
+      .catch((e) => e);
+
+    expect(sinMayuscula.message).toBe('La contraseña debe tener mínimo 8 caracteres, una mayúscula y un número');
+    expect(sinNumero.message).toBe('La contraseña debe tener mínimo 8 caracteres, una mayúscula y un número');
+    expect(corta.message).toBe('La contraseña debe tener mínimo 8 caracteres, una mayúscula y un número');
   });
 });

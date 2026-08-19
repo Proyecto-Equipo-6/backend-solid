@@ -1,6 +1,8 @@
 const ListarProductosPublicosUseCase = require('../../application/ListarProductosPublicosUseCase');
 const ObtenerProductoPublicoUseCase = require('../../application/ObtenerProductoPublicoUseCase');
 const ListarCategoriasUseCase = require('../../application/ListarCategoriasUseCase');
+const ListarProductosPorCategoriaUseCase = require('../../application/ListarProductosPorCategoriaUseCase');
+const BuscarProductosUseCase = require('../../application/BuscarProductosUseCase');
 const InMemoryProductoRepository = require('../../infraestructure/repositories/in-memory/InMemoryProductoRepository');
 const InMemoryCategoriaRepository = require('../../infraestructure/repositories/in-memory/InMemoryCategoriaRepository');
 
@@ -98,5 +100,36 @@ describe('CU-001 Visualizar catálogo (ListarCategoriasUseCase)', () => {
 
     expect(categorias).toHaveLength(1);
     expect(categorias[0].nombre).toBe('Cocina');
+  });
+});
+
+describe('CU-001 Visualizar catálogo (filtro por categoría y búsqueda)', () => {
+  test('CP-CU-001-02: filtra productos por categoría', async () => {
+    const repositorio = new InMemoryProductoRepository();
+    repositorio.productos.push(
+      { ...PRODUCTO_ACTIVO, id_producto: 1, id_categoria: 1, nombre: 'Juego Utensilios Pro' },
+      { ...PRODUCTO_ACTIVO, id_producto: 2, id_categoria: 2, nombre: 'Parlante Bluetooth' },
+    );
+
+    const casoUso = new ListarProductosPorCategoriaUseCase(repositorio);
+    const productos = await casoUso.execute(1);
+
+    expect(productos).toHaveLength(1);
+    expect(productos[0].id_producto).toBe(1);
+  });
+
+  test('CP-CU-001-03: búsqueda predictiva con autocompletado', async () => {
+    const repositorio = new InMemoryProductoRepository();
+    repositorio.productos.push(
+      { ...PRODUCTO_ACTIVO, id_producto: 1, nombre: 'Juego Utensilios Pro' },
+      { ...PRODUCTO_ACTIVO, id_producto: 2, nombre: 'Parlante Bluetooth' },
+    );
+
+    const casoUso = new BuscarProductosUseCase(repositorio);
+    const resultado = await casoUso.execute({ termino: 'Juego' });
+
+    expect(resultado.sugerencias).toHaveLength(1);
+    expect(resultado.items).toHaveLength(1);
+    expect(resultado.items[0].nombre).toBe('Juego Utensilios Pro');
   });
 });

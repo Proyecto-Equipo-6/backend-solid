@@ -15,7 +15,7 @@ describe('CU-004 Visualizar perfil (ObtenerPerfilUseCase)', () => {
       tipo_documento: 'CC',
       numero_documento: '1000000001',
       email: 'ana@example.com',
-      password: await bcrypt.hash('abcd1234', 4),
+      password: await bcrypt.hash('Abcd1234', 4),
       telefono: '3001234567',
       direccion: 'Calle 10 # 5-20, Medellín',
       activo: 1,

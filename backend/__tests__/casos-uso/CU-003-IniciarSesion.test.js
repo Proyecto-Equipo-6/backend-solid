@@ -1,4 +1,5 @@
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 const LoginUseCase = require('../../application/LoginUseCase');
 const InMemoryUserRepository = require('../../infraestructure/repositories/in-memory/InMemoryUserRepository');
 
@@ -30,9 +31,9 @@ describe('CU-003 Iniciar sesión (LoginUseCase)', () => {
   });
 
   it('autentica con credenciales válidas y devuelve token + usuario sin password', async () => {
-    await crearUsuario(repositorio, { email: 'ana@example.com', password: 'abcd1234' });
+    await crearUsuario(repositorio, { email: 'ana@example.com', password: 'Abcd1234' });
 
-    const resultado = await casoUso.execute({ email: 'ana@example.com', password: 'abcd1234' });
+    const resultado = await casoUso.execute({ email: 'ana@example.com', password: 'Abcd1234' });
 
     expect(resultado.token).toEqual(expect.any(String));
     expect(resultado.usuario.id_usuario).toBe(1);
@@ -41,10 +42,10 @@ describe('CU-003 Iniciar sesión (LoginUseCase)', () => {
   });
 
   it('rechaza con 401 una contraseña incorrecta', async () => {
-    await crearUsuario(repositorio, { email: 'ana@example.com', password: 'abcd1234' });
+    await crearUsuario(repositorio, { email: 'ana@example.com', password: 'Abcd1234' });
 
     const error = await casoUso
-      .execute({ email: 'ana@example.com', password: 'incorrecta' })
+      .execute({ email: 'ana@example.com', password: 'Incorrecta123' })
       .catch((e) => e);
 
     expect(error.status).toBe(401);
@@ -53,7 +54,7 @@ describe('CU-003 Iniciar sesión (LoginUseCase)', () => {
 
   it('rechaza con 401 un correo no registrado', async () => {
     const error = await casoUso
-      .execute({ email: 'nadie@example.com', password: 'abcd1234' })
+      .execute({ email: 'nadie@example.com', password: 'Abcd1234' })
       .catch((e) => e);
 
     expect(error.status).toBe(401);
@@ -63,12 +64,12 @@ describe('CU-003 Iniciar sesión (LoginUseCase)', () => {
   it('rechaza con 403 una cuenta inactiva', async () => {
     await crearUsuario(repositorio, {
       email: 'inactivo@example.com',
-      password: 'abcd1234',
+      password: 'Abcd1234',
       activo: 0,
     });
 
     const error = await casoUso
-      .execute({ email: 'inactivo@example.com', password: 'abcd1234' })
+      .execute({ email: 'inactivo@example.com', password: 'Abcd1234' })
       .catch((e) => e);
 
     expect(error.status).toBe(403);
@@ -81,5 +82,29 @@ describe('CU-003 Iniciar sesión (LoginUseCase)', () => {
     const error = await casoUso.execute({ email: '', password: '' }).catch((e) => e);
 
     expect(error.status).toBe(401);
+  });
+
+  it('expira el token JWT después de 30 minutos (CP-CU-003-06)', async () => {
+  await crearUsuario(repositorio, {
+    email: 'ana@example.com',
+    password: 'Abcd1234'
+  });
+
+  const { token } = await casoUso.execute({
+    email: 'ana@example.com',
+    password: 'Abcd1234'
+  });
+
+  // Verificar que el token es válido en el momento actual
+  const payloadActual = jwt.verify(token, JWT_SECRET_PRUEBA);
+  expect(payloadActual.email).toBe('ana@example.com');
+
+  // Simular 31 minutos en el futuro (en segundos)
+  const futuro = Math.floor(Date.now() / 1000) + 31 * 60;
+
+  // Verificar que lanza error de expiración
+  expect(() =>
+    jwt.verify(token, JWT_SECRET_PRUEBA, { clockTimestamp: futuro })
+  ).toThrow(jwt.TokenExpiredError);
   });
 });

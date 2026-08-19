@@ -16,13 +16,14 @@ class RestablecerContrasenaUseCase {
       throw new ErrorTokenInvalido();
     }
 
-    if (
-      !nueva_password ||
-      typeof nueva_password !== 'string' ||
-      nueva_password.length < 8 ||
-      nueva_password.length > 20
-    ) {
-      throw new Error('La contraseña debe tener entre 8 y 20 caracteres.');
+    const passwordValida =
+    typeof nueva_password === 'string' &&
+    nueva_password.length >= 8 &&
+    /[A-Z]/.test(nueva_password) &&
+    /[0-9]/.test(nueva_password);
+
+    if (!passwordValida) {
+      throw new Error('La contraseña debe tener mínimo 8 caracteres, una mayúscula y un número');
     }
 
     const registro = await this.tokensRepository.findByToken(token);

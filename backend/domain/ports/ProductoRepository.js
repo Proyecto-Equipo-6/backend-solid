@@ -8,6 +8,10 @@ class ProductoRepository {
     throw new Error("Método 'findActivos' no implementado");
   }
 
+  async findActivosPorCategoria(id_categoria) {
+  throw new Error("Método 'findActivosPorCategoria' no implementado");
+  }
+  
   async findById(id) {
     throw new Error("Método 'findById' no implementado");
   }
@@ -47,6 +51,7 @@ class ProductoRepository {
   async buscar(termino, filtros = {}) {
     throw new Error("Método 'buscar' no implementado");
   }
+  
 }
 
 module.exports = ProductoRepository;
