@@ -34,15 +34,25 @@ class CancelarPedidoAdminUseCase {
       }
     }
 
-    if (pedido.id_repartidor !== null && pedido.id_repartidor !== undefined) {
-      await this.repartidorRepo.marcarDisponible(pedido.id_repartidor);
-    }
-
-    return await this.pedidoRepo.actualizarPedido(id_pedido, {
+        // Actualizar pedido a CANCELADO
+    const pedidoCancelado = await this.pedidoRepo.actualizarPedido(id_pedido, {
       estado: 'CANCELADO',
       motivo_cancelacion,
       observaciones: observaciones || null
     });
+
+    // Liberar repartidor si el pedido tenía uno asignado
+    if (pedido.id_repartidor !== null && pedido.id_repartidor !== undefined) {
+      try {
+        await this.repartidorRepo.marcarDisponible(pedido.id_repartidor);
+      } catch (error) {
+        // CP-CU-020-05: la cancelación se realizó, pero la liberación falló.
+        // Se propaga el error para que el controlador registre auditoría.
+        throw error;
+      }
+    }
+
+    return pedidoCancelado;
   }
 }
 
