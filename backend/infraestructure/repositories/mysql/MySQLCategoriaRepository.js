@@ -18,6 +18,12 @@ class MySQLCategoriaRepository extends CategoriaRepository {
     return rows;
   }
 
+  async findAll() {
+    const query = `${SELECT_BASE} ORDER BY id_categoria ASC`;
+    const [rows] = await pool.execute(query);
+    return rows;
+  }
+
   async guardar(categoriaData) {
     const { nombre, descripcion, estado } = categoriaData;
     const [result] = await pool.execute(

@@ -81,6 +81,15 @@ class MySQLProveedorRepository extends ProveedorRepository {
     );
     return filas;
   }
+
+  async findAll() {
+    const [filas] = await pool.execute(
+      `SELECT id_proveedor, nit_proveedor, razon_social, telefono, email, imagen_url, estado, fecha_creacion
+       FROM proveedores
+       ORDER BY id_proveedor ASC`
+    );
+    return filas;
+  }
 }
 
 module.exports = MySQLProveedorRepository;

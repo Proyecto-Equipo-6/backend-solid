@@ -33,6 +33,12 @@ class MySQLProductoRepository extends ProductoRepository {
     return rows;
   }
 
+  async findAll() {
+    const query = `${SELECT_BASE} ORDER BY p.id_producto ASC`;
+    const [rows] = await pool.execute(query);
+    return rows;
+  }
+
   async findById(id) {
     const query = `${SELECT_BASE} WHERE p.id_producto = ? LIMIT 1`;
     const [rows] = await pool.execute(query, [id]);

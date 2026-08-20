@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "Remates el Paisa - Backend API",
-    "description": "Colección para probar el backend de Remates el Paisa (backend-solid). Flujo: autenticación → catálogo → carrito → pedidos. Requiere variables de entorno: baseUrl, email, password.",
+    "description": "Colección completa organizada por Casos de Uso.\n\nFlujo: Login → Copiar token cookie → Probar rutas.\nRequiere variable de entorno: baseUrl (default http://localhost:3000).\n\nRoles:\n- Admin: require cookie token + id_rol=1\n- Cliente: require cookie token + id_rol=2\n- Repartidor: require cookie token + id_rol=3",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -9,35 +9,75 @@
       "key": "baseUrl",
       "value": "http://localhost:3000",
       "type": "string"
-    },
-    {
-      "key": "email",
-      "value": "juan@email.com",
-      "type": "string"
-    },
-    {
-      "key": "password",
-      "value": "1234",
-      "type": "string"
     }
   ],
   "item": [
     {
-      "name": "1. Autenticación",
+      "name": "CU-002 Registrar Cuenta",
       "item": [
         {
-          "name": "Login (obtiene cookie de sesión)",
+          "name": "Registrar cliente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "pm.test('Retorna id y datos', () => {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.have.property('id_usuario');",
+                  "  pm.expect(json).to.have.property('email');",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+              { "key": "Content-Type", "value": "application/json" }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}"
+              "raw": "{\n  \"nombre_apellido\": \"Juan Pérez\",\n  \"tipo_documento\": \"CC\",\n  \"numero_documento\": \"1020304050\",\n  \"email\": \"juan@email.com\",\n  \"password\": \"12345678\",\n  \"telefono\": \"3001234567\",\n  \"direccion\": \"Calle 10 #5-20, Medellín\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "users"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "CU-003 Iniciar Sesión",
+      "item": [
+        {
+          "name": "Login (guarda cookie token)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Retorna usuario', () => {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.have.property('usuario');",
+                  "  pm.expect(json.usuario).to.have.property('id_rol');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"juan@email.com\",\n  \"password\": \"12345678\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/auth/login",
@@ -56,32 +96,107 @@
               "path": ["api", "v1", "auth", "logout"]
             }
           }
-        },
+        }
+      ]
+    },
+    {
+      "name": "CU-004 Visualizar Perfil",
+      "item": [
         {
-          "name": "Registrar usuario (cliente)",
+          "name": "Ver perfil",
           "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"nombre_apellido\": \"Nuevo Cliente\",\n  \"tipo_documento\": \"CC\",\n  \"numero_documento\": \"123456789\",\n  \"email\": \"nuevo@email.com\",\n  \"password\": \"1234\",\n  \"telefono\": \"3000000000\",\n  \"direccion\": \"Calle 1 # 2-3, Medellín\"\n}"
-            },
+            "method": "GET",
             "url": {
-              "raw": "{{baseUrl}}/api/v1/users",
+              "raw": "{{baseUrl}}/api/v1/users/perfil",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "users"]
+              "path": ["api", "v1", "users", "perfil"]
             }
           }
         }
       ]
     },
     {
-      "name": "2. Catálogo",
+      "name": "CU-005 Editar Perfil",
+      "item": [
+        {
+          "name": "Actualizar perfil",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"telefono\": \"3009999999\",\n  \"direccion\": \"Carrera 50 #20-10, Medellín\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/perfil",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "users", "perfil"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "CU-006 Recuperar Contraseña",
+      "item": [
+        {
+          "name": "Solicitar recuperación",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"juan@email.com\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/recuperar",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "auth", "recuperar"]
+            }
+          }
+        },
+        {
+          "name": "Restablecer contraseña",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"TOKEN_DEL_EMAIL\",\n  \"nuevaPassword\": \"nueva12345\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/restablecer",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "auth", "restablecer"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "CU-007 Cerrar Sesión",
+      "item": [
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "auth", "logout"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "CU-001 Visualizar Catálogo",
       "item": [
         {
           "name": "Listar productos públicos",
@@ -95,7 +210,7 @@
           }
         },
         {
-          "name": "Detalle de producto",
+          "name": "Obtener producto por ID",
           "request": {
             "method": "GET",
             "url": {
@@ -106,7 +221,7 @@
           }
         },
         {
-          "name": "Listar categorías",
+          "name": "Listar categorías públicas",
           "request": {
             "method": "GET",
             "url": {
@@ -119,7 +234,7 @@
       ]
     },
     {
-      "name": "3. Carrito (requiere sesión Cliente)",
+      "name": "CU-011 Ver Carrito (Cliente)",
       "item": [
         {
           "name": "Ver carrito",
@@ -131,20 +246,22 @@
               "path": ["api", "v1", "carrito"]
             }
           }
-        },
+        }
+      ]
+    },
+    {
+      "name": "CU-008 Agregar/Actualizar Carrito (Cliente)",
+      "item": [
         {
           "name": "Agregar producto al carrito",
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+              { "key": "Content-Type", "value": "application/json" }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"productoId\": 1,\n  \"cantidad\": 1\n}"
+              "raw": "{\n  \"productoId\": 1,\n  \"cantidad\": 2\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/carrito",
@@ -158,14 +275,11 @@
           "request": {
             "method": "PUT",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+              { "key": "Content-Type", "value": "application/json" }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"cantidad\": 2\n}"
+              "raw": "{\n  \"cantidad\": 3\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/carrito/1",
@@ -188,21 +302,32 @@
       ]
     },
     {
-      "name": "4. Pedidos (requiere sesión Cliente)",
+      "name": "CU-012 Crear Pedido (Cliente)",
       "item": [
         {
-          "name": "Generar pedido (CU-012)",
+          "name": "Generar pedido desde carrito",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "pm.test('Estado PENDIENTE', () => {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.pedido.estado).to.eql('PENDIENTE');",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+              { "key": "Content-Type", "value": "application/json" }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"direccionEntrega\": \"Calle 10 # 5-20, Medellín\",\n  \"observaciones\": \"Entregar en horario laboral\"\n}"
+              "raw": "{\n  \"direccionEntrega\": \"Calle 10 #5-20, Medellín\",\n  \"observaciones\": \"Entregar en horario laboral\",\n  \"idMetodoPago\": 1\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/pedidos",
@@ -214,37 +339,515 @@
       ]
     },
     {
-      "name": "5. Perfil (requiere sesión)",
+      "name": "CU-013 Ver Pedidos (Cliente)",
       "item": [
         {
-          "name": "Ver perfil",
+          "name": "Listar mis pedidos",
           "request": {
             "method": "GET",
             "url": {
-              "raw": "{{baseUrl}}/api/v1/users/perfil",
+              "raw": "{{baseUrl}}/api/v1/pedidos",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "users", "perfil"]
+              "path": ["api", "v1", "pedidos"]
             }
           }
         },
         {
-          "name": "Actualizar perfil",
+          "name": "Filtrar por estado",
           "request": {
-            "method": "PUT",
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/pedidos?estado=PENDIENTE",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "pedidos"],
+              "query": [
+                { "key": "estado", "value": "PENDIENTE" }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "CU-014 Cancelar Pedido (Cliente)",
+      "item": [
+        {
+          "name": "Cancelar pedido (solo estado PENDIENTE)",
+          "request": {
+            "method": "DELETE",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+              { "key": "Content-Type", "value": "application/json" }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"telefono\": \"3002000002\",\n  \"direccion\": \"Calle 10 # 5-20, Medellín\"\n}"
+              "raw": "{\n  \"motivo\": \"Ya no necesito el producto\"\n}"
             },
             "url": {
-              "raw": "{{baseUrl}}/api/v1/users/perfil",
+              "raw": "{{baseUrl}}/api/v1/pedidos/1",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "users", "perfil"]
+              "path": ["api", "v1", "pedidos", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "CU-022 CRUD Categorías (Admin)",
+      "item": [
+        {
+          "name": "Listar categorías",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/categorias",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "categorias"]
+            }
+          }
+        },
+        {
+          "name": "Crear categoría",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Electrónica\",\n  \"descripcion\": \"Dispositivos electrónicos\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/categorias",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "categorias"]
+            }
+          }
+        },
+        {
+          "name": "Editar categoría",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Electrónica v2\",\n  \"descripcion\": \"Dispositivos electrónicos actualizados\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/categorias/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "categorias", "1"]
+            }
+          }
+        },
+        {
+          "name": "Eliminar categoría",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/categorias/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "categorias", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "CU-023 CRUD Productos (Admin)",
+      "item": [
+        {
+          "name": "Crear producto",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sku\": \"ASE-JAB-01\",\n  \"id_categoria\": 1,\n  \"id_proveedor\": 1,\n  \"nombre\": \"Jabón Líquido\",\n  \"descripcion\": \"Rinde 5 litros\",\n  \"precio\": 15000,\n  \"stock\": 50\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/productos",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "productos"]
+            }
+          }
+        },
+        {
+          "name": "Editar producto",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Jabón Líquido Premium\",\n  \"precio\": 18000,\n  \"stock\": 100\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/productos/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "productos", "1"]
+            }
+          }
+        },
+        {
+          "name": "Eliminar producto",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/productos/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "productos", "1"]
+            }
+          }
+        },
+        {
+          "name": "Ajustar stock",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cantidad_nueva\": 200,\n  \"motivo\": \"Ingreso de mercancía\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/productos/1/ajustar-stock",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "productos", "1", "ajustar-stock"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "CU-025 CRUD Proveedores (Admin)",
+      "item": [
+        {
+          "name": "Listar proveedores activos",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/proveedores",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "proveedores"]
+            }
+          }
+        },
+        {
+          "name": "Crear proveedor (sin imagen)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nit_proveedor\": \"900123456-7\",\n  \"razon_social\": \"Distribuidora ABC\",\n  \"telefono\": \"6012345678\",\n  \"email\": \"abc@proveedor.com\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/proveedores",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "proveedores"]
+            }
+          }
+        },
+        {
+          "name": "Editar proveedor",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"razon_social\": \"Distribuidora ABC S.A.S.\",\n  \"telefono\": \"6019999999\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/proveedores/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "proveedores", "1"]
+            }
+          }
+        },
+        {
+          "name": "Eliminar proveedor",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/proveedores/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "proveedores", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "CU-021 Admin Repartidores",
+      "item": [
+        {
+          "name": "Listar repartidores",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/repartidores",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "admin", "repartidores"]
+            }
+          }
+        },
+        {
+          "name": "Cambiar estado operativo",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": \"ACTIVO\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/repartidores/1/estado",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "admin", "repartidores", "1", "estado"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "CU-026 Admin Usuarios",
+      "item": [
+        {
+          "name": "Listar usuarios",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/usuarios",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "admin", "usuarios"]
+            }
+          }
+        },
+        {
+          "name": "Activar/Desactivar usuario",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"activo\": 0\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/usuarios/1/estado",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "admin", "usuarios", "1", "estado"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "CU-027 Admin Pedidos",
+      "item": [
+        {
+          "name": "Listar todos los pedidos",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/pedidos",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "admin", "pedidos"]
+            }
+          }
+        },
+        {
+          "name": "Detalle de pedido",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/pedidos/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "admin", "pedidos", "1"]
+            }
+          }
+        },
+        {
+          "name": "Actualizar estado del pedido",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": \"CONFIRMADO\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/pedidos/1/estado",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "admin", "pedidos", "1", "estado"]
+            }
+          }
+        },
+        {
+          "name": "Asignar repartidor",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_repartidor\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/pedidos/1/asignar",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "admin", "pedidos", "1", "asignar"]
+            }
+          }
+        },
+        {
+          "name": "Cancelar pedido (admin)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"motivo\": \"Producto agotado\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/pedidos/1/cancelar",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "admin", "pedidos", "1", "cancelar"]
+            }
+          }
+        },
+        {
+          "name": "Generar ticket HTML",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/pedidos/1/ticket",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "admin", "pedidos", "1", "ticket"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "CU-015 a CU-018 Repartidor",
+      "item": [
+        {
+          "name": "Dashboard repartidor (CU-015)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/repartidor/dashboard",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "repartidor", "dashboard"]
+            }
+          }
+        },
+        {
+          "name": "Detalle pedido asignado (CU-016)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/repartidor/pedidos/1/detalle",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "repartidor", "pedidos", "1", "detalle"]
+            }
+          }
+        },
+        {
+          "name": "Actualizar estado pedido (CU-017)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": \"EN_CAMINO\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/repartidor/pedidos/1/estado",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "repartidor", "pedidos", "1", "estado"]
+            }
+          }
+        },
+        {
+          "name": "Historial pedidos finalizados (CU-018)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/repartidor/historial",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "repartidor", "historial"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "CU-030 Analítica (Admin)",
+      "item": [
+        {
+          "name": "Resumen dashboard",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/analitica/resumen",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "analitica", "resumen"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Roles (Admin)",
+      "item": [
+        {
+          "name": "Listar roles",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/roles",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "roles"]
+            }
+          }
+        },
+        {
+          "name": "Actualizar rol de usuario",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_usuario\": 2,\n  \"id_rol\": 3\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/roles",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "roles"]
             }
           }
         }
