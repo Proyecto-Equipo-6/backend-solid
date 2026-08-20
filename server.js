@@ -11,6 +11,8 @@ const UpdateRolUseCase = require('./backend/application/UpdateRolUseCase');
 const AdminUpdateRolController = require('./backend/infraestructure/controllers/AdminUpdateRolController');
 const createRolRouter = require('./backend/infraestructure/routes/rolRoutes');
 const LoginUseCase = require('./backend/application/LoginUseCase');
+const LogoutUseCase = require('./backend/application/LogoutUseCase');
+const InMemoryTokenBlacklistRepository = require('./backend/infraestructure/repositories/in-memory/InMemoryTokenBlacklistRepository');
 const AuthController = require('./backend/infraestructure/controllers/AuthController');
 const createAuthRouter = require('./backend/infraestructure/routes/authRoutes');
 const SolicitarRecuperacionUseCase = require('./backend/application/SolicitarRecuperacionUseCase');
@@ -124,7 +126,11 @@ const createUserUseCase = new CreateUserUseCase(userRepository);
 // --- Inyección de Dependencias para el Perfil (CU-004/CU-005, DIP) ---
 const obtenerPerfilUseCase = new ObtenerPerfilUseCase(userRepository);
 const actualizarPerfilUseCase = new ActualizarPerfilUseCase(userRepository);
-const autenticar = crearAutenticador(process.env.JWT_SECRET);
+
+// RN-024: lista negra de tokens revocados al cerrar sesión (se crea antes
+// del autenticador porque el middleware la consulta en cada petición).
+const tokenBlacklistRepository = new InMemoryTokenBlacklistRepository();
+const autenticar = crearAutenticador(process.env.JWT_SECRET, tokenBlacklistRepository);
 
 // 3. Inicializamos el controlador inyectándole el caso de uso
 const userController = new UserController(
@@ -145,6 +151,8 @@ const loginUseCase = new LoginUseCase(
   process.env.JWT_EXPIRES_IN
 );
 
+const logoutUseCase = new LogoutUseCase(tokenBlacklistRepository);
+
 // --- Inyección de Dependencias para Recuperación de Contraseña (DIP) ---
 const tokensRecuperacionRepository = new MySQLTokensRecuperacionRepository();
 const emailSender = new SmtpEmailSender();
@@ -161,7 +169,8 @@ const restablecerContrasenaUseCase = new RestablecerContrasenaUseCase(
 const authController = new AuthController(
   loginUseCase,
   solicitarRecuperacionUseCase,
-  restablecerContrasenaUseCase
+  restablecerContrasenaUseCase,
+  logoutUseCase
 );
 
 // --- Inyección de Dependencias para Categorías (CU-022, DIP) ---

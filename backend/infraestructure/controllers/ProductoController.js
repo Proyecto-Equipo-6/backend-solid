@@ -28,7 +28,8 @@ class ProductoController {
 
   async listarPublicos(req, res) {
     try {
-      const productos = await this.listarProductosUseCase.execute();
+      const { pagina, limite } = req.query;
+      const productos = await this.listarProductosUseCase.execute({ pagina, limite });
       return res.status(200).json(productos);
     } catch (error) {
       const status = error.status || 500;
