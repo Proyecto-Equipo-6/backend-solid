@@ -17,7 +17,7 @@ class LogoutUseCase {
     // Decodificar el payload sin verificar firma para conocer la expiración.
     let expiraEn = null;
     try {
-      const payload any = JSON.parse(Buffer.from(token.split('.')[1], 'base64url').toString('utf8'));
+      const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64url').toString('utf8'));
       if (payload && payload.exp) expiraEn = new Date(payload.exp * 1000);
     } catch {
       // Si el token no se puede decodificar, se revoca igualmente sin expiración.
