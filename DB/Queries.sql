@@ -2,39 +2,49 @@
 -- ARCHIVO: queries.sql
 -- DESCRIPCIÓN: Consultas de Reportes, Métricas y Logs
 -- BASE DE DATOS: sistema_comercial
--- NOTA: Los strings duplicados (ej. 'Cliente Eliminado') son
---       literales SQL que no pueden usar constantes en SQL puro.
+-- NOTA: Los strings duplicados se centralizaron en variables de sesión
+--       (ej. @FORMATO_FECHA_HORA) para evitar literales repetidos.
 -- =====================================================
 
 USE sistema_comercial;
 
+-- Constante de formato de fecha/hora usada en todos los reportes
+SET @FORMATO_FECHA_HORA = '%d/%m/%Y %H:%i';
+
 -- =====================================================
 -- 1. REPORTE DE VENTAS Y PEDIDOS DETALLADO
--- (Alineado con pedidos, pedido_detalles y metodos_pago)
+-- (Separado en 2 consultas para respetar el límite de 3 tablas
+--  por consulta de SonarQube. 1A: encabezado. 1B: detalle de ítems.)
 -- =====================================================
+-- 1A. ENCABEZADO DE PEDIDOS
 SELECT 
     p.id_pedido                                             AS Pedido_No,
-    DATE_FORMAT(p.fecha_pedido, '%d/%m/%Y %H:%i')           AS Fecha_Pedido,
+    DATE_FORMAT(p.fecha_pedido, @FORMATO_FECHA_HORA)        AS Fecha_Pedido,
     IFNULL(u.nombre_apellido, 'Cliente Eliminado')          AS Cliente,
     u.tipo_documento                                        AS Tipo_Doc,
     u.numero_documento                                      AS Documento,
     p.direccion_entrega                                     AS Direccion,
     mp.nombre                                               AS Metodo_Pago,
-    IFNULL(cat.nombre, 'Sin Categoría')                     AS Categoria,
-    IFNULL(prod.nombre, 'Producto Eliminado')               AS Producto,
-    prod.sku                                                AS SKU,
-    IFNULL(pd.cantidad, 0)                                  AS Cantidad,
-    IFNULL(pd.precio_unitario, 0)                           AS Precio_Unitario,
-    IFNULL(pd.subtotal, 0)                                  AS Subtotal_Item,
     p.total                                                 AS Total_Pedido,
     p.estado                                                AS Estado_Pedido
 FROM pedidos p
 INNER JOIN usuarios u           ON p.id_usuario = u.id_usuario
 INNER JOIN metodos_pago mp      ON p.id_metodo_pago = mp.id_metodo_pago
-LEFT JOIN pedido_detalles pd    ON p.id_pedido = pd.id_pedido
-LEFT JOIN productos prod        ON pd.id_producto = prod.id_producto
-LEFT JOIN categorias cat        ON prod.id_categoria = cat.id_categoria
 ORDER BY p.fecha_pedido DESC;
+
+-- 1B. DETALLE DE ÍTEMS POR PEDIDO
+SELECT 
+    pd.id_pedido                                            AS Pedido_No,
+    IFNULL(cat.nombre, 'Sin Categoría')                     AS Categoria,
+    IFNULL(prod.nombre, 'Producto Eliminado')               AS Producto,
+    prod.sku                                                AS SKU,
+    IFNULL(pd.cantidad, 0)                                  AS Cantidad,
+    IFNULL(pd.precio_unitario, 0)                           AS Precio_Unitario,
+    IFNULL(pd.subtotal, 0)                                  AS Subtotal_Item
+FROM pedido_detalles pd
+INNER JOIN productos prod       ON pd.id_producto = prod.id_producto
+LEFT JOIN categorias cat        ON prod.id_categoria = cat.id_categoria
+ORDER BY pd.id_pedido DESC;
 
 
 -- =====================================================
@@ -76,7 +86,7 @@ SELECT
     IFNULL(r.nombre, 'SIN ROL')                             AS Rol,
     IFNULL(r.descripcion, '—')                              AS Permisos,
     CASE WHEN u.activo = 1 THEN 'ACTIVO' ELSE 'INACTIVO' END AS Estado_Cuenta,
-    DATE_FORMAT(u.fecha_creacion, '%d/%m/%Y %H:%i')         AS Fecha_Registro
+    DATE_FORMAT(u.fecha_creacion, @FORMATO_FECHA_HORA)         AS Fecha_Registro
 FROM usuarios u
 LEFT JOIN roles r ON u.id_rol = r.id_rol
 ORDER BY r.nombre ASC, u.nombre_apellido ASC;
@@ -100,7 +110,7 @@ SELECT
         WHEN p.stock < cd.cantidad THEN 'STOCK INSUFICIENTE'
         ELSE 'LISTO PARA COMPRAR'
     END                                                     AS Disponibilidad,
-    DATE_FORMAT(c.fecha_actualizacion, '%d/%m/%Y %H:%i')    AS Ultima_Actividad
+    DATE_FORMAT(c.fecha_actualizacion, @FORMATO_FECHA_HORA)    AS Ultima_Actividad
 FROM carrito c
 INNER JOIN usuarios u          ON c.id_usuario = u.id_usuario
 INNER JOIN carrito_detalles cd ON c.id_carrito = cd.id_carrito
@@ -134,8 +144,8 @@ SELECT
     t.id_token                                              AS ID_Token,
     u.nombre_apellido                                       AS Usuario,
     u.email                                                 AS Email,
-    DATE_FORMAT(t.fecha_creacion, '%d/%m/%Y %H:%i')         AS Solicitado_El,
-    DATE_FORMAT(t.expira_en, '%d/%m/%Y %H:%i')              AS Expira_El,
+DATE_FORMAT(t.fecha_creacion, @FORMATO_FECHA_HORA)         AS Solicitado_El,
+DATE_FORMAT(t.expira_en, @FORMATO_FECHA_HORA)              AS Expira_El,
     CASE 
         WHEN t.usado = 1 THEN 'UTILIZADO'
         WHEN t.expira_en < NOW() THEN 'EXPIRADO'

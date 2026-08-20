@@ -2,7 +2,7 @@ const ErrorConflicto = require('./errors/ErrorConflicto');
 const ErrorValidacion = require('./errors/ErrorValidacion');
 const bcrypt = require('bcrypt');
 
-const TIPOS_DOCUMENTO = ['CC', 'Pasaporte', 'CE', 'Otro'];
+const TIPOS_DOCUMENTO = new Set(['CC', 'Pasaporte', 'CE', 'Otro']);
 
 /**
  * Caso de Uso: CrearUsuarioAdminUseCase
@@ -31,7 +31,7 @@ class CrearUsuarioAdminUseCase {
     if (id_rol === undefined || !Number(id_rol)) {
       throw new ErrorValidacion('El rol es obligatorio');
     }
-    if (tipo_documento && !TIPOS_DOCUMENTO.includes(tipo_documento)) {
+    if (tipo_documento && !TIPOS_DOCUMENTO.has(tipo_documento)) {
       throw new ErrorValidacion('Tipo de documento no válido');
     }
 
@@ -62,7 +62,8 @@ class CrearUsuarioAdminUseCase {
       activo: 1,
     });
 
-    const { password: _omitida, ...datosPublicos } = guardado;
+    const datosPublicos = { ...guardado };
+    delete datosPublicos.password;
     return { usuario: datosPublicos, mensaje: 'Usuario creado correctamente.' };
   }
 }
