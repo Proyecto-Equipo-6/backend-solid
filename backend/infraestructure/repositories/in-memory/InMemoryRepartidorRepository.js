@@ -43,6 +43,10 @@ class InMemoryRepartidorRepository extends RepartidorRepository {
     return new Repartidor({ ...nuevoRepartidor });
   }
 
+  async crear(datos) {
+    return this.guardar({ ...datos, estado: 'DISPONIBLE' });
+  }
+
   async actualizar(idRepartidor, datos) {
     const index = this.repartidores.findIndex(r => r.id_usuario === idRepartidor);
     if (index === -1) throw new Error('Repartidor no encontrado');

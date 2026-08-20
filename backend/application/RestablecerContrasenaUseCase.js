@@ -36,6 +36,12 @@ class RestablecerContrasenaUseCase {
       throw new ErrorTokenInvalido();
     }
 
+    // RN-021: la nueva contraseña debe ser diferente a la anterior.
+    const esIgualAnterior = await bcrypt.compare(nueva_password, usuario.password);
+    if (esIgualAnterior) {
+      throw new Error('La nueva contraseña debe ser diferente a la anterior');
+    }
+
     const saltRounds = Number(process.env.BCRYPT_ROUNDS) || 10;
     const hash = await bcrypt.hash(nueva_password, saltRounds);
 

@@ -142,4 +142,20 @@ describe('CU-002 Registrar cuenta (CreateUserUseCase)', () => {
     expect(error.message).toBe('Por favor verifique los campos del formulario');
     expect(repositorio.users).toHaveLength(0);
   });
+
+  it('rechaza nombre con caracteres especiales o números (RF-001.1)', async () => {
+    const casos = [
+      'Ana Torres 123',
+      'Ana@Torres',
+      'Ana_Torres',
+    ];
+
+    for (const nombre_apellido of casos) {
+      const error = await casoUso
+        .execute({ ...datosValidos, nombre_apellido })
+        .catch((e) => e);
+      expect(error.message).toBe('Por favor verifique los campos del formulario');
+    }
+    expect(repositorio.users).toHaveLength(0);
+  });
 });

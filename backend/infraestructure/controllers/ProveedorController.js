@@ -10,11 +10,13 @@ class ProveedorController {
     editarProveedorUseCase,
     eliminarProveedorUseCase,
     listarProveedoresActivosUseCase,
+    listarTodosProveedoresUseCase,
   }) {
     this.crearProveedorUseCase = crearProveedorUseCase;
     this.editarProveedorUseCase = editarProveedorUseCase;
     this.eliminarProveedorUseCase = eliminarProveedorUseCase;
     this.listarProveedoresActivosUseCase = listarProveedoresActivosUseCase;
+    this.listarTodosProveedoresUseCase = listarTodosProveedoresUseCase;
   }
 
   async crear(req, res) {
@@ -84,6 +86,15 @@ class ProveedorController {
   async listarActivos(req, res) {
     try {
       const proveedores = await this.listarProveedoresActivosUseCase.ejecutar();
+      return res.status(200).json(proveedores);
+    } catch (error) {
+      return res.status(500).json({ error: error.message });
+    }
+  }
+
+  async listarTodos(req, res) {
+    try {
+      const proveedores = await this.listarTodosProveedoresUseCase.ejecutar();
       return res.status(200).json(proveedores);
     } catch (error) {
       return res.status(500).json({ error: error.message });

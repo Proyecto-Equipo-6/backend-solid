@@ -50,7 +50,7 @@ describe('Módulo CRUD productos - Aseo (CU-023)', () => {
     expect(producto.sku).toBe('ASE-JAB-01');
     expect(producto.nombre).toBe('Jabón Líquido');
     expect(producto.estado).toBe(1);
-    expect(producto.imagen_url).toBe('sin_imagen.jpg');
+    expect(producto.imagen_url).toBe('sin_imagen.jpg'); // se incluye CP-CU-023-02: Imagen por defecto
     expect(producto.fecha_creacion).toBeDefined();
   });
 
@@ -140,7 +140,7 @@ describe('Módulo CRUD productos - Aseo (CU-023)', () => {
         precio: 0,
         stock: 10
       })
-    ).rejects.toThrow('El precio debe ser un número mayor a cero');
+    ).rejects.toThrow('El precio debe ser mayor a cero');
 
     await expect(
       useCase.ejecutar({

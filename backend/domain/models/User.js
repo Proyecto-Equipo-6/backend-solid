@@ -26,6 +26,8 @@ class User {
     const telefonoValido = /^\d{10}$/.test(this.telefono || '');
     const documentoValido = /^\d+$/.test(this.numero_documento || '');
     const emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.email || '');
+  
+    const nombreValido = /^[A-Za-zÁÉÍÓÚÑáéíóúñ\s]+$/.test(this.nombre_apellido || '');
     const passwordValida =
       typeof this.password === 'string' &&
       this.password.length >= 8 &&
@@ -33,7 +35,7 @@ class User {
       /[0-9]/.test(this.password);
 
     return Boolean(
-      this.nombre_apellido &&
+      this.nombre_apellido && nombreValido &&
       this.tipo_documento && tiposValidos.includes(this.tipo_documento) &&
       this.numero_documento && documentoValido &&
       this.email && emailValido &&

@@ -11,6 +11,8 @@ const UpdateRolUseCase = require('./backend/application/UpdateRolUseCase');
 const AdminUpdateRolController = require('./backend/infraestructure/controllers/AdminUpdateRolController');
 const createRolRouter = require('./backend/infraestructure/routes/rolRoutes');
 const LoginUseCase = require('./backend/application/LoginUseCase');
+const LogoutUseCase = require('./backend/application/LogoutUseCase');
+const InMemoryTokenBlacklistRepository = require('./backend/infraestructure/repositories/in-memory/InMemoryTokenBlacklistRepository');
 const AuthController = require('./backend/infraestructure/controllers/AuthController');
 const createAuthRouter = require('./backend/infraestructure/routes/authRoutes');
 const SolicitarRecuperacionUseCase = require('./backend/application/SolicitarRecuperacionUseCase');
@@ -19,6 +21,7 @@ const MySQLTokensRecuperacionRepository = require('./backend/infraestructure/rep
 const SmtpEmailSender = require('./backend/infraestructure/services/SmtpEmailSender');
 const MySQLProductoRepository = require('./backend/infraestructure/repositories/mysql/MySQLProductoRepository');
 const ListarProductosPublicosUseCase = require('./backend/application/ListarProductosPublicosUseCase');
+const ListarTodosProductosUseCase = require('./backend/application/listarTodosProductosUseCase');
 const ObtenerProductoPublicoUseCase = require('./backend/application/ObtenerProductoPublicoUseCase');
 const CrearProductoUseCase = require('./backend/application/crearProductoUseCase');
 const EditarProductoUseCase = require('./backend/application/editarProductoUseCase');
@@ -28,6 +31,7 @@ const ProductoController = require('./backend/infraestructure/controllers/Produc
 const createProductoRouter = require('./backend/infraestructure/routes/productoRoutes');
 const MySQLCategoriaRepository = require('./backend/infraestructure/repositories/mysql/MySQLCategoriaRepository');
 const ListarCategoriasUseCase = require('./backend/application/ListarCategoriasUseCase');
+const ListarTodasCategoriasUseCase = require('./backend/application/listarTodasCategoriasUseCase');
 const CrearCategoriaUseCase = require('./backend/application/crearCategoriaUseCase');
 const EditarCategoriaUseCase = require('./backend/application/editarCategoriaUseCase');
 const EliminarCategoriaUseCase = require('./backend/application/eliminarCategoriaUseCase');
@@ -71,6 +75,7 @@ const CrearProveedorUseCase = require('./backend/application/crearProveedorUseCa
 const EditarProveedorUseCase = require('./backend/application/editarProveedorUseCase');
 const EliminarProveedorUseCase = require('./backend/application/eliminarProveedorUseCase');
 const ListarProveedoresActivosUseCase = require('./backend/application/listarProveedoresActivosUseCase');
+const ListarTodosProveedoresUseCase = require('./backend/application/listarTodosProveedoresUseCase');
 const ProveedorController = require('./backend/infraestructure/controllers/ProveedorController');
 const createProveedorRouter = require('./backend/infraestructure/routes/proveedorRoutes');
 
@@ -121,7 +126,11 @@ const createUserUseCase = new CreateUserUseCase(userRepository);
 // --- Inyección de Dependencias para el Perfil (CU-004/CU-005, DIP) ---
 const obtenerPerfilUseCase = new ObtenerPerfilUseCase(userRepository);
 const actualizarPerfilUseCase = new ActualizarPerfilUseCase(userRepository);
-const autenticar = crearAutenticador(process.env.JWT_SECRET);
+
+// RN-024: lista negra de tokens revocados al cerrar sesión (se crea antes
+// del autenticador porque el middleware la consulta en cada petición).
+const tokenBlacklistRepository = new InMemoryTokenBlacklistRepository();
+const autenticar = crearAutenticador(process.env.JWT_SECRET, tokenBlacklistRepository);
 
 // 3. Inicializamos el controlador inyectándole el caso de uso
 const userController = new UserController(
@@ -142,6 +151,8 @@ const loginUseCase = new LoginUseCase(
   process.env.JWT_EXPIRES_IN
 );
 
+const logoutUseCase = new LogoutUseCase(tokenBlacklistRepository);
+
 // --- Inyección de Dependencias para Recuperación de Contraseña (DIP) ---
 const tokensRecuperacionRepository = new MySQLTokensRecuperacionRepository();
 const emailSender = new SmtpEmailSender();
@@ -158,17 +169,20 @@ const restablecerContrasenaUseCase = new RestablecerContrasenaUseCase(
 const authController = new AuthController(
   loginUseCase,
   solicitarRecuperacionUseCase,
-  restablecerContrasenaUseCase
+  restablecerContrasenaUseCase,
+  logoutUseCase
 );
 
 // --- Inyección de Dependencias para Categorías (CU-022, DIP) ---
 const categoriaRepository = new MySQLCategoriaRepository();
 const listarCategoriasUseCase = new ListarCategoriasUseCase(categoriaRepository);
+const listarTodasCategoriasUseCase = new ListarTodasCategoriasUseCase(categoriaRepository);
 const crearCategoriaUseCase = new CrearCategoriaUseCase(categoriaRepository);
 const editarCategoriaUseCase = new EditarCategoriaUseCase(categoriaRepository);
 const eliminarCategoriaUseCase = new EliminarCategoriaUseCase(categoriaRepository);
 const categoriaController = new CategoriaController({
   listarCategoriasUseCase,
+  listarTodasCategoriasUseCase,
   crearCategoriaUseCase,
   editarCategoriaUseCase,
   eliminarCategoriaUseCase,
@@ -180,17 +194,20 @@ const crearProveedorUseCase = new CrearProveedorUseCase(proveedorRepository);
 const editarProveedorUseCase = new EditarProveedorUseCase(proveedorRepository);
 const eliminarProveedorUseCase = new EliminarProveedorUseCase(proveedorRepository);
 const listarProveedoresActivosUseCase = new ListarProveedoresActivosUseCase(proveedorRepository);
+const listarTodosProveedoresUseCase = new ListarTodosProveedoresUseCase(proveedorRepository);
 const proveedorController = new ProveedorController({
   crearProveedorUseCase,
   editarProveedorUseCase,
   eliminarProveedorUseCase,
   listarProveedoresActivosUseCase,
+  listarTodosProveedoresUseCase,
 });
 
 // --- Inyección de Dependencias para Productos (CU-023, DIP) ---
 const productoRepository = new MySQLProductoRepository();
 const ajustarStockProductoUseCase = new AjustarStockProductoUseCase(productoRepository);
 const listarProductosUseCase = new ListarProductosPublicosUseCase(productoRepository);
+const listarTodosProductosUseCase = new ListarTodosProductosUseCase(productoRepository);
 const obtenerProductoUseCase = new ObtenerProductoPublicoUseCase(productoRepository);
 const crearProductoUseCase = new CrearProductoUseCase(productoRepository, categoriaRepository, proveedorRepository);
 const editarProductoUseCase = new EditarProductoUseCase(productoRepository, categoriaRepository, proveedorRepository);
@@ -198,6 +215,7 @@ const eliminarProductoUseCase = new EliminarProductoUseCase(productoRepository);
 const buscarProductosUseCase = new BuscarProductosUseCase(productoRepository);
 const productoController = new ProductoController({
   listarProductosUseCase,
+  listarTodosProductosUseCase,
   obtenerProductoUseCase,
   crearProductoUseCase,
   editarProductoUseCase,

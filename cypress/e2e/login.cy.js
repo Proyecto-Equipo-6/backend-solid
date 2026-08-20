@@ -13,4 +13,6 @@ describe('Prueba E2E de Autenticación - Remates el Paisa', () => {
 
     cy.log('Prueba de E2E ejecutada exitosamente');
   });
-});
+
+  
+})

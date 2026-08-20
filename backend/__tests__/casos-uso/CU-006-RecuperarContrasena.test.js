@@ -168,4 +168,15 @@ describe('CU-006 Recuperar contraseña (RestablecerContrasenaUseCase)', () => {
     expect(sinNumero.message).toBe('La contraseña debe tener mínimo 8 caracteres, una mayúscula y un número');
     expect(corta.message).toBe('La contraseña debe tener mínimo 8 caracteres, una mayúscula y un número');
   });
+
+  it('rechaza que la nueva contraseña sea igual a la anterior (RN-021)', async () => {
+    await guardarToken();
+
+    const error = await casoUso
+      .execute({ token: 'token-valido-123', nueva_password: 'Abcd1234' })
+      .catch((e) => e);
+
+    expect(error.message).toBe('La nueva contraseña debe ser diferente a la anterior');
+    expect(repositorio.users[0].password).toBe(usuario.password);
+  });
 });

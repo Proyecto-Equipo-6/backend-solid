@@ -35,6 +35,14 @@ class UserRepository {
   async updateEstado(id, activo) {
     throw new Error("Método 'updateEstado' no implementado");
   }
+
+  async actualizar(id, datos) {
+    throw new Error("Método 'actualizar' no implementado");
+  }
+
+  async contarPorRol(idRol) {
+    throw new Error("Método 'contarPorRol' no implementado");
+  }
 }
 
 module.exports = UserRepository;

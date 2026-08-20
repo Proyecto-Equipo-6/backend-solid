@@ -3,15 +3,15 @@
  */
 const MENSAJES = {
   NO_ENCONTRADO: 'no encontrado',
+  CONFLICTO: 'ya se encuentra',
 };
 
-/**
- * Determina si un error es de tipo "no encontrado" (404).
- * @param {string} mensaje - Mensaje del error
- * @returns {boolean}
- */
 function esNoEncontrado(mensaje) {
   return mensaje?.includes(MENSAJES.NO_ENCONTRADO);
 }
 
-module.exports = { MENSAJES, esNoEncontrado };
+function esConflicto(mensaje) {
+  return mensaje?.includes(MENSAJES.CONFLICTO);
+}
+
+module.exports = { MENSAJES, esNoEncontrado, esConflicto };

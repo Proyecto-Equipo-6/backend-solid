@@ -35,12 +35,16 @@ describe('CU-001 Visualizar catálogo (ListarProductosPublicosUseCase)', () => {
     ]);
     const casoUso = new ListarProductosPublicosUseCase(repositorio);
 
-    const productos = await casoUso.execute();
+    const resultado = await casoUso.execute();
+    const productos = resultado.items;
 
     expect(productos).toHaveLength(2);
     expect(productos.map((p) => p.id_producto)).toEqual([1, 2]);
     expect(productos[0].categoria).toBe('Cocina');
     expect(productos[0].proveedor).toBe('Mega Plásticos S.A.S.');
+    expect(resultado.total).toBe(2);
+    expect(resultado.pagina).toBe(1);
+    expect(resultado.totalPaginas).toBe(1);
   });
 
   it('devuelve lista vacía si no hay productos activos', async () => {
@@ -49,9 +53,29 @@ describe('CU-001 Visualizar catálogo (ListarProductosPublicosUseCase)', () => {
     ]);
     const casoUso = new ListarProductosPublicosUseCase(repositorio);
 
-    const productos = await casoUso.execute();
+    const resultado = await casoUso.execute();
 
-    expect(productos).toEqual([]);
+    expect(resultado.items).toEqual([]);
+    expect(resultado.total).toBe(0);
+  });
+
+  it('aplica paginación server-side con límite por defecto de 12 (RN-011)', async () => {
+    const repositorio = crearRepositorioConProductos(
+      Array.from({ length: 15 }, (_, i) => ({
+        ...PRODUCTO_ACTIVO,
+        id_producto: i + 1,
+        sku: `SKU-${i + 1}`,
+      }))
+    );
+    const casoUso = new ListarProductosPublicosUseCase(repositorio);
+
+    const pagina1 = await casoUso.execute({ pagina: 1 });
+    expect(pagina1.items).toHaveLength(12);
+    expect(pagina1.total).toBe(15);
+    expect(pagina1.totalPaginas).toBe(2);
+
+    const pagina2 = await casoUso.execute({ pagina: 2 });
+    expect(pagina2.items).toHaveLength(3);
   });
 });
 
