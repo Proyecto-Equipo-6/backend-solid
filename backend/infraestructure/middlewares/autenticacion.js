@@ -10,7 +10,11 @@ const ErrorSesionExpirada = require('../../application/errors/ErrorSesionExpirad
  */
 function crearAutenticador(jwtSecret, tokenBlacklistRepository = null) {
   return async function autenticar(req, res, next) {
-    const token = req.cookies?.token;
+    let token = req.cookies?.token;
+
+    if (!token && req.headers?.authorization?.startsWith('Bearer ')) {
+      token = req.headers.authorization.slice(7);
+    }
 
     if (!token) {
       return next(new ErrorSesionExpirada());
