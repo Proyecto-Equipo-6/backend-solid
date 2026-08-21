@@ -42,18 +42,16 @@ class MySQLRepartidorRepository extends RepartidorRepository {
     return repartidor?.estado === 'DISPONIBLE';
   }
 
+  // El estado "ocupado" se deriva de los pedidos activos del repartidor
+  // (ver ConsultarRepartidoresUseCase). Estos métodos no alteran el estado
+  // de cuenta (activo) para no marcar como inactivo a un repartidor que
+  // simplemente está trabajando.
   async marcarOcupado(idRepartidor) {
-    await pool.execute(
-      'UPDATE repartidores SET activo = 0 WHERE id_usuario = ?',
-      [idRepartidor]
-    );
+    await this.buscarPorId(idRepartidor);
   }
 
   async marcarDisponible(idRepartidor) {
-    await pool.execute(
-      'UPDATE repartidores SET activo = 1 WHERE id_usuario = ?',
-      [idRepartidor]
-    );
+    await this.buscarPorId(idRepartidor);
   }
 
   async actualizar(idRepartidor, datos) {

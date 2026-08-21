@@ -13,6 +13,7 @@ class ObtenerDetallePedidoAdminUseCase {
 
     return {
       id_pedido: pedido.id_pedido,
+      id_repartidor: pedido.id_repartidor,
       cliente: {
         nombre: pedido.clienteNombre || 'Cliente no especificado',
         telefono: pedido.clienteTelefono || 'No registrado'

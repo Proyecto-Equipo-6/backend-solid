@@ -5,8 +5,7 @@ const { DIAGRAMA_SEGUIMIENTO } = require('../domain/models/Pedido');
 
 /**
  * CU-016 · Ver detalles pedido (repartidor)
- * Muestra la información logística y de manipulación del pedido asignado.
- * RN-062: no se muestran los productos.
+ * Muestra la información logística, los productos del pedido y el seguimiento.
  * RN-063: solo el repartidor asignado puede ver los datos sensibles.
  * RN-064: se incluye el diagrama de seguimiento en orden fijo.
  */
@@ -38,6 +37,8 @@ class VerDetallePedidoUseCase {
       throw new Error('Acceso denegado: el pedido pertenece a otro repartidor');
     }
 
+    const detalles = await this.pedidoRepo.obtenerDetallesPorPedido(pedidoId);
+
     return {
       id_pedido: pedido.id_pedido,
       clienteNombre: pedido.clienteNombre,
@@ -47,7 +48,14 @@ class VerDetallePedidoUseCase {
       caracteristicasLogistica: pedido.caracteristicasLogistica,
       diagramaSeguimiento: DIAGRAMA_SEGUIMIENTO,
       fecha_pedido: pedido.fecha_pedido,
-      fecha_actualizacion: pedido.fecha_actualizacion
+      fecha_actualizacion: pedido.fecha_actualizacion,
+      productos: detalles.map((d) => ({
+        id_producto: d.id_producto,
+        nombre: d.producto_nombre || `Producto #${d.id_producto}`,
+        cantidad: d.cantidad,
+        precio_unitario: d.precio_unitario,
+        subtotal: d.subtotal,
+      })),
     };
   }
 }

@@ -3,6 +3,7 @@ const crearDashboardPedidosController = require('../controllers/dashboardPedidos
 const crearDetallePedidoController = require('../controllers/detallePedidoController');
 const crearActualizarEstadoPedidoController = require('../controllers/actualizarEstadoPedidoController');
 const crearHistorialPedidosController = require('../controllers/historialPedidosController');
+const { uploadEvidencia } = require('../middlewares/uploadMiddleware');
 
 /**
  * Fábrica de rutas del módulo Repartidor (CU-015 a CU-018).
@@ -26,7 +27,7 @@ function createPedidosRepartidorRouter(pedidoRepo, autenticar, requerirRepartido
   router.get('/pedidos/:pedidoId/detalle', detalleController);
 
   // CU-017: actualizar estado (ASIGNADO → EN_CAMINO → ENTREGADO / NO_ENTREGADO)
-  router.patch('/pedidos/:pedidoId/estado', actualizarEstadoController);
+  router.patch('/pedidos/:pedidoId/estado', uploadEvidencia, actualizarEstadoController);
 
   // CU-018: historial de pedidos finalizados
   router.get('/historial', historialController);

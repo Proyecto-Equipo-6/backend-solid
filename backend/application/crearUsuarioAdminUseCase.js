@@ -1,16 +1,19 @@
 const ErrorConflicto = require('./errors/ErrorConflicto');
 const ErrorValidacion = require('./errors/ErrorValidacion');
 const bcrypt = require('bcrypt');
+const { ROL_REPARTIDOR } = require('../constants');
 
 const TIPOS_DOCUMENTO = new Set(['CC', 'Pasaporte', 'CE', 'Otro']);
 
 /**
  * Caso de Uso: CrearUsuarioAdminUseCase
  * Permite al administrador crear un usuario con un rol específico.
+ * Si el rol es repartidor, crea también su registro en la tabla repartidores.
  */
 class CrearUsuarioAdminUseCase {
-  constructor(userRepository) {
+  constructor(userRepository, repartidorRepository) {
     this.userRepository = userRepository;
+    this.repartidorRepository = repartidorRepository;
   }
 
   async execute(datos) {
@@ -61,6 +64,11 @@ class CrearUsuarioAdminUseCase {
       direccion: direccion || null,
       activo: 1,
     });
+
+    if (Number(id_rol) === ROL_REPARTIDOR) {
+      const idUsuario = guardado.id ?? guardado.id_usuario;
+      await this.repartidorRepository.crear({ id_usuario: idUsuario });
+    }
 
     const datosPublicos = { ...guardado };
     delete datosPublicos.password;

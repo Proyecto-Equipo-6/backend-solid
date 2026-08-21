@@ -42,6 +42,8 @@ class VerHistorialPedidosUseCase {
         fecha: pedido.fechaEntregaReal,
         estado: pedido.estado,
         direccion_entrega: pedido.direccion_entrega,
+        total: pedido.total,
+        observacion: pedido.observaciones,
       })),
       mensaje: null,
     };

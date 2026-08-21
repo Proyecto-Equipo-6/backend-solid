@@ -8,12 +8,16 @@ class AsignarRepartidorUseCase {
     const pedido = await this.pedidoRepo.obtenerDetallePedido(id_pedido);
     if (!pedido) throw new Error('Pedido no encontrado');
 
-    if (pedido.estado !== 'CONFIRMADO') {
-      throw new Error('El pedido no está en estado Confirmado');
+    if (pedido.estado !== 'CONFIRMADO' && pedido.estado !== 'ASIGNADO') {
+      throw new Error('El pedido no está en estado Confirmado o Asignado');
     }
 
-    if (pedido.id_repartidor !== null && pedido.id_repartidor !== undefined) {
-      throw new Error('El pedido ya fue asignado');
+    if (
+      pedido.id_repartidor !== null &&
+      pedido.id_repartidor !== undefined &&
+      Number(pedido.id_repartidor) !== Number(id_usuario_repartidor)
+    ) {
+      await this.repartidorRepo.marcarDisponible(pedido.id_repartidor);
     }
 
     const disponible = await this.repartidorRepo.estaDisponible(id_usuario_repartidor);

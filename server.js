@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
+const path = require('path');
 const MySQLUserRepository = require('./backend/infraestructure/repositories/mysql/MySQLUserRepository');
 const CreateUserUseCase = require('./backend/application/CreateUserUseCase');
 const UserController = require('./backend/infraestructure/controllers/UserController');
@@ -297,6 +298,8 @@ const obtenerDetallePedidoAdminUseCase = new ObtenerDetallePedidoAdminUseCase(pe
 const actualizarEstadoPedidoAdminUseCase = new ActualizarEstadoPedidoAdminUseCase(pedidoRepartidorRepository);
 const cancelarPedidoAdminUseCase = new CancelarPedidoAdminUseCase(pedidoRepartidorRepository, productoRepository, repartidorRepository);
 const asignarRepartidorUseCase = new AsignarRepartidorUseCase(pedidoRepartidorRepository, repartidorRepository);
+const DesasignarRepartidorUseCase = require('./backend/application/desasignarRepartidorUseCase');
+const desasignarRepartidorUseCase = new DesasignarRepartidorUseCase(pedidoRepartidorRepository, repartidorRepository);
 const generarTicketPedidoUseCase = new GenerarTicketPedidoUseCase(pedidoRepartidorRepository);
 const pedidoAdminController = new PedidoAdminController({
   obtenerTodosPedidosUseCase,
@@ -304,6 +307,7 @@ const pedidoAdminController = new PedidoAdminController({
   actualizarEstadoPedidoAdminUseCase,
   cancelarPedidoAdminUseCase,
   asignarRepartidorUseCase,
+  desasignarRepartidorUseCase,
   generarTicketPedidoUseCase,
 });
 
@@ -313,8 +317,8 @@ const ActualizarUsuarioAdminUseCase = require('./backend/application/actualizarU
 const EliminarUsuarioAdminUseCase = require('./backend/application/eliminarUsuarioAdminUseCase');
 const listarUsuariosAdminUseCase = new ListarUsuariosAdminUseCase(userRepository);
 const actualizarEstadoUsuarioUseCase = new ActualizarEstadoUsuarioUseCase(userRepository);
-const crearUsuarioAdminUseCase = new CrearUsuarioAdminUseCase(userRepository);
-const actualizarUsuarioAdminUseCase = new ActualizarUsuarioAdminUseCase(userRepository);
+const crearUsuarioAdminUseCase = new CrearUsuarioAdminUseCase(userRepository, repartidorRepository);
+const actualizarUsuarioAdminUseCase = new ActualizarUsuarioAdminUseCase(userRepository, repartidorRepository);
 const eliminarUsuarioAdminUseCase = new EliminarUsuarioAdminUseCase(userRepository);
 const adminUsuarioController = new AdminUsuarioController({
   listarUsuariosAdminUseCase,
@@ -338,6 +342,9 @@ app.use('/api/v1/proveedores', createProveedorRouter(proveedorController, autent
 app.use('/api/v1/admin/repartidores', createRepartidorAdminRouter(repartidorAdminController, autenticar, requerirAdmin));
 app.use('/api/v1/admin/pedidos', createPedidoAdminRouter(pedidoAdminController, autenticar, requerirAdmin));
 app.use('/api/v1/admin/usuarios', createUsuarioAdminRouter(adminUsuarioController, autenticar, requerirAdmin));
+
+// --- Archivos estáticos (evidencias guardadas localmente como fallback de Cloudinary) ---
+app.use('/api/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // --- 404 ---
 app.use((req, res) => {

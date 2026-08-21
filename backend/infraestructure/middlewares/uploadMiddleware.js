@@ -1,5 +1,7 @@
 const multer = require('multer');
 const cloudinary = require('cloudinary').v2;
+const fs = require('fs');
+const path = require('path');
 
 // Configuración de Cloudinary (variables en .env)
 cloudinary.config({
@@ -7,6 +9,8 @@ cloudinary.config({
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
+
+const DIRECTORIO_EVIDENCIAS = path.join(__dirname, '../../../uploads/evidencias');
 
 /**
  * Middleware de subida de evidencia fotográfica (CU-017).
@@ -63,4 +67,25 @@ async function subirEvidenciaFotografica(buffer, carpeta = 'nexbit/evidencias') 
   });
 }
 
-module.exports = { uploadEvidencia, uploadProducto, subirEvidenciaFotografica };
+/**
+ * Guarda la evidencia en el servidor local (fallback cuando Cloudinary no está
+ * disponible) y devuelve la ruta pública relativa.
+ * @param {Buffer} buffer - contenido del archivo
+ * @param {string} mimetype - tipo MIME del archivo
+ * @param {string} idPedido - id del pedido para nombrar el archivo
+ * @returns {string} ruta relativa accesible por HTTP (ej. /api/uploads/evidencias/...)
+ */
+function guardarEvidenciaLocal(buffer, mimetype, idPedido) {
+  if (!fs.existsSync(DIRECTORIO_EVIDENCIAS)) {
+    fs.mkdirSync(DIRECTORIO_EVIDENCIAS, { recursive: true });
+  }
+
+  const extension = mimetype === 'image/png' ? 'png' : mimetype === 'application/pdf' ? 'pdf' : 'jpg';
+  const nombreArchivo = `pedido_${idPedido}_${Date.now()}.${extension}`;
+  const rutaCompleta = path.join(DIRECTORIO_EVIDENCIAS, nombreArchivo);
+  fs.writeFileSync(rutaCompleta, buffer);
+
+  return `/api/uploads/evidencias/${nombreArchivo}`;
+}
+
+module.exports = { uploadEvidencia, uploadProducto, subirEvidenciaFotografica, guardarEvidenciaLocal };

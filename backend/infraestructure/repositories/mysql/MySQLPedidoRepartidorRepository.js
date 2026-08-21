@@ -29,16 +29,18 @@ class MySQLPedidoRepartidorRepository extends PedidoRepartidorRepository {
     });
   }
 
-  // CU-015: pedidos ASIGNADO del día (RN-059/RN-060)
+  // CU-015: pedidos del repartidor del día (RN-059/RN-060)
+  // Incluye ASIGNADO y EN_CAMINO para que el pedido activo siga el flujo
+  // hasta ENTREGADO/NO_ENTREGADO (CU-017).
   async obtenerPedidosDelDia(repartidorId) {
     const [filas] = await pool.execute(
       `SELECT p.*, u.nombre_apellido AS cliente_nombre, u.telefono AS cliente_telefono
        FROM pedidos p
        JOIN usuarios u ON u.id_usuario = p.id_usuario
        WHERE p.id_repartidor = ?
-         AND p.estado = 'ASIGNADO'
+         AND p.estado IN ('ASIGNADO', 'EN_CAMINO')
          AND DATE(p.fecha_actualizacion) = CURDATE()
-       ORDER BY p.fecha_actualizacion ASC`,
+       ORDER BY CASE WHEN p.estado = 'EN_CAMINO' THEN 0 ELSE 1 END, p.fecha_actualizacion ASC`,
       [repartidorId]
     );
     return filas.map((fila) => this._mapearFila(fila));
@@ -59,13 +61,18 @@ class MySQLPedidoRepartidorRepository extends PedidoRepartidorRepository {
 
   // CU-017: actualizar estado con validación de concurrencia (RN-065 a RN-070)
   async actualizarEstado(pedidoId, nuevoEstado, estadoAnterior, datosAdicionales = {}) {
+    const foto =
+      datosAdicionales.foto && typeof datosAdicionales.foto === 'object'
+        ? JSON.stringify(datosAdicionales.foto)
+        : datosAdicionales.foto || null;
+
     const [resultado] = await pool.execute(
       `UPDATE pedidos
        SET estado = ?, comprobante_url = COALESCE(?, comprobante_url), observaciones = COALESCE(?, observaciones)
        WHERE id_pedido = ? AND estado = ?`,
       [
         nuevoEstado,
-        datosAdicionales.foto || null,
+        foto,
         datosAdicionales.observacion || null,
         pedidoId,
         estadoAnterior,
@@ -193,7 +200,7 @@ class MySQLPedidoRepartidorRepository extends PedidoRepartidorRepository {
   async obtenerHistorialPedidos(repartidorId, filtros = {}) {
     const estadosFinales = ['ENTREGADO', 'NO_ENTREGADO', 'CANCELADO'];
     let sql = `
-      SELECT p.id_pedido, p.estado, p.direccion_entrega,
+      SELECT p.id_pedido, p.estado, p.direccion_entrega, p.total, p.observaciones,
              COALESCE(p.fecha_actualizacion, p.fecha_pedido) AS fechaEntregaReal
       FROM pedidos p
       WHERE p.id_repartidor = ?

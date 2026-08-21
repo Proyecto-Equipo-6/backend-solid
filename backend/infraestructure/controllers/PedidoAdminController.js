@@ -11,6 +11,7 @@ class PedidoAdminController {
     actualizarEstadoPedidoAdminUseCase,
     cancelarPedidoAdminUseCase,
     asignarRepartidorUseCase,
+    desasignarRepartidorUseCase,
     generarTicketPedidoUseCase,
   }) {
     this.obtenerTodosPedidosUseCase = obtenerTodosPedidosUseCase;
@@ -18,6 +19,7 @@ class PedidoAdminController {
     this.actualizarEstadoPedidoAdminUseCase = actualizarEstadoPedidoAdminUseCase;
     this.cancelarPedidoAdminUseCase = cancelarPedidoAdminUseCase;
     this.asignarRepartidorUseCase = asignarRepartidorUseCase;
+    this.desasignarRepartidorUseCase = desasignarRepartidorUseCase;
     this.generarTicketPedidoUseCase = generarTicketPedidoUseCase;
   }
 
@@ -95,6 +97,17 @@ class PedidoAdminController {
       }
 
       const pedido = await this.asignarRepartidorUseCase.ejecutar(id_pedido, Number(id_repartidor));
+      return res.status(200).json(pedido);
+    } catch (error) {
+      const status = esNoEncontrado(error.message) ? 404 : 400;
+      return res.status(status).json({ error: error.message });
+    }
+  }
+
+  async desasignarRepartidor(req, res) {
+    try {
+      const id_pedido = Number(req.params.id);
+      const pedido = await this.desasignarRepartidorUseCase.ejecutar(id_pedido);
       return res.status(200).json(pedido);
     } catch (error) {
       const status = esNoEncontrado(error.message) ? 404 : 400;

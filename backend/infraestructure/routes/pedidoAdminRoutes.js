@@ -8,6 +8,7 @@ const express = require('express');
  * PUT  /:id/estado             → actualizar estado
  * PUT  /:id/cancelar           → cancelar pedido
  * PUT  /:id/asignar            → asignar repartidor
+ * PUT  /:id/desasignar         → quitar repartidor asignado
  */
 function createPedidoAdminRouter(pedidoAdminController, autenticar, requerirAdmin) {
   const router = express.Router();
@@ -21,6 +22,7 @@ function createPedidoAdminRouter(pedidoAdminController, autenticar, requerirAdmi
   router.put('/:id/estado', (req, res) => pedidoAdminController.actualizarEstado(req, res));
   router.put('/:id/cancelar', (req, res) => pedidoAdminController.cancelar(req, res));
   router.put('/:id/asignar', (req, res) => pedidoAdminController.asignarRepartidor(req, res));
+  router.put('/:id/desasignar', (req, res) => pedidoAdminController.desasignarRepartidor(req, res));
 
   return router;
 }

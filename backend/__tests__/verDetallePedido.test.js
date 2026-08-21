@@ -35,7 +35,7 @@ describe('CU-016: Ver detalles pedido', () => {
     expect(detalle.estado).toBe('ASIGNADO');
     expect(detalle.caracteristicasLogistica).toBe('Frágil');
     expect(detalle.diagramaSeguimiento).toEqual(['ASIGNADO', 'EN_CAMINO', 'ENTREGADO']);
-    expect(detalle).not.toHaveProperty('productos');
+    expect(detalle.productos).toEqual([]);
   });
 
   test('CP-CU-016-06: Flujo de seguridad, otro repartidor no puede ver los datos', async () => {

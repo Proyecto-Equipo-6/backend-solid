@@ -9,6 +9,9 @@ class ConsultarRepartidoresUseCase {
 
     // FP-005 / FA-002: filtro por estado.
     // Por defecto se muestran solo activos (DISPONIBLE u OCUPADO).
+    // Deriva estado operativo real antes de filtrar
+    repartidores = await this.derivarEstadoOperativo(repartidores);
+
     if (estado === 'Activo') {
       repartidores = repartidores.filter(
         r => r.estado === 'DISPONIBLE' || r.estado === 'OCUPADO'
@@ -62,6 +65,33 @@ class ConsultarRepartidoresUseCase {
     }
 
     return resultado;
+  }
+
+  // Deriva el estado operativo real: si la cuenta está activa pero el repartidor
+  // tiene pedidos en curso hoy, el estado es OCUPADO (no INACTIVO).
+  async derivarEstadoOperativo(repartidores) {
+    const derivados = [];
+    for (const repartidor of repartidores) {
+      if (repartidor.estado === 'INACTIVO') {
+        derivados.push(repartidor);
+        continue;
+      }
+      const pedidosHoy = await this.contarPedidosDelDia(repartidor.id_usuario);
+      derivados.push({ ...repartidor, estado: pedidosHoy > 0 ? 'OCUPADO' : 'DISPONIBLE' });
+    }
+    return derivados;
+  }
+
+  async contarPedidosDelDia(repartidorId) {
+    if (typeof this.pedidoRepo.contarPedidosDelDia !== 'function') {
+      return 0;
+    }
+    try {
+      return await this.pedidoRepo.contarPedidosDelDia(repartidorId);
+    } catch (error) {
+      console.error(`Error contando pedidos del repartidor ${repartidorId}:`, error.message);
+      return 0;
+    }
   }
 }
 
