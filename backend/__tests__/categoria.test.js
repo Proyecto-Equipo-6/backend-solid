@@ -66,25 +66,23 @@ describe('Módulo CRUD categorías (CU-022)', () => {
   expect(editada.estado).toBe(0); // Inactivo
 });
 
-  test('CP-CU-022-05: Eliminar categoría sin productos asociados exitosamente', async () => {
+  test('CP-CU-022-05: Desactivar categoría sin productos asociados (borrado lógico)', async () => {
   const repo = new InMemoryCategoriaRepository();
   const crear = new CrearCategoriaUseCase(repo);
   const eliminar = new EliminarCategoriaUseCase(repo);
 
-  // Crear una categoría sin productos
   const categoria = await crear.ejecutar({ nombre: 'Cocina', descripcion: 'Artículos de cocina' });
 
-  // Verificar que no tiene productos asociados
   const productosAsociados = await repo.contarProductosAsociados(categoria.id_categoria);
   expect(productosAsociados).toBe(0);
 
-  // Eliminar la categoría
   const resultado = await eliminar.ejecutar(categoria.id_categoria);
 
-  expect(resultado).toEqual({ mensaje: 'Categoría eliminada' });
+  expect(resultado).toEqual({ mensaje: 'Categoría desactivada correctamente' });
 
-  // Verificar que ya no existe
-  const categoriaEliminada = await repo.buscarPorId(categoria.id_categoria);
-  expect(categoriaEliminada).toBeNull();
+  // La categoría sigue existiendo, pero con estado 0
+  const categoriaDesactivada = await repo.buscarPorId(categoria.id_categoria);
+  expect(categoriaDesactivada).not.toBeNull();
+  expect(categoriaDesactivada.estado).toBe(0);
 });
 });

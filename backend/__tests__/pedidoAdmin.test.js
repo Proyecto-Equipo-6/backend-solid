@@ -329,4 +329,29 @@ describe('Módulo administración de pedidos (CU-019, CU-020, CU-027)', () => {
   expect(resultado.data[0].id_pedido).toBe(1);
   expect(resultado.data[1].id_pedido).toBe(2);
   });
+
+  test('CP-CU-020-05: Falla al liberar repartidor, pero el pedido se cancela y el error se propaga', async () => {
+  const repoPedidos = new InMemoryPedidoRepartidorRepository(
+    [crearPedido(1, 'CONFIRMADO', 100, 10)],
+    [crearDetallePedido(1, 1, 2)]
+  );
+  const repoProductos = new InMemoryProductoRepository([crearProducto(1, 10)]);
+
+  // Repartidor ocupado y con marcarDisponible roto
+  const repoRepartidores = new InMemoryRepartidorRepository([
+    { id_usuario: 10, estado: 'OCUPADO' }
+  ]);
+  repoRepartidores.marcarDisponible = jest.fn().mockRejectedValue(new Error('Fallo al actualizar contador'));
+
+  const useCase = new CancelarPedidoAdminUseCase(repoPedidos, repoProductos, repoRepartidores);
+
+  // El pedido se cancela antes de fallar la liberación
+  await expect(
+    useCase.ejecutar(1, 'Cliente solicitó anulación', { reintegrar_stock: true })
+  ).rejects.toThrow('Fallo al actualizar contador');
+
+  // Verificar que el pedido quedó cancelado a pesar del fallo
+  const pedido = await repoPedidos.obtenerDetallePedido(1);
+  expect(pedido.estado).toBe('CANCELADO');
+});
 });

@@ -6,10 +6,15 @@ const ErrorSesionExpirada = require('../../application/errors/ErrorSesionExpirad
  * Factory que crea un middleware de autenticación (JWT).
  * Verifica el token guardado en la cookie httpOnly y adjunta el payload
  * del usuario autenticado a req.usuario (RN-014).
+ * También verifica que el token no esté revocado (RN-024 / RF-002.3).
  */
-function crearAutenticador(jwtSecret) {
-  return function autenticar(req, res, next) {
-    const token = req.cookies?.token;
+function crearAutenticador(jwtSecret, tokenBlacklistRepository = null) {
+  return async function autenticar(req, res, next) {
+    let token = req.cookies?.token;
+
+    if (!token && req.headers?.authorization?.startsWith('Bearer ')) {
+      token = req.headers.authorization.slice(7);
+    }
 
     if (!token) {
       return next(new ErrorSesionExpirada());
@@ -17,6 +22,14 @@ function crearAutenticador(jwtSecret) {
 
     try {
       const payload = jwt.verify(token, jwtSecret);
+
+      if (tokenBlacklistRepository) {
+        const revocado = await tokenBlacklistRepository.estaRevocado(token);
+        if (revocado) {
+          return next(new ErrorSesionExpirada());
+        }
+      }
+
       req.usuario = payload;
       return next();
     } catch (error) {

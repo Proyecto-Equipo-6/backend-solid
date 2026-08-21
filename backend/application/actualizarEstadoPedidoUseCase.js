@@ -1,3 +1,6 @@
+// MVP: NO_ENTREGADO solo puede pasar a CANCELADO (RN-069).
+// No se implementa reintento/reprogramación en esta fase.
+
 class ActualizarEstadoPedidoUseCase {
   constructor(pedidoRepo) {
     this.pedidoRepo = pedidoRepo;
