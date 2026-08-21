@@ -5,6 +5,10 @@ const {
   EvidenciaFotograficaRequeridaError,
   ObservacionRequeridaError,
 } = require('../../domain/errors/pedidoErrors');
+const {
+  subirEvidenciaFotografica,
+  guardarEvidenciaLocal,
+} = require('../middlewares/uploadMiddleware');
 
 function crearActualizarEstadoPedidoController(pedidoRepo) {
   return async function actualizarEstadoPedidoController(req, res) {
@@ -12,11 +16,26 @@ function crearActualizarEstadoPedidoController(pedidoRepo) {
       const pedidoId = Number(req.params.pedidoId);
       const nuevoEstado = req.body?.estado;
       const estadoAnterior = req.body?.estadoAnterior; // para concurrencia
-      const foto = req.body?.foto || null;
       const observacion = req.body?.observacion || null;
 
       if (!nuevoEstado || !estadoAnterior) {
         return res.status(400).json({ message: 'Estado y estadoAnterior son obligatorios' });
+      }
+
+      let foto = req.body?.foto || null;
+
+      if (nuevoEstado === 'ENTREGADO') {
+        if (req.file) {
+          try {
+            const subida = await subirEvidenciaFotografica(req.file.buffer, 'nexbit/evidencias');
+            foto = subida.secure_url || subida.url || null;
+          } catch (cloudinaryError) {
+            console.error('Cloudinary no disponible, usando almacenamiento local:', cloudinaryError.message);
+            foto = guardarEvidenciaLocal(req.file.buffer, req.file.mimetype, pedidoId);
+          }
+        } else if (!foto) {
+          return res.status(400).json({ message: 'La foto es obligatoria para confirmar la entrega' });
+        }
       }
 
       const useCase = new ActualizarEstadoPedidoUseCase(pedidoRepo);

@@ -1,8 +1,8 @@
 /**
  * Caso de Uso: GenerarTicketPedidoUseCase
  * Genera el HTML del ticket de un pedido para impresión a PDF (CU-031).
- * RN-050: solo disponible en estado CONFIRMADO.
  * RN-053: nombre del archivo Ticket_Pedido_[ID].pdf
+ * El ticket está disponible en cualquier estado del pedido.
  */
 class GenerarTicketPedidoUseCase {
   constructor(pedidoRepartidorRepository) {
@@ -13,10 +13,6 @@ class GenerarTicketPedidoUseCase {
     const pedido = await this.pedidoRepartidorRepository.obtenerDetallePedido(id_pedido);
     if (!pedido) {
       throw new Error('Pedido no encontrado');
-    }
-
-    if (pedido.estado !== 'CONFIRMADO') {
-      throw new Error('El ticket solo está disponible en estado CONFIRMADO');
     }
 
     const detalles = await this.pedidoRepartidorRepository.obtenerDetallesPorPedido(id_pedido);

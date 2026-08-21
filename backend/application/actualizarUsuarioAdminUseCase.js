@@ -1,13 +1,17 @@
 const ErrorValidacion = require('./errors/ErrorValidacion');
 const ErrorNoEncontrado = require('./errors/ErrorNoEncontrado');
+const { ROL_REPARTIDOR } = require('../constants');
 
 /**
  * Caso de Uso: ActualizarUsuarioAdminUseCase
  * Permite al administrador editar los datos de un usuario existente.
+ * Si el usuario pasa a rol repartidor, asegura que exista su registro
+ * en la tabla repartidores (RN-014-01 / EP-010).
  */
 class ActualizarUsuarioAdminUseCase {
-  constructor(userRepository) {
+  constructor(userRepository, repartidorRepository) {
     this.userRepository = userRepository;
+    this.repartidorRepository = repartidorRepository;
   }
 
   async execute({ id, ...datos }) {
@@ -21,9 +25,22 @@ class ActualizarUsuarioAdminUseCase {
 
     const campos = this.construirCamposUsuario(datos);
     const actualizado = await this.userRepository.actualizar(idUsuario, campos);
+
+    const rolResultante = datos.id_rol !== undefined ? Number(datos.id_rol) : Number(usuario.id_rol);
+    if (rolResultante === ROL_REPARTIDOR) {
+      await this.asegurarRepartidor(idUsuario);
+    }
+
     const datosPublicos = { ...actualizado };
     delete datosPublicos.password;
     return { usuario: datosPublicos, mensaje: 'Usuario actualizado correctamente.' };
+  }
+
+  async asegurarRepartidor(idUsuario) {
+    const existente = await this.repartidorRepository.buscarPorId(idUsuario);
+    if (!existente) {
+      await this.repartidorRepository.crear({ id_usuario: idUsuario });
+    }
   }
 
   async validarDatos(datos, idUsuario) {

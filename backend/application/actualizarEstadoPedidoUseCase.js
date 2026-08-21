@@ -28,15 +28,18 @@ class ActualizarEstadoPedidoUseCase {
         throw new Error('La foto es obligatoria para confirmar la entrega');
       }
 
-      const formato = (foto.formato || foto.mimetype || '').toLowerCase();
-      if (!['jpg', 'jpeg', 'png'].includes(formato)) {
-        throw new Error('La foto debe ser en formato JPG o PNG');
-      }
+      // Si viene la URL de Cloudinary (string) ya fue validada por el middleware.
+      if (typeof foto === 'object') {
+        const formato = (foto.formato || foto.mimetype || '').toLowerCase();
+        if (!['jpg', 'jpeg', 'png'].includes(formato)) {
+          throw new Error('La foto debe ser en formato JPG o PNG');
+        }
 
-      const tamano = foto.tamano ?? foto.size;
-      const tamanoMaximo = 3 * 1024 * 1024;
-      if (tamano === undefined || tamano > tamanoMaximo) {
-        throw new Error('La foto no debe superar los 3MB');
+        const tamano = foto.tamano ?? foto.size;
+        const tamanoMaximo = 3 * 1024 * 1024;
+        if (tamano === undefined || tamano > tamanoMaximo) {
+          throw new Error('La foto no debe superar los 3MB');
+        }
       }
     }
 
