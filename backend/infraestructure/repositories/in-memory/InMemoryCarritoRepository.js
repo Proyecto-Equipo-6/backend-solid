@@ -25,7 +25,7 @@ class InMemoryCarritoRepository extends CarritoRepository {
 
   _aItem(producto, cantidad) {
     return {
-      idProducto: producto.id,
+      idProducto: producto.id_producto ?? producto.id,
       titulo: producto.titulo,
       imagen: producto.imagen,
       precio: producto.precio,
@@ -42,7 +42,8 @@ class InMemoryCarritoRepository extends CarritoRepository {
 
   async agregarProducto(idUsuario, producto, cantidad) {
     const carrito = this._carritoDe(idUsuario);
-    const existente = carrito.find((item) => item.idProducto === producto.id);
+    const idProducto = producto.id_producto ?? producto.id;
+    const existente = carrito.find((item) => item.idProducto === idProducto);
     if (existente) {
       existente.cantidad += cantidad;
       existente.subtotal = Number((existente.precio * existente.cantidad).toFixed(2));

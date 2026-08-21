@@ -18,7 +18,7 @@ function validarCamposObligatoriosProducto({ sku, nombre, precio, stock }) {
 
 function validarValoresNumericosProducto(precio, stock) {
   if (typeof precio !== 'number' || precio <= 0) {
-    throw new Error('El precio debe ser un número mayor a cero');
+    throw new Error('El precio debe ser mayor a cero');
   }
   if (typeof stock !== 'number' || stock < 0) {
     throw new Error('El stock no puede ser negativo');

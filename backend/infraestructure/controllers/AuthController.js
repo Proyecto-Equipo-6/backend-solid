@@ -3,10 +3,11 @@
  * Maneja las peticiones HTTP de autenticación y las delega al Caso de Uso.
  */
 class AuthController {
-  constructor(loginUseCase, solicitarRecuperacionUseCase, restablecerContrasenaUseCase) {
+  constructor(loginUseCase, solicitarRecuperacionUseCase, restablecerContrasenaUseCase, logoutUseCase = null) {
     this.loginUseCase = loginUseCase;
     this.solicitarRecuperacionUseCase = solicitarRecuperacionUseCase;
     this.restablecerContrasenaUseCase = restablecerContrasenaUseCase;
+    this.logoutUseCase = logoutUseCase;
   }
 
   async login(req, res) {
@@ -31,6 +32,10 @@ class AuthController {
 
   async logout(req, res) {
     try {
+      // RN-024: revocar el token en el servidor antes de limpiar la cookie.
+      if (this.logoutUseCase) {
+        await this.logoutUseCase.execute({ token: req.cookies?.token });
+      }
       res.clearCookie('token');
       return res.status(200).json({ mensaje: 'Sesión cerrada correctamente' });
     } catch (error) {

@@ -58,10 +58,11 @@ class InMemoryCategoriaRepository extends CategoriaRepository {
   }
 
   async eliminar(id_categoria) {
-    const index = this.categorias.findIndex((c) => c.id_categoria === id_categoria);
-    if (index === -1) throw new Error('Categoría no encontrada');
-    this.categorias.splice(index, 1);
-    return true;
+  const categoria = await this.buscarPorId(id_categoria);
+  if (!categoria) throw new Error('Categoría no encontrada');
+
+  // Borrado lógico: estado = 0 (Inactivo)
+  return this.actualizar(id_categoria, { estado: 0 });
   }
 
   async contarProductosAsociados(id_categoria) {

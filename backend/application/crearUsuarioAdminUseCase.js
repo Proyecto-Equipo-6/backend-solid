@@ -22,8 +22,8 @@ class CrearUsuarioAdminUseCase {
     if (!email || !String(email).includes('@')) {
       throw new ErrorValidacion('Correo electrónico inválido');
     }
-    if (!password || String(password).length < 4) {
-      throw new ErrorValidacion('La contraseña debe tener al menos 4 caracteres');
+    if (!password || String(password).length < 8) {
+      throw new ErrorValidacion('La contraseña debe tener al menos 8 caracteres');
     }
     if (!telefono || !/^\d{10}$/.test(String(telefono))) {
       throw new ErrorValidacion('El teléfono debe tener exactamente 10 dígitos');

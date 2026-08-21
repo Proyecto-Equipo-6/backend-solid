@@ -28,6 +28,23 @@ const uploadEvidencia = multer({
 }).single('fotoEvidencia');
 
 /**
+ * Middleware de subida de imágenes de productos.
+ * Acepta JPG/PNG/WebP, máx 5MB.
+ * Guarda el archivo en memoria (req.file.buffer) para subirlo a Cloudinary desde el controlador.
+ */
+const uploadProducto = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+  fileFilter: (req, file, cb) => {
+    const formatosPermitidos = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!formatosPermitidos.includes(file.mimetype)) {
+      return cb(new Error('Formato no permitido. Solo se aceptan JPG, PNG o WebP'));
+    }
+    return cb(null, true);
+  },
+}).single('fotoEvidencia');
+
+/**
  * Sube un buffer a Cloudinary y devuelve la URL segura.
  * @param {Buffer} buffer - contenido del archivo
  * @param {string} carpeta - carpeta destino en Cloudinary (ej. 'nexbit/evidencias')
@@ -46,4 +63,4 @@ async function subirEvidenciaFotografica(buffer, carpeta = 'nexbit/evidencias') 
   });
 }
 
-module.exports = { uploadEvidencia, subirEvidenciaFotografica };
+module.exports = { uploadEvidencia, uploadProducto, subirEvidenciaFotografica };

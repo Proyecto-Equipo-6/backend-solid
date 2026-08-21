@@ -14,8 +14,8 @@ class EliminarCategoriaUseCase {
       throw new Error(`No se puede eliminar: la categoría tiene ${productosAsociados} productos asociados`); // FE-001 / RN-093
     }
 
-    await this.categoriaRepo.eliminar(id_categoria);
-    return { mensaje: 'Categoría eliminada' };
+     await this.categoriaRepo.eliminar(id_categoria);
+     return { mensaje: 'Categoría desactivada correctamente' };
   }
 }
 

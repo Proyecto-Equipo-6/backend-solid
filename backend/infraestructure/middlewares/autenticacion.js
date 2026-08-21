@@ -28,13 +28,14 @@ function extraerToken(req) {
  * Verifica el token en cookie o cabecera Authorization y adjunta
  * el payload del usuario autenticado a req.usuario (RN-014).
  * @param {string} jwtSecret - Secreto para firmar/verificar JWT (obligatorio).
+ * También verifica que el token no esté revocado (RN-024 / RF-002.3).
  */
-function crearAutenticador(jwtSecret) {
+function crearAutenticador(jwtSecret, tokenBlacklistRepository = null) {
   if (!jwtSecret || typeof jwtSecret !== 'string') {
     throw new Error('JWT_SECRET es obligatorio y debe ser un string no vacío');
   }
 
-  return function autenticar(req, res, next) {
+  return async function autenticar(req, res, next) {
     const token = extraerToken(req);
 
     if (!token) {
@@ -43,6 +44,14 @@ function crearAutenticador(jwtSecret) {
 
     try {
       const payload = jwt.verify(token, jwtSecret);
+
+      if (tokenBlacklistRepository) {
+        const revocado = await tokenBlacklistRepository.estaRevocado(token);
+        if (revocado) {
+          return next(new ErrorSesionExpirada());
+        }
+      }
+
       req.usuario = payload;
       return next();
     } catch (error) {

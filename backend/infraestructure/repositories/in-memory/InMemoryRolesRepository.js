@@ -34,6 +34,10 @@ class InMemoryRolesRepository extends RolesRepository {
         this.roles.splice(index, 1);
         return { id: eliminado.id, eliminado: true };
     }
+
+    async findAll() {
+        return this.roles.map((r) => ({ ...r }));
+    }
 }
 
 module.exports = InMemoryRolesRepository;
