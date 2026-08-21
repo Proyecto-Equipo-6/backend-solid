@@ -105,12 +105,16 @@ const createUsuarioAdminRouter = require('./backend/infraestructure/routes/usuar
 
 const app = express();
 app.disable('x-powered-by');
-app.use(
-  cors({
-    origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
-    credentials: true,
-  })
-);
+const corsOptions = {
+  // En desarrollo (sin CORS_ORIGIN en .env) refleja el origen dinámicamente.
+  // En producción usará el dominio exacto guardado en process.env.CORS_ORIGIN.
+  origin: process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : true,
+  credentials: true,
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(cookieParser());
 
