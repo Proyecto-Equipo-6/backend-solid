@@ -1,11 +1,22 @@
-const bcrypt = require('bcrypt');
-const SolicitarRecuperacionUseCase = require('../../application/SolicitarRecuperacionUseCase');
-const RestablecerContrasenaUseCase = require('../../application/RestablecerContrasenaUseCase');
-const InMemoryUserRepository = require('../../infraestructure/repositories/in-memory/InMemoryUserRepository');
-const InMemoryTokensRecuperacionRepository = require('../../infraestructure/repositories/in-memory/InMemoryTokensRecuperacionRepository');
+import bcrypt from 'bcrypt';
+import SolicitarRecuperacionUseCase from '../../application/SolicitarRecuperacionUseCase';
+import RestablecerContrasenaUseCase from '../../application/RestablecerContrasenaUseCase';
+import InMemoryUserRepository from '../../infraestructure/repositories/in-memory/InMemoryUserRepository';
+import InMemoryTokensRecuperacionRepository from '../../infraestructure/repositories/in-memory/InMemoryTokensRecuperacionRepository';
 
-const MENSAJE_GENERICO =
-  'Recibirá un enlace de recuperación a su correo electrónico';
+const MENSAJE_GENERICO = 'Recibirá un enlace de recuperación a su correo electrónico';
+
+function crearRepositorio() {
+  return new InMemoryUserRepository();
+}
+
+function crearTokensRepositorio() {
+  return new InMemoryTokensRecuperacionRepository();
+}
+
+function crearEmailSender() {
+  return { enviarRecuperacion: jest.fn().mockResolvedValue(true) };
+}
 
 async function crearUsuario(repositorio, { email = 'ana@example.com', password = 'Abcd1234' } = {}) {
   const usuario = {
@@ -30,19 +41,22 @@ describe('CU-006 Recuperar contraseña (SolicitarRecuperacionUseCase)', () => {
   let casoUso;
 
   beforeEach(() => {
-    repositorio = new InMemoryUserRepository();
-    tokensRepositorio = new InMemoryTokensRecuperacionRepository();
-    emailSender = { enviarRecuperacion: jest.fn().mockResolvedValue(true) };
+    repositorio = crearRepositorio();
+    tokensRepositorio = crearTokensRepositorio();
+    emailSender = crearEmailSender();
     casoUso = new SolicitarRecuperacionUseCase(repositorio, tokensRepositorio, emailSender);
   });
 
-  it('genera token válido por 15 minutos y envía el correo para un correo existente', async () => {
+  it('CP-CU-006-01 / CP-RF-002.2-01 / CP-HU-002.2-01: genera token válido y envía correo', async () => {
+    // Arrange
     await crearUsuario(repositorio);
-
     const antes = Date.now();
+
+    // Act
     const resultado = await casoUso.execute({ email: 'ana@example.com' });
     const despues = Date.now();
 
+    // Assert
     expect(resultado.mensaje).toBe(MENSAJE_GENERICO);
     expect(tokensRepositorio.tokens).toHaveLength(1);
 
@@ -62,22 +76,28 @@ describe('CU-006 Recuperar contraseña (SolicitarRecuperacionUseCase)', () => {
     expect(token).toBe(registro.token);
   });
 
-  it('no genera token ni envía correo para un correo no registrado (mismo mensaje)', async () => {
-    const resultado = await casoUso.execute({ email: 'nadie@example.com' });
+  it('CP-CU-006-04 / CP-HU-002.2-03: no revela si el correo no existe', async () => {
+    // Arrange
+    const email = 'nadie@example.com';
 
+    // Act
+    const resultado = await casoUso.execute({ email });
+
+    // Assert
     expect(resultado.mensaje).toBe(MENSAJE_GENERICO);
     expect(tokensRepositorio.tokens).toHaveLength(0);
     expect(emailSender.enviarRecuperacion).not.toHaveBeenCalled();
   });
 
-  it('lanza error cuando el envío del correo falla (CP-006-05)', async () => {
-    await crearUsuario(repositorio, { email: 'ana@example.com' });
-
+  it('CP-CU-006-05: lanza error cuando el envío del correo falla', async () => {
+    // Arrange
+    await crearUsuario(repositorio);
     emailSender.enviarRecuperacion = jest.fn().mockRejectedValue(new Error('Fallo SMTP'));
 
-    const error = await casoUso.execute({ email: 'ana@example.com' }).catch((e) => e);
-
-    expect(error.message).toBe('No se pudo enviar el correo de recuperación. Inténtalo de nuevo más tarde.');
+    // Act & Assert
+    await expect(
+      casoUso.execute({ email: 'ana@example.com' })
+    ).rejects.toThrow('No se pudo enviar el correo de recuperación. Inténtalo de nuevo más tarde.');
   });
 });
 
@@ -88,10 +108,10 @@ describe('CU-006 Recuperar contraseña (RestablecerContrasenaUseCase)', () => {
   let usuario;
 
   beforeEach(async () => {
-    repositorio = new InMemoryUserRepository();
-    tokensRepositorio = new InMemoryTokensRecuperacionRepository();
+    repositorio = crearRepositorio();
+    tokensRepositorio = crearTokensRepositorio();
     casoUso = new RestablecerContrasenaUseCase(repositorio, tokensRepositorio);
-    usuario = await crearUsuario(repositorio, { email: 'ana@example.com', password: 'Abcd1234' });
+    usuario = await crearUsuario(repositorio);
   });
 
   async function guardarToken(token = 'token-valido-123', expiraEn = null) {
@@ -102,81 +122,92 @@ describe('CU-006 Recuperar contraseña (RestablecerContrasenaUseCase)', () => {
     });
   }
 
-  it('actualiza la contraseña cifrada e invalida el token con uno válido', async () => {
-    const passwordOriginal = usuario.password;
+  it('CP-CU-006-01 / CP-RF-002.2-01 / CP-HU-002.2-01: restablece contraseña y invalida token', async () => {
+    // Arrange
     await guardarToken();
+    const passwordOriginal = usuario.password;
 
-    const resultado = await casoUso.execute({ token: 'token-valido-123', nueva_password: 'Nueva1234' });
+    // Act
+    const resultado = await casoUso.execute({
+      token: 'token-valido-123',
+      nueva_password: 'Nueva1234',
+    });
 
-    expect(resultado.mensaje).toBe(
-      'Contraseña actualizada correctamente. Por favor inicie sesión'
-    );
+    // Assert
+    expect(resultado.mensaje).toBe('Contraseña actualizada correctamente. Por favor inicie sesión');
     expect((await tokensRepositorio.findByToken('token-valido-123')).usado).toBe(1);
     expect(repositorio.users[0].password).not.toBe(passwordOriginal);
     expect(await bcrypt.compare('Nueva1234', repositorio.users[0].password)).toBe(true);
   });
 
-  it('rechaza con 400 un token expirado', async () => {
+  it('CP-CU-006-02 / CP-RF-002.2-02 / CP-HU-002.2-02: rechaza token expirado', async () => {
+    // Arrange
     await guardarToken('token-expirado', new Date(Date.now() - 1000));
 
-    const error = await casoUso
-      .execute({ token: 'token-expirado', nueva_password: 'Nueva1234' })
-      .catch((e) => e);
-
-    expect(error.status).toBe(400);
-    expect(error.message).toBe('El token de recuperación ha expirado. Solicitelo nuevamente');
+    // Act & Assert
+    await expect(
+      casoUso.execute({ token: 'token-expirado', nueva_password: 'Nueva1234' })
+    ).rejects.toMatchObject({ status: 400 });
+    await expect(
+      casoUso.execute({ token: 'token-expirado', nueva_password: 'Nueva1234' })
+    ).rejects.toThrow('El token de recuperación ha expirado. Solicitelo nuevamente');
     expect(repositorio.users[0].password).toBe(usuario.password);
   });
 
-  it('rechaza con 400 un token ya utilizado', async () => {
+  it('rechaza token ya utilizado', async () => {
+    // Arrange
     await guardarToken('token-usado');
     await tokensRepositorio.marcarUsado('token-usado');
 
-    const error = await casoUso
-      .execute({ token: 'token-usado', nueva_password: 'Nueva1234' })
-      .catch((e) => e);
-
-    expect(error.status).toBe(400);
-    expect(error.message).toBe('El token de recuperación ha expirado. Solicitelo nuevamente');
+    // Act & Assert
+    await expect(
+      casoUso.execute({ token: 'token-usado', nueva_password: 'Nueva1234' })
+    ).rejects.toMatchObject({ status: 400 });
+    await expect(
+      casoUso.execute({ token: 'token-usado', nueva_password: 'Nueva1234' })
+    ).rejects.toThrow('El token de recuperación ha expirado. Solicitelo nuevamente');
   });
 
-  it('rechaza con 400 un token inexistente', async () => {
-    const error = await casoUso
-      .execute({ token: 'no-existe', nueva_password: 'Nueva1234' })
-      .catch((e) => e);
+  it('rechaza token inexistente', async () => {
+    // Arrange
+    const token = 'no-existe';
 
-    expect(error.status).toBe(400);
-    expect(error.message).toBe('El token de recuperación ha expirado. Solicitelo nuevamente');
+    // Act & Assert
+    await expect(
+      casoUso.execute({ token, nueva_password: 'Nueva1234' })
+    ).rejects.toMatchObject({ status: 400 });
+    await expect(
+      casoUso.execute({ token, nueva_password: 'Nueva1234' })
+    ).rejects.toThrow('El token de recuperación ha expirado. Solicitelo nuevamente');
   });
 
-  it('rechaza una contraseña débil (sin mayúscula, sin número o menor a 8 caracteres)', async () => {
+  it('CP-CU-006-03: rechaza contraseña débil', async () => {
+    // Arrange
+    await guardarToken();
+    const casos = ['abcdefg1', 'Abcdefgh', 'Ab1'];
+
+    // Act & Assert
+    for (const password of casos) {
+      await expect(
+        casoUso.execute({ token: 'token-valido-123', nueva_password: password })
+      ).rejects.toMatchObject({ status: 400 });
+      await expect(
+        casoUso.execute({ token: 'token-valido-123', nueva_password: password })
+      ).rejects.toThrow('La contraseña debe tener mínimo 8 caracteres, una mayúscula y un número');
+    }
+  });
+
+  it('RN-021: rechaza si la nueva contraseña es igual a la anterior', async () => {
+    // Arrange
     await guardarToken();
 
-    const sinMayuscula = await casoUso
-      .execute({ token: 'token-valido-123', nueva_password: 'abcdefg1' })
-      .catch((e) => e);
-
-    const sinNumero = await casoUso
-      .execute({ token: 'token-valido-123', nueva_password: 'Abcdefgh' })
-      .catch((e) => e);
-
-    const corta = await casoUso
-      .execute({ token: 'token-valido-123', nueva_password: 'Ab1' })
-      .catch((e) => e);
-
-    expect(sinMayuscula.message).toBe('La contraseña debe tener mínimo 8 caracteres, una mayúscula y un número');
-    expect(sinNumero.message).toBe('La contraseña debe tener mínimo 8 caracteres, una mayúscula y un número');
-    expect(corta.message).toBe('La contraseña debe tener mínimo 8 caracteres, una mayúscula y un número');
-  });
-
-  it('rechaza que la nueva contraseña sea igual a la anterior (RN-021)', async () => {
-    await guardarToken();
-
-    const error = await casoUso
-      .execute({ token: 'token-valido-123', nueva_password: 'Abcd1234' })
-      .catch((e) => e);
-
-    expect(error.message).toBe('La nueva contraseña debe ser diferente a la anterior');
+    // Act & Assert
+    await expect(
+      casoUso.execute({ token: 'token-valido-123', nueva_password: 'Abcd1234' })
+    ).rejects.toMatchObject({ status: 400 });
+    await expect(
+      casoUso.execute({ token: 'token-valido-123', nueva_password: 'Abcd1234' })
+    ).rejects.toThrow('La nueva contraseña debe ser diferente a la anterior');
     expect(repositorio.users[0].password).toBe(usuario.password);
   });
 });

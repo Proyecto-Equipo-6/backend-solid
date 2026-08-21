@@ -12,14 +12,21 @@ class InMemoryProductoRepository extends ProductoRepository {
     this.productosConHistorial = new Set(); // ids de productos con ventas
   }
 
+  _normalizarTexto(texto) {
+    return texto
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase();
+  }
+
   async findActivos() {
     return this.productos.filter(p => p.estado === 1);
   }
 
   async findActivosPorCategoria(id_categoria) {
-  return this.productos.filter(
-    p => p.estado === 1 && p.id_categoria === Number(id_categoria)
-  ).map(p => new Producto({ ...p }));
+    return this.productos.filter(
+      p => p.estado === 1 && p.id_categoria === Number(id_categoria)
+    ).map(p => new Producto({ ...p }));
   }
 
   async findById(id) {
@@ -28,13 +35,13 @@ class InMemoryProductoRepository extends ProductoRepository {
 
   async buscarPorNombre(nombre) {
     return this.productos.find(
-      p => p.nombre.toLowerCase() === nombre.toLowerCase()
+      p => this._normalizarTexto(p.nombre) === this._normalizarTexto(nombre)
     ) || null;
   }
 
   async buscarPorSKU(sku) {
     return this.productos.find(
-      p => p.sku && p.sku.toLowerCase() === sku.toLowerCase()
+      p => p.sku && this._normalizarTexto(p.sku) === this._normalizarTexto(sku)
     ) || null;
   }
 
@@ -134,36 +141,47 @@ class InMemoryProductoRepository extends ProductoRepository {
 
   async sugerencias(termino, limite = 5) {
     return this.productos
-      .filter(p => p.estado === 1 && p.nombre.toLowerCase().includes(termino.toLowerCase()))
+      .filter(p =>
+        p.estado === 1 &&
+        this._normalizarTexto(p.nombre).includes(this._normalizarTexto(termino))
+      )
       .slice(0, limite)
       .map(p => ({ id_producto: p.id_producto, nombre: p.nombre, imagen_url: p.imagen_url }));
   }
 
   async buscar(termino, filtros = {}) {
-    let resultados = this.productos.filter(p => p.estado === 1 && p.nombre.toLowerCase().includes(termino.toLowerCase()));
+  let resultados = this.productos.filter(p =>
+    p.estado === 1 &&
+    this._normalizarTexto(p.nombre).includes(this._normalizarTexto(termino))
+  );
 
-    if (filtros.categoria) {
-      resultados = resultados.filter(p => p.id_categoria === Number(filtros.categoria));
-    }
-    if (filtros.precioMin) {
-      resultados = resultados.filter(p => p.precio >= Number(filtros.precioMin));
-    }
-    if (filtros.precioMax) {
-      resultados = resultados.filter(p => p.precio <= Number(filtros.precioMax));
-    }
+  if (filtros.categoria) {
+    resultados = resultados.filter(p => p.id_categoria === Number(filtros.categoria));
+  }
+  if (filtros.precioMin) {
+    resultados = resultados.filter(p => p.precio >= Number(filtros.precioMin));
+  }
+  if (filtros.precioMax) {
+    resultados = resultados.filter(p => p.precio <= Number(filtros.precioMax));
+  }
 
-    const total = resultados.length;
-    const pagina = Number(filtros.pagina) || 1;
-    const limite = Number(filtros.limite) || 12;
-    const start = (pagina - 1) * limite;
+  // CP-HU-003.1-01: ordenamiento por menor precio
+  if (filtros.orden === 'precio_asc') {
+    resultados.sort((a, b) => a.precio - b.precio);
+  }
 
-    return {
-      items: resultados.slice(start, start + limite),
-      total,
-      pagina,
-      limite,
-      totalPaginas: Math.ceil(total / limite),
-    };
+  const total = resultados.length;
+  const pagina = Number(filtros.pagina) || 1;
+  const limite = Number(filtros.limite) || 12;
+  const start = (pagina - 1) * limite;
+
+  return {
+    items: resultados.slice(start, start + limite),
+    total,
+    pagina,
+    limite,
+    totalPaginas: Math.ceil(total / limite),
+  };
   }
 }
 

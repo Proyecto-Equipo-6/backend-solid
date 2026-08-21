@@ -1,5 +1,6 @@
 const bcrypt = require('bcrypt');
 const ErrorTokenInvalido = require('./errors/ErrorTokenInvalido');
+const ErrorValidacion = require('./errors/ErrorValidacion');
 
 /**
  * Caso de Uso: RestablecerContrasenaUseCase
@@ -17,13 +18,13 @@ class RestablecerContrasenaUseCase {
     }
 
     const passwordValida =
-    typeof nueva_password === 'string' &&
-    nueva_password.length >= 8 &&
-    /[A-Z]/.test(nueva_password) &&
-    /[0-9]/.test(nueva_password);
+      typeof nueva_password === 'string' &&
+      nueva_password.length >= 8 &&
+      /[A-Z]/.test(nueva_password) &&
+      /[0-9]/.test(nueva_password);
 
     if (!passwordValida) {
-      throw new Error('La contraseña debe tener mínimo 8 caracteres, una mayúscula y un número');
+      throw new ErrorValidacion('La contraseña debe tener mínimo 8 caracteres, una mayúscula y un número');
     }
 
     const registro = await this.tokensRepository.findByToken(token);
@@ -39,7 +40,7 @@ class RestablecerContrasenaUseCase {
     // RN-021: la nueva contraseña debe ser diferente a la anterior.
     const esIgualAnterior = await bcrypt.compare(nueva_password, usuario.password);
     if (esIgualAnterior) {
-      throw new Error('La nueva contraseña debe ser diferente a la anterior');
+      throw new ErrorValidacion('La nueva contraseña debe ser diferente a la anterior');
     }
 
     const saltRounds = Number(process.env.BCRYPT_ROUNDS) || 10;

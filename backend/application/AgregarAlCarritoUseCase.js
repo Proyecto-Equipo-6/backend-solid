@@ -18,6 +18,11 @@ class AgregarAlCarritoUseCase {
   }
 
   async execute(usuario, { productoId, cantidad = 1 }) {
+    // 🚨 Validación de sesión (RN-037)
+    if (!usuario || !usuario.id_usuario) {
+      throw new ErrorValidacion('Debes iniciar sesión para agregar productos al carrito');
+    }
+
     if (productoId === undefined || productoId === null) {
       throw new ErrorValidacion('Debes indicar el producto');
     }

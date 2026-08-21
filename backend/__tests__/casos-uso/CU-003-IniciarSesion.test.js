@@ -1,9 +1,17 @@
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
-const LoginUseCase = require('../../application/LoginUseCase');
-const InMemoryUserRepository = require('../../infraestructure/repositories/in-memory/InMemoryUserRepository');
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+import LoginUseCase from '../../application/LoginUseCase';
+import InMemoryUserRepository from '../../infraestructure/repositories/in-memory/InMemoryUserRepository';
 
 const JWT_SECRET_PRUEBA = 'secreto-de-prueba';
+
+function crearRepositorio() {
+  return new InMemoryUserRepository();
+}
+
+function crearCasoUso(repositorio) {
+  return new LoginUseCase(repositorio, JWT_SECRET_PRUEBA);
+}
 
 async function crearUsuario(repositorio, { email, password, activo = 1, id_rol = 2 }) {
   const usuario = {
@@ -24,87 +32,139 @@ async function crearUsuario(repositorio, { email, password, activo = 1, id_rol =
 describe('CU-003 Iniciar sesión (LoginUseCase)', () => {
   let repositorio;
   let casoUso;
+  let roundsOriginal;
 
-  beforeEach(() => {
-    repositorio = new InMemoryUserRepository();
-    casoUso = new LoginUseCase(repositorio, JWT_SECRET_PRUEBA);
+  beforeAll(() => {
+    roundsOriginal = process.env.BCRYPT_ROUNDS;
+    process.env.BCRYPT_ROUNDS = '4';
   });
 
-  it('autentica con credenciales válidas y devuelve token + usuario sin password', async () => {
+  afterAll(() => {
+    if (roundsOriginal === undefined) {
+      delete process.env.BCRYPT_ROUNDS;
+    } else {
+      process.env.BCRYPT_ROUNDS = roundsOriginal;
+    }
+  });
+
+  beforeEach(() => {
+    repositorio = crearRepositorio();
+    casoUso = crearCasoUso(repositorio);
+  });
+
+  it('CP-CU-003-01 / CP-RF-002.1-01 / CP-HU-002.1-01: autentica con credenciales válidas y devuelve token + usuario sin password', async () => {
+    // Arrange
     await crearUsuario(repositorio, { email: 'ana@example.com', password: 'Abcd1234' });
 
+    // Act
     const resultado = await casoUso.execute({ email: 'ana@example.com', password: 'Abcd1234' });
 
+    // Assert
     expect(resultado.token).toEqual(expect.any(String));
     expect(resultado.usuario.id_usuario).toBe(1);
     expect(resultado.usuario.id_rol).toBe(2);
     expect(resultado.usuario.password).toBeUndefined();
   });
 
-  it('rechaza con 401 una contraseña incorrecta', async () => {
+  it('CP-CU-003-02 / CP-RF-002.1-02 / CP-HU-002.1-02: rechaza con 401 una contraseña incorrecta', async () => {
+    // Arrange
     await crearUsuario(repositorio, { email: 'ana@example.com', password: 'Abcd1234' });
 
-    const error = await casoUso
-      .execute({ email: 'ana@example.com', password: 'Incorrecta123' })
-      .catch((e) => e);
-
-    expect(error.status).toBe(401);
-    expect(error.message).toBe('Correo electrónico o contraseña incorrectos');
+    // Act & Assert
+    await expect(
+      casoUso.execute({ email: 'ana@example.com', password: 'Incorrecta123' })
+    ).rejects.toMatchObject({ status: 401 });
+    await expect(
+      casoUso.execute({ email: 'ana@example.com', password: 'Incorrecta123' })
+    ).rejects.toThrow('Correo electrónico o contraseña incorrectos');
   });
 
-  it('rechaza con 401 un correo no registrado', async () => {
-    const error = await casoUso
-      .execute({ email: 'nadie@example.com', password: 'Abcd1234' })
-      .catch((e) => e);
+  it('CP-CU-003-02: rechaza con 401 un correo no registrado', async () => {
+    // Arrange
+    const email = 'nadie@example.com';
 
-    expect(error.status).toBe(401);
-    expect(error.message).toBe('Correo electrónico o contraseña incorrectos');
+    // Act & Assert
+    await expect(
+      casoUso.execute({ email, password: 'Abcd1234' })
+    ).rejects.toMatchObject({ status: 401 });
+    await expect(
+      casoUso.execute({ email, password: 'Abcd1234' })
+    ).rejects.toThrow('Correo electrónico o contraseña incorrectos');
   });
 
-  it('rechaza con 403 una cuenta inactiva', async () => {
+  it('CP-CU-003-03: rechaza con 401 campos faltantes', async () => {
+    // Arrange
+    const credenciales = { email: '', password: '' };
+
+    // Act & Assert
+    await expect(casoUso.execute(credenciales)).rejects.toMatchObject({ status: 401 });
+  });
+
+  it('CP-RF-002.1-03 / CP-HU-002.1-03: rechaza con 403 cuenta inactiva', async () => {
+    // Arrange
     await crearUsuario(repositorio, {
       email: 'inactivo@example.com',
       password: 'Abcd1234',
       activo: 0,
     });
 
-    const error = await casoUso
-      .execute({ email: 'inactivo@example.com', password: 'Abcd1234' })
-      .catch((e) => e);
-
-    expect(error.status).toBe(403);
-    expect(error.message).toBe(
-      'Su cuenta se encuentra suspendida. Comuníquese con administración'
-    );
+    // Act & Assert
+    await expect(
+      casoUso.execute({ email: 'inactivo@example.com', password: 'Abcd1234' })
+    ).rejects.toMatchObject({ status: 403 });
+    await expect(
+      casoUso.execute({ email: 'inactivo@example.com', password: 'Abcd1234' })
+    ).rejects.toThrow('Su cuenta se encuentra suspendida. Comuníquese con administración');
   });
 
-  it('rechaza con 401 campos faltantes', async () => {
-    const error = await casoUso.execute({ email: '', password: '' }).catch((e) => e);
+  it('CP-CU-003-05: maneja error de conexión con la BD', async () => {
+    // Arrange
+    const repositorioFalso = {
+      findByEmail: jest.fn().mockRejectedValue(new Error('Error de conexión a BD')),
+    };
+    const casoUsoFalso = new LoginUseCase(repositorioFalso, JWT_SECRET_PRUEBA);
 
-    expect(error.status).toBe(401);
+    // Act & Assert
+    await expect(
+      casoUsoFalso.execute({ email: 'ana@example.com', password: 'Abcd1234' })
+    ).rejects.toThrow('Error de conexión a BD');
   });
 
-  it('expira el token JWT después de 30 minutos (CP-CU-003-06)', async () => {
-  await crearUsuario(repositorio, {
-    email: 'ana@example.com',
-    password: 'Abcd1234'
+  it('CP-CU-003-06: expira el token JWT después de 30 minutos', async () => {
+    // Arrange
+    await crearUsuario(repositorio, {
+      email: 'ana@example.com',
+      password: 'Abcd1234'
+    });
+
+    const { token } = await casoUso.execute({
+      email: 'ana@example.com',
+      password: 'Abcd1234'
+    });
+
+    // Act
+    const payloadActual = jwt.verify(token, JWT_SECRET_PRUEBA);
+    const futuro = Math.floor(Date.now() / 1000) + 31 * 60;
+
+    // Assert
+    expect(payloadActual.email).toBe('ana@example.com');
+    expect(() =>
+      jwt.verify(token, JWT_SECRET_PRUEBA, { clockTimestamp: futuro })
+    ).toThrow(jwt.TokenExpiredError);
   });
 
-  const { token } = await casoUso.execute({
-    email: 'ana@example.com',
-    password: 'Abcd1234'
-  });
+  it('CP-RF-002.1-01: devuelve id_rol para que el frontend redirija según rol', async () => {
+    // Arrange
+    await crearUsuario(repositorio, { email: 'cliente@example.com', password: 'Abcd1234', id_rol: 2 });
 
-  // Verificar que el token es válido en el momento actual
-  const payloadActual = jwt.verify(token, JWT_SECRET_PRUEBA);
-  expect(payloadActual.email).toBe('ana@example.com');
+    // Act
+    const resultado = await casoUso.execute({
+      email: 'cliente@example.com',
+      password: 'Abcd1234'
+    });
 
-  // Simular 31 minutos en el futuro (en segundos)
-  const futuro = Math.floor(Date.now() / 1000) + 31 * 60;
-
-  // Verificar que lanza error de expiración
-  expect(() =>
-    jwt.verify(token, JWT_SECRET_PRUEBA, { clockTimestamp: futuro })
-  ).toThrow(jwt.TokenExpiredError);
+    // Assert
+    expect(resultado.usuario.id_rol).toBe(2);
+    expect(resultado.token).toBeDefined();
   });
 });
