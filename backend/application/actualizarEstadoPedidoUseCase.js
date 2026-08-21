@@ -10,7 +10,25 @@ class ActualizarEstadoPedidoUseCase {
       throw new Error('Pedido no encontrado');
     }
 
-    // Validación de transición de estados
+    this.validarTransicion(pedido, nuevoEstado);
+
+    if (nuevoEstado === 'ENTREGADO') {
+      this.validarFoto(datosAdicionales.foto);
+    }
+
+    if (nuevoEstado === 'NO_ENTREGADO') {
+      this.validarObservacion(datosAdicionales.observacion);
+    }
+
+    return await this.pedidoRepo.actualizarEstado(
+      pedidoId,
+      nuevoEstado,
+      estadoAnterior,
+      datosAdicionales
+    );
+  }
+
+  validarTransicion(pedido, nuevoEstado) {
     const transicionesValidas = {
       'ASIGNADO': ['EN_CAMINO'],
       'EN_CAMINO': ['ENTREGADO', 'NO_ENTREGADO']
@@ -20,42 +38,34 @@ class ActualizarEstadoPedidoUseCase {
     if (!estadosPermitidos.includes(nuevoEstado)) {
       throw new Error(`Transición inválida de ${pedido.estado} a ${nuevoEstado}`);
     }
+  }
 
-    // Validación de foto obligatoria para ENTREGADO
-    if (nuevoEstado === 'ENTREGADO') {
-      const foto = datosAdicionales.foto;
-      if (!foto) {
-        throw new Error('La foto es obligatoria para confirmar la entrega');
-      }
-
-      // Si viene la URL de Cloudinary (string) ya fue validada por el middleware.
-      if (typeof foto === 'object') {
-        const formato = (foto.formato || foto.mimetype || '').toLowerCase();
-        if (!['jpg', 'jpeg', 'png'].includes(formato)) {
-          throw new Error('La foto debe ser en formato JPG o PNG');
-        }
-
-        const tamano = foto.tamano ?? foto.size;
-        const tamanoMaximo = 3 * 1024 * 1024;
-        if (tamano === undefined || tamano > tamanoMaximo) {
-          throw new Error('La foto no debe superar los 3MB');
-        }
-      }
+  validarFoto(foto) {
+    if (!foto) {
+      throw new Error('La foto es obligatoria para confirmar la entrega');
     }
 
-    // Validación de observación obligatoria para NO_ENTREGADO
-    if (nuevoEstado === 'NO_ENTREGADO') {
-      if (!datosAdicionales.observacion || datosAdicionales.observacion.trim() === '') {
-        throw new Error('La observación es obligatoria para marcar No Entregado');
-      }
+    // Si viene la URL de Cloudinary (string) ya fue validada por el middleware.
+    if (typeof foto !== 'object') {
+      return;
     }
 
-    return await this.pedidoRepo.actualizarEstado(
-      pedidoId,
-      nuevoEstado,
-      estadoAnterior,
-      datosAdicionales
-    );
+    const formato = (foto.formato || foto.mimetype || '').toLowerCase();
+    if (!['jpg', 'jpeg', 'png'].includes(formato)) {
+      throw new Error('La foto debe ser en formato JPG o PNG');
+    }
+
+    const tamano = foto.tamano ?? foto.size;
+    const tamanoMaximo = 3 * 1024 * 1024;
+    if (tamano === undefined || tamano > tamanoMaximo) {
+      throw new Error('La foto no debe superar los 3MB');
+    }
+  }
+
+  validarObservacion(observacion) {
+    if (!observacion || observacion.trim() === '') {
+      throw new Error('La observación es obligatoria para marcar No Entregado');
+    }
   }
 }
 
