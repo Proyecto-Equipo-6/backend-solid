@@ -122,12 +122,14 @@ describe('Módulo administración de pedidos (CU-019, CU-020, CU-027)', () => {
     await expect(useCase.ejecutar(1, 10)).rejects.toThrow('El repartidor no está disponible');
   });
 
-  test('CP-CU-019-03: Bloqueo si el pedido ya fue asignado', async () => {
+  test('CP-CU-019-03: Reasignación permitida si el repartidor es distinto', async () => {
     const repoPedidos = new InMemoryPedidoRepartidorRepository([crearPedido(1, 'CONFIRMADO', 100, 10)]);
     const repoRepartidores = crearRepoRepartidores();
     const useCase = new AsignarRepartidorUseCase(repoPedidos, repoRepartidores);
 
-    await expect(useCase.ejecutar(1, 20)).rejects.toThrow('El pedido ya fue asignado');
+    const pedidoReasignado = await useCase.ejecutar(1, 20);
+    expect(pedidoReasignado.id_repartidor).toBe(20);
+    expect(pedidoReasignado.estado).toBe('ASIGNADO');
   });
 
   test('Bloqueo si el repartidor alcanzó 3 pedidos diarios - CP-CU-019-05', async () => {
