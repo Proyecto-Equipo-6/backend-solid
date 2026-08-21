@@ -22,7 +22,7 @@ class AuthController {
         maxAge: duracionMinutos * 60 * 1000,
       });
 
-      return res.status(200).json({ usuario });
+      return res.status(200).json({ token, usuario });
     } catch (error) {
       const status = error.status || 401;
       return res.status(status).json({ error: error.message });

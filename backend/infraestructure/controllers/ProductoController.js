@@ -1,4 +1,5 @@
 const { esNoEncontrado } = require('../helpers/responseHelpers');
+const { subirEvidenciaFotografica } = require('../middlewares/uploadMiddleware');
 
 /**
  * Adaptador de Infraestructura: ProductoController
@@ -87,6 +88,18 @@ class ProductoController {
     } catch (error) {
       const status = esNoEncontrado(error.message) ? 404 : 400;
       return res.status(status).json({ error: error.message });
+    }
+  }
+
+  async subirImagen(req, res) {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: 'El campo fotoEvidencia es obligatorio' });
+      }
+      const resultado = await subirEvidenciaFotografica(req.file.buffer, 'nexbit/productos');
+      return res.status(200).json({ imagen_url: resultado.secure_url });
+    } catch (error) {
+      return res.status(400).json({ error: error.message });
     }
   }
 
