@@ -26,8 +26,9 @@ class User {
     const telefonoValido = /^\d{10}$/.test(this.telefono || '');
     const passwordValida =
       typeof this.password === 'string' &&
-      this.password.length >= 8 &&
-      this.password.length <= 20;
+      this.password.length >= 4 &&
+      this.password.length <= 8;
+
     return Boolean(
       this.nombre_apellido &&
       this.tipo_documento && tiposValidos.includes(this.tipo_documento) &&

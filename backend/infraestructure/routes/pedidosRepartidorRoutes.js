@@ -1,5 +1,5 @@
 const express = require('express');
-const { uploadEvidencia } = require('../middlewares/uploadMiddleware');
+const { uploadEvidencia, uploadComprobante } = require('../middlewares/uploadMiddleware');
 
 /**
  * Fábrica de rutas del módulo Repartidor (CU-015 a CU-018).
@@ -17,6 +17,11 @@ function createPedidosRepartidorRouter(repartidorController, autenticar, requeri
 
   // CU-016: detalle de un pedido asignado
   router.get('/pedidos/:pedidoId/detalle', (req, res) => repartidorController.detalle(req, res));
+
+  // CU-017: subir comprobante de entrega
+  router.post('/pedidos/:pedidoId/comprobante', uploadComprobante, (req, res) =>
+    repartidorController.subirComprobante(req, res)
+  );
 
   // CU-017: actualizar estado (ASIGNADO → EN_CAMINO → ENTREGADO / NO_ENTREGADO)
   router.patch('/pedidos/:pedidoId/estado', uploadEvidencia, (req, res) =>

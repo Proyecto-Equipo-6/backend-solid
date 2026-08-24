@@ -32,6 +32,39 @@ const uploadEvidencia = multer({
 }).single('fotoEvidencia');
 
 /**
+ * Middleware de subida de comprobante de entrega.
+ * Acepta JPG/PNG, máx 5MB.
+ */
+const uploadComprobante = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const formatosPermitidos = ['image/jpeg', 'image/png'];
+    if (!formatosPermitidos.includes(file.mimetype)) {
+      return cb(new Error('Formato no permitido. Solo se aceptan JPG o PNG'));
+    }
+    return cb(null, true);
+  },
+}).single('foto');
+
+/**
+ * Middleware de subida de imágenes de productos.
+ * Acepta JPG/PNG/WebP, máx 5MB.
+ * Guarda el archivo en memoria (req.file.buffer) para subirlo a Cloudinary desde el controlador.
+ */
+const uploadProducto = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+  fileFilter: (req, file, cb) => {
+    const formatosPermitidos = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!formatosPermitidos.includes(file.mimetype)) {
+      return cb(new Error('Formato no permitido. Solo se aceptan JPG, PNG o WebP'));
+    }
+    return cb(null, true);
+  },
+}).single('fotoEvidencia');
+
+/**
  * Sube un buffer a Cloudinary y devuelve la URL segura.
  * @param {Buffer} buffer - contenido del archivo
  * @param {string} carpeta - carpeta destino en Cloudinary (ej. 'nexbit/evidencias')
@@ -52,11 +85,11 @@ async function subirEvidenciaFotografica(buffer, carpeta = 'nexbit/evidencias') 
 
 /**
  * Guarda la evidencia en el servidor local (fallback cuando Cloudinary no está
- * disponible) y devuelve la ruta pública relativa.
+ * disponible) y devuelve la URL completa accesible por HTTP.
  * @param {Buffer} buffer - contenido del archivo
  * @param {string} mimetype - tipo MIME del archivo
  * @param {string} idPedido - id del pedido para nombrar el archivo
- * @returns {string} ruta relativa accesible por HTTP (ej. /api/uploads/evidencias/...)
+ * @returns {string} URL completa (ej. http://localhost:3000/api/uploads/evidencias/...)
  */
 function guardarEvidenciaLocal(buffer, mimetype, idPedido) {
   if (!fs.existsSync(DIRECTORIO_EVIDENCIAS)) {
@@ -68,7 +101,8 @@ function guardarEvidenciaLocal(buffer, mimetype, idPedido) {
   const rutaCompleta = path.join(DIRECTORIO_EVIDENCIAS, nombreArchivo);
   fs.writeFileSync(rutaCompleta, buffer);
 
-  return `/api/uploads/evidencias/${nombreArchivo}`;
+  const port = process.env.PORT || 3000;
+  return `http://localhost:${port}/api/uploads/evidencias/${nombreArchivo}`;
 }
 
-module.exports = { uploadEvidencia, subirEvidenciaFotografica, guardarEvidenciaLocal };
+module.exports = { uploadEvidencia, uploadComprobante, uploadProducto, subirEvidenciaFotografica, guardarEvidenciaLocal };

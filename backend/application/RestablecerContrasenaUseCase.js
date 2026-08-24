@@ -19,10 +19,10 @@ class RestablecerContrasenaUseCase {
     if (
       !nueva_password ||
       typeof nueva_password !== 'string' ||
-      nueva_password.length < 8 ||
-      nueva_password.length > 20
+      nueva_password.length < 4 ||
+      nueva_password.length > 8
     ) {
-      throw new Error('La contraseña debe tener entre 8 y 20 caracteres.');
+      throw new Error('La contraseña debe tener entre 4 y 8 caracteres.');
     }
 
     const registro = await this.tokensRepository.findByToken(token);

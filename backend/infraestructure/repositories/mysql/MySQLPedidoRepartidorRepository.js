@@ -39,8 +39,8 @@ class MySQLPedidoRepartidorRepository extends PedidoRepartidorRepository {
        JOIN usuarios u ON u.id_usuario = p.id_usuario
        WHERE p.id_repartidor = ?
          AND p.estado IN ('ASIGNADO', 'EN_CAMINO')
-         AND DATE(p.fecha_actualizacion) = CURDATE()
-       ORDER BY CASE WHEN p.estado = 'EN_CAMINO' THEN 0 ELSE 1 END, p.fecha_actualizacion ASC`,
+         AND DATE(COALESCE(p.fecha_actualizacion, p.fecha_pedido)) = CURDATE()
+       ORDER BY CASE WHEN p.estado = 'EN_CAMINO' THEN 0 ELSE 1 END, COALESCE(p.fecha_actualizacion, p.fecha_pedido) ASC`,
       [repartidorId]
     );
     return filas.map((fila) => this._mapearFila(fila));
@@ -68,7 +68,7 @@ class MySQLPedidoRepartidorRepository extends PedidoRepartidorRepository {
 
     const [resultado] = await pool.execute(
       `UPDATE pedidos
-       SET estado = ?, comprobante_url = COALESCE(?, comprobante_url), observaciones = COALESCE(?, observaciones)
+       SET estado = ?, comprobante_url = COALESCE(?, comprobante_url), observaciones = COALESCE(?, observaciones), fecha_actualizacion = NOW()
        WHERE id_pedido = ? AND estado = ?`,
       [
         nuevoEstado,
@@ -176,6 +176,7 @@ class MySQLPedidoRepartidorRepository extends PedidoRepartidorRepository {
 
     if (campos.length === 0) return this.obtenerDetallePedido(idPedido);
 
+    campos.push('fecha_actualizacion = NOW()');
     valores.push(idPedido);
     await pool.execute(
       `UPDATE pedidos SET ${campos.join(', ')} WHERE id_pedido = ?`,
