@@ -1,36 +1,30 @@
 const express = require('express');
-const crearDashboardPedidosController = require('../controllers/dashboardPedidosController');
-const crearDetallePedidoController = require('../controllers/detallePedidoController');
-const crearActualizarEstadoPedidoController = require('../controllers/actualizarEstadoPedidoController');
-const crearHistorialPedidosController = require('../controllers/historialPedidosController');
 const { uploadEvidencia } = require('../middlewares/uploadMiddleware');
 
 /**
  * Fábrica de rutas del módulo Repartidor (CU-015 a CU-018).
- * Recibe el repositorio y los middlewares ya instanciados (DIP).
+ * Recibe el controlador (que a su vez recibe los casos de uso inyectados)
+ * y los middlewares ya instanciados (DIP).
  * Todas las rutas requieren sesión iniciada y rol Repartidor (RN-058).
  */
-function createPedidosRepartidorRouter(pedidoRepo, autenticar, requerirRepartidor) {
+function createPedidosRepartidorRouter(repartidorController, autenticar, requerirRepartidor) {
   const router = express.Router();
-
-  const dashboardController = crearDashboardPedidosController(pedidoRepo);
-  const detalleController = crearDetallePedidoController(pedidoRepo);
-  const actualizarEstadoController = crearActualizarEstadoPedidoController(pedidoRepo);
-  const historialController = crearHistorialPedidosController(pedidoRepo);
 
   router.use(autenticar, requerirRepartidor);
 
   // CU-015: dashboard del repartidor
-  router.get('/dashboard', dashboardController);
+  router.get('/dashboard', (req, res) => repartidorController.dashboard(req, res));
 
   // CU-016: detalle de un pedido asignado
-  router.get('/pedidos/:pedidoId/detalle', detalleController);
+  router.get('/pedidos/:pedidoId/detalle', (req, res) => repartidorController.detalle(req, res));
 
   // CU-017: actualizar estado (ASIGNADO → EN_CAMINO → ENTREGADO / NO_ENTREGADO)
-  router.patch('/pedidos/:pedidoId/estado', uploadEvidencia, actualizarEstadoController);
+  router.patch('/pedidos/:pedidoId/estado', uploadEvidencia, (req, res) =>
+    repartidorController.estado(req, res)
+  );
 
   // CU-018: historial de pedidos finalizados
-  router.get('/historial', historialController);
+  router.get('/historial', (req, res) => repartidorController.historial(req, res));
 
   return router;
 }

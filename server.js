@@ -69,6 +69,11 @@ const createPedidoRouter = require('./backend/infraestructure/routes/pedidoRoute
 // --- Módulos de Repartidor (CU-015 a CU-018) ---
 const MySQLPedidoRepartidorRepository = require('./backend/infraestructure/repositories/mysql/MySQLPedidoRepartidorRepository');
 const createPedidosRepartidorRouter = require('./backend/infraestructure/routes/pedidosRepartidorRoutes');
+const RepartidorController = require('./backend/infraestructure/controllers/RepartidorController');
+const VerDashboardPedidosUseCase = require('./backend/application/verDashboardPedidosUseCase');
+const VerDetallePedidoUseCase = require('./backend/application/verDetallePedidoUseCase');
+const VerHistorialPedidosUseCase = require('./backend/application/verHistorialPedidosUseCase');
+const ActualizarEstadoPedidoUseCase = require('./backend/application/actualizarEstadoPedidoUseCase');
 
 // --- Módulos de Proveedores (CU-025) ---
 const MySQLProveedorRepository = require('./backend/infraestructure/repositories/mysql/MySQLProveedorRepository');
@@ -274,6 +279,14 @@ const requerirAdmin = crearRequerirAdmin(ROL_ADMIN);
 // --- Inyección de Dependencias para Repartidor (DIP) ---
 const pedidoRepartidorRepository = new MySQLPedidoRepartidorRepository();
 
+// --- Controller de Repartidor (CU-015 a CU-018) con casos de uso inyectados (DIP) ---
+const repartidorController = new RepartidorController({
+  verDashboard: new VerDashboardPedidosUseCase(pedidoRepartidorRepository),
+  verDetalle: new VerDetallePedidoUseCase(pedidoRepartidorRepository),
+  actualizarEstado: new ActualizarEstadoPedidoUseCase(pedidoRepartidorRepository),
+  verHistorial: new VerHistorialPedidosUseCase(pedidoRepartidorRepository),
+});
+
 // --- Inyección de Dependencias para Repartidores Admin (CU-021, DIP) ---
 const CrearRepartidorAdminUseCase = require('./backend/application/crearRepartidorAdminUseCase');
 const ActualizarRepartidorAdminUseCase = require('./backend/application/actualizarRepartidorAdminUseCase');
@@ -337,7 +350,7 @@ app.use('/api/v1/categorias', createCategoriaRouter(categoriaController, autenti
 app.use('/api/v1/analitica', createAnaliticaRouter(analiticaController, autenticar, requerirAdmin));
 app.use('/api/v1/carrito', createCarritoRouter(carritoController, autenticar, requerirCliente));
 app.use('/api/v1/pedidos', createPedidoRouter(pedidoController, autenticar, requerirCliente));
-app.use('/api/v1/repartidor', createPedidosRepartidorRouter(pedidoRepartidorRepository, autenticar, requerirRepartidor));
+app.use('/api/v1/repartidor', createPedidosRepartidorRouter(repartidorController, autenticar, requerirRepartidor));
 app.use('/api/v1/proveedores', createProveedorRouter(proveedorController, autenticar, requerirAdmin));
 app.use('/api/v1/admin/repartidores', createRepartidorAdminRouter(repartidorAdminController, autenticar, requerirAdmin));
 app.use('/api/v1/admin/pedidos', createPedidoAdminRouter(pedidoAdminController, autenticar, requerirAdmin));
