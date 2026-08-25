@@ -28,7 +28,7 @@ function validarPasswordLongitud(password, mensaje) {
     String(password).length > 20 ||
     !/[A-Z]/.test(String(password)) ||
     !/[a-z]/.test(String(password)) ||
-    !/[0-9]/.test(String(password))
+    !/\d/.test(String(password))
   ) {
     throw new ErrorValidacion(mensaje);
   }

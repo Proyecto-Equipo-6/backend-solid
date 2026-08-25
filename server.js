@@ -373,11 +373,13 @@ app.use((err, req, res, next) => {
   if (status >= 500) console.error(err);
   let message = 'Error interno del servidor';
   if (status < 500) {
-    message = err.type === 'entity.parse.failed'
-      ? 'JSON inválido en el cuerpo de la petición.'
-      : err.code === 'LIMIT_FILE_SIZE'
-        ? 'El archivo supera el tamaño máximo permitido.'
-        : err.message;
+    if (err.type === 'entity.parse.failed') {
+      message = 'JSON inválido en el cuerpo de la petición.';
+    } else if (err.code === 'LIMIT_FILE_SIZE') {
+      message = 'El archivo supera el tamaño máximo permitido.';
+    } else {
+      message = err.message;
+    }
   }
   res.status(status).json({ error: message });
 });
