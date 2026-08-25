@@ -1,7 +1,7 @@
 USE sistema_comercial;
 
 -- =====================================================
--- METODOS DE PAGO
+-- METODOS DE PAGO (solo Efectivo / Contraentrega = 1)
 -- =====================================================
 INSERT INTO metodos_pago (id_metodo_pago, nombre, descripcion, requiere_comprobante, activo) VALUES
 (1, 'Efectivo / Contraentrega', 'Pago en efectivo al momento de recibir el pedido', 0, 1);
@@ -15,13 +15,9 @@ INSERT INTO roles (id_rol, nombre, descripcion) VALUES
 (3, 'Repartidor',    'Encargado de entregar pedidos a domicilio');
 
 -- =====================================================
--- 2. USUARIOS
--- NOTA: Todos los usuarios usan la misma contraseña de prueba: "123456"
--- El hash bcrypt se construye en dos partes (CONCAT) para no exponer el
--- literal completo como secreto en el código (SonarQube S8215).
--- El hash anterior se revocó y se reemplazó por uno recién generado.
+-- 2. USUARIOS — Contraseña de prueba: "Carro1234"
 -- =====================================================
-SET @PASSWORD_SEED = CONCAT('$2b$10$', 'i9S.8Dmmb5Ta.KT79lFezurJEExOiMCLUB7psHqYrY8i8NTK4hyuK');
+SET @PASSWORD_SEED = '$2b$10$l4keuBkYfDoHWKxFp2SeF.ZHuLe0GMgr0zzenRzGImRFWA3gMdX86';
 INSERT INTO usuarios (id_usuario, id_rol, nombre_apellido, tipo_documento, numero_documento, email, password, telefono, direccion) VALUES
 (1, 1, 'Sebastian Admin', 'CC', '1010', 'admin@remate.com', @PASSWORD_SEED, '3001000001', 'Calle 100 #15-20, Medellín'),
 (2, 2, 'Juan Cliente',    'CC', '2020', 'juan@email.com',   @PASSWORD_SEED, '3002000002', 'Carrera 7 # 45-10, Medellín'),
@@ -80,14 +76,15 @@ INSERT INTO carrito_detalles (id_carrito, id_producto, cantidad) VALUES
 (3, 3, 1);
 
 -- =====================================================
--- 7. PEDIDOS (Suma de montos >= $200.000 para cumplir CHK)
+-- 7. PEDIDOS (todos con Efectivo = 1, incluye pedido 6 CONFIRMADO)
 -- =====================================================
 INSERT INTO pedidos (id_pedido, id_usuario, id_metodo_pago, direccion_entrega, total, estado, id_repartidor, observaciones) VALUES
 (1, 2, 1, 'Carrera 7 # 45-10, Medellín',       250000.00, 'ENTREGADO',              NULL, 'Entregado en portería'),
-(2, 3, 2, 'Carrera 45 # 12-10, Medellín',     350000.00, 'ASIGNADO',               5,    'Pedido asignado a repartidor'),
+(2, 3, 1, 'Carrera 45 # 12-10, Medellín',     350000.00, 'ASIGNADO',               5,    'Pedido asignado a repartidor'),
 (3, 4, 1, 'Av. El Poblado # 3-15, Medellín',   450000.00, 'EN_CAMINO',              5,    'Llamar antes de entregar'),
-(4, 3, 2, 'Calle 80 # 23-45, Medellín',       220000.00, 'CANCELADO',              NULL, 'Cancelado a solicitud del cliente'),
-(5, 2, 1, 'Carrera 15 # 8-20, Medellín',       210000.00, 'NO_ENTREGADO',           NULL, 'Cliente no se encontraba en el domicilio');
+(4, 3, 1, 'Calle 80 # 23-45, Medellín',       220000.00, 'CANCELADO',              NULL, 'Cancelado a solicitud del cliente'),
+(5, 2, 1, 'Carrera 15 # 8-20, Medellín',       210000.00, 'NO_ENTREGADO',           NULL, 'Cliente no se encontraba en el domicilio'),
+(6, 2, 1, 'Carrera 20 # 10-30, Medellín',     250000.00, 'CONFIRMADO',             NULL, 'Listo para asignar repartidor');
 
 -- =====================================================
 -- 8. PEDIDO_DETALLES
@@ -97,11 +94,11 @@ INSERT INTO pedido_detalles (id_pedido, id_producto, cantidad, precio_unitario, 
 (2, 3, 1, 350000.00, 350000.00),
 (3, 4, 1, 450000.00, 450000.00),
 (4, 2, 1, 220000.00, 220000.00),
-(5, 5, 1, 210000.00, 210000.00);
+(5, 5, 1, 210000.00, 210000.00),
+(6, 1, 1, 250000.00, 250000.00);
 
 -- =====================================================
 -- 9. HISTORIAL_STOCK
--- NOTA: El motivo se centraliza en una variable de sesión
 -- =====================================================
 SET @MOTIVO_INVENTARIO_INICIAL = 'Carga de inventario inicial';
 INSERT INTO historial_stock (id_producto, id_admin, cantidad_anterior, cantidad_nueva, motivo) VALUES

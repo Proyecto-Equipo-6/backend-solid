@@ -1,19 +1,13 @@
 -- =============================================================================
 -- SISTEMA_COMERCIAL — ARCHIVO COMPLETO (Schema + Triggers + Seed)
 -- =============================================================================
--- Creado: 2026-08-17
--- Propósito: ejecutar TODO en un solo archivo desde MySQL Workbench para
---            levantar la base de datos de pruebas.
---
--- NOTA: Para re-crear desde cero, descomenta la línea DROP DATABASE.
---       ⚠️ Es DESTRUCTIVO: borra la BD actual.
+-- Creado: 2026-08-17 | Corregido: 2026-08-24
+-- Contraseña de prueba: "Carro1234" | Solo Efectivo (sin Nequi)
+-- ⚠️ Para re-crear desde cero, la línea DROP DATABASE ya está ACTIVA (DESTRUCTIVO).
 -- =============================================================================
 
--- DROP DATABASE IF EXISTS sistema_comercial;
+DROP DATABASE IF EXISTS sistema_comercial;
 
--- =============================================================================
--- SCHEMA
--- =============================================================================
 CREATE DATABASE IF NOT EXISTS sistema_comercial
     CHARACTER SET utf8mb4
     COLLATE utf8mb4_unicode_ci;
@@ -76,19 +70,16 @@ CREATE TABLE proveedores (
     fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 
--- 5.1 TABLA: REPARTIDORES
+-- 5.1 TABLA: REPARTIDORES (SIN vehiculo/placa)
 CREATE TABLE repartidores (
     id_repartidor INT AUTO_INCREMENT PRIMARY KEY,
     id_usuario INT NOT NULL UNIQUE,
-    vehiculo VARCHAR(50) NULL,
-    placa VARCHAR(20) NULL,
     activo TINYINT(1) NOT NULL DEFAULT 1,
     fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_repartidores_usuarios FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario) ON DELETE RESTRICT
 ) ENGINE=InnoDB;
 
--- 6. TABLA: METODOS_PAGO
--- NOTA: Métodos de pago disponibles: 1 = Efectivo / Contraentrega, 2 = Nequi.
+-- 6. TABLA: METODOS_PAGO (solo Efectivo = 1)
 CREATE TABLE metodos_pago (
     id_metodo_pago INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(50) NOT NULL UNIQUE,
@@ -277,35 +268,30 @@ BEGIN
     END IF;
 END //
 
-DELIMITER ;
+DELIMITER ; 
 
 -- =============================================================================
 -- SEED (datos de prueba)
 -- =============================================================================
--- METODOS DE PAGO (1 = Efectivo / Contraentrega, 2 = Nequi)
 INSERT INTO metodos_pago (id_metodo_pago, nombre, descripcion, requiere_comprobante, activo) VALUES
-(1, 'Efectivo / Contraentrega', 'Pago en efectivo al momento de recibir el pedido', 0, 1),
-(2, 'Nequi', 'Pago por Nequi', 0, 1);
+(1, 'Efectivo / Contraentrega', 'Pago en efectivo al momento de recibir el pedido', 0, 1);
 
--- ROLES
 INSERT INTO roles (id_rol, nombre, descripcion) VALUES
 (1, 'Administrador', 'Control total del sistema'),
 (2, 'Cliente',       'Usuario registrado con acceso a compras'),
 (3, 'Repartidor',    'Encargado de entregar pedidos a domicilio');
 
--- USUARIOS
--- NOTA: Todos los usuarios usan la misma contraseña de prueba: "123456"
--- El hash bcrypt se genera una sola vez y se reutiliza para el seed (datos de prueba).
+-- USUARIOS (contraseña: Carro1234)
 INSERT INTO usuarios (id_usuario, id_rol, nombre_apellido, tipo_documento, numero_documento, email, password, telefono, direccion) VALUES
-(1, 1, 'Sebastian Admin', 'CC', '1010', 'admin@remate.com', '$2b$10$FmvdWkpOie1MECB/paY9a.D1XyitCgIDj1g4XIZGqXvgIR4sVNGh6', '3001000001', 'Calle 100 #15-20, Medellín'),
-(2, 2, 'Juan Cliente',    'CC', '2020', 'juan@email.com',   '$2b$10$FmvdWkpOie1MECB/paY9a.D1XyitCgIDj1g4XIZGqXvgIR4sVNGh6', '3002000002', 'Carrera 7 # 45-10, Medellín'),
-(3, 2, 'Maria Compra',    'CC', '3030', 'maria@email.com',  '$2b$10$FmvdWkpOie1MECB/paY9a.D1XyitCgIDj1g4XIZGqXvgIR4sVNGh6', '3003000003', 'Carrera 45 # 12-10, Medellín'),
-(4, 2, 'Carlos Venta',    'CC', '4040', 'carlos@email.com', '$2b$10$FmvdWkpOie1MECB/paY9a.D1XyitCgIDj1g4XIZGqXvgIR4sVNGh6', '3004000004', 'Av. El Poblado # 3-15, Medellín'),
-(5, 3, 'Luis Repartidor', 'CC', '6060', 'luis@remate.com',  '$2b$10$FmvdWkpOie1MECB/paY9a.D1XyitCgIDj1g4XIZGqXvgIR4sVNGh6', '3006000006', 'Transversal 39 # 77-50, Medellín');
+(1, 1, 'Sebastian Admin', 'CC', '1010', 'admin@remate.com', '$2b$10$l4keuBkYfDoHWKxFp2SeF.ZHuLe0GMgr0zzenRzGImRFWA3gMdX86', '3001000001', 'Calle 100 #15-20, Medellín'),
+(2, 2, 'Juan Cliente',    'CC', '2020', 'juan@email.com',   '$2b$10$l4keuBkYfDoHWKxFp2SeF.ZHuLe0GMgr0zzenRzGImRFWA3gMdX86', '3002000002', 'Carrera 7 # 45-10, Medellín'),
+(3, 2, 'Maria Compra',    'CC', '3030', 'maria@email.com',  '$2b$10$l4keuBkYfDoHWKxFp2SeF.ZHuLe0GMgr0zzenRzGImRFWA3gMdX86', '3003000003', 'Carrera 45 # 12-10, Medellín'),
+(4, 2, 'Carlos Venta',    'CC', '4040', 'carlos@email.com', '$2b$10$l4keuBkYfDoHWKxFp2SeF.ZHuLe0GMgr0zzenRzGImRFWA3gMdX86', '3004000004', 'Av. El Poblado # 3-15, Medellín'),
+(5, 3, 'Luis Repartidor', 'CC', '6060', 'luis@remate.com',  '$2b$10$l4keuBkYfDoHWKxFp2SeF.ZHuLe0GMgr0zzenRzGImRFWA3gMdX86', '3006000006', 'Transversal 39 # 77-50, Medellín');
 
--- REPARTIDORES (vinculados a usuarios con rol 3)
-INSERT INTO repartidores (id_repartidor, id_usuario, vehiculo, placa, activo) VALUES
-(1, 5, 'Moto Honda CB190', 'ABC123', 1);
+-- REPARTIDORES (SIN vehiculo/placa)
+INSERT INTO repartidores (id_repartidor, id_usuario, activo) VALUES
+(1, 5, 1);
 
 -- CATEGORIAS
 INSERT INTO categorias (id_categoria, nombre, descripcion) VALUES
@@ -343,14 +329,14 @@ INSERT INTO carrito_detalles (id_carrito, id_producto, cantidad) VALUES
 (2, 4, 1),
 (3, 3, 1);
 
--- PEDIDOS (todos con id_metodo_pago = 1: Efectivo / Contraentrega)
--- NOTA: 'CANCELADO' se repite en ENUM, triggers y seed — en SQL no existen constantes.
-INSERT INTO pedidos (id_pedido, id_usuario, id_metodo_pago, direccion_entrega, total, estado, observaciones) VALUES
-(1, 2, 1, 'Carrera 7 # 45-10, Medellín',       250000.00, 'ENTREGADO',              'Entregado en portería'),
-(2, 3, 1, 'Carrera 45 # 12-10, Medellín',     350000.00, 'ASIGNADO',               'Pedido asignado a repartidor'),
-(3, 4, 1, 'Av. El Poblado # 3-15, Medellín',   450000.00, 'EN_CAMINO',              'Llamar antes de entregar'),
-(4, 3, 1, 'Calle 80 # 23-45, Medellín',       220000.00, 'CANCELADO',              'Cancelado a solicitud del cliente'),
-(5, 2, 1, 'Carrera 7 # 45-10, Medellín',       210000.00, 'NO_ENTREGADO',           'Cliente no se encontraba en el domicilio');
+-- PEDIDOS (todos Efectivo = 1, incluye pedido 6 CONFIRMADO)
+INSERT INTO pedidos (id_pedido, id_usuario, id_metodo_pago, direccion_entrega, total, estado, id_repartidor, observaciones) VALUES
+(1, 2, 1, 'Carrera 7 # 45-10, Medellín',       250000.00, 'ENTREGADO',   NULL, 'Entregado en portería'),
+(2, 3, 1, 'Carrera 45 # 12-10, Medellín',     350000.00, 'ASIGNADO',    5,    'Pedido asignado a repartidor'),
+(3, 4, 1, 'Av. El Poblado # 3-15, Medellín',   450000.00, 'EN_CAMINO',   5,    'Llamar antes de entregar'),
+(4, 3, 1, 'Calle 80 # 23-45, Medellín',       220000.00, 'CANCELADO',   NULL, 'Cancelado a solicitud del cliente'),
+(5, 2, 1, 'Carrera 7 # 45-10, Medellín',       210000.00, 'NO_ENTREGADO', NULL, 'Cliente no se encontraba en el domicilio'),
+(6, 2, 1, 'Carrera 20 # 10-30, Medellín',     250000.00, 'CONFIRMADO',  NULL, 'Listo para asignar repartidor');
 
 -- PEDIDO_DETALLES
 INSERT INTO pedido_detalles (id_pedido, id_producto, cantidad, precio_unitario, subtotal) VALUES
@@ -358,10 +344,10 @@ INSERT INTO pedido_detalles (id_pedido, id_producto, cantidad, precio_unitario, 
 (2, 3, 1, 350000.00, 350000.00),
 (3, 4, 1, 450000.00, 450000.00),
 (4, 2, 1, 220000.00, 220000.00),
-(5, 5, 1, 210000.00, 210000.00);
+(5, 5, 1, 210000.00, 210000.00),
+(6, 1, 1, 250000.00, 250000.00);
 
 -- HISTORIAL_STOCK
--- NOTA: 'Carga de inventario inicial' se repite por cada producto — en SQL no existen constantes.
 INSERT INTO historial_stock (id_producto, id_admin, cantidad_anterior, cantidad_nueva, motivo) VALUES
 (1, 1, 0, 100, 'Carga de inventario inicial'),
 (2, 1, 0,  50, 'Carga de inventario inicial'),
