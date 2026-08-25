@@ -42,8 +42,10 @@ class ConsultarRepartidoresUseCase {
         resultado.push({
           id_repartidor: repartidor.id_usuario,
           nombre: `${repartidor.nombre} ${repartidor.apellidos}`.trim(),
+          nombre_apellido: repartidor.nombre_apellido || `${repartidor.nombre} ${repartidor.apellidos}`.trim(),
           telefono: repartidor.telefono,
           email: repartidor.email,
+          direccion: repartidor.direccion,
           estado: repartidor.estado,
           pedidos_hoy: pedidosHoy,
           pedidos_semana: periodo.totalSemana,
@@ -54,8 +56,10 @@ class ConsultarRepartidoresUseCase {
         resultado.push({
           id_repartidor: repartidor.id_usuario,
           nombre: `${repartidor.nombre} ${repartidor.apellidos}`.trim(),
+          nombre_apellido: repartidor.nombre_apellido || `${repartidor.nombre} ${repartidor.apellidos}`.trim(),
           telefono: repartidor.telefono,
           email: repartidor.email,
+          direccion: repartidor.direccion,
           estado: repartidor.estado,
           pedidos_hoy: '-',
           pedidos_semana: '-',

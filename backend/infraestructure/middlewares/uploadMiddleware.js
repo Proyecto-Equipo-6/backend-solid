@@ -3,7 +3,6 @@ const cloudinary = require('cloudinary').v2;
 const fs = require('fs');
 const path = require('path');
 
-// Configuración de Cloudinary (variables en .env)
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
@@ -11,6 +10,7 @@ cloudinary.config({
 });
 
 const DIRECTORIO_EVIDENCIAS = path.join(__dirname, '../../../uploads/evidencias');
+const DIRECTORIO_PRODUCTOS = path.join(__dirname, '../../../uploads/productos');
 
 /**
  * Middleware de subida de evidencia fotográfica (CU-017).
@@ -25,44 +25,27 @@ const uploadEvidencia = multer({
   fileFilter: (req, file, cb) => {
     const formatosPermitidos = ['image/jpeg', 'image/png', 'application/pdf'];
     if (!formatosPermitidos.includes(file.mimetype)) {
-      return cb(new Error('Formato no permitido. Solo se aceptan JPG, PNG o PDF'));
+      const error = new Error('Formato no permitido. Solo se aceptan JPG, PNG o PDF');
+      error.status = 400;
+      return cb(error);
     }
     return cb(null, true);
   },
 }).single('fotoEvidencia');
 
-/**
- * Middleware de subida de comprobante de entrega.
- * Acepta JPG/PNG, máx 5MB.
- */
 const uploadComprobante = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 5 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
     const formatosPermitidos = ['image/jpeg', 'image/png'];
     if (!formatosPermitidos.includes(file.mimetype)) {
-      return cb(new Error('Formato no permitido. Solo se aceptan JPG o PNG'));
+      const error = new Error('Formato no permitido. Solo se aceptan JPG o PNG');
+      error.status = 400;
+      return cb(error);
     }
     return cb(null, true);
   },
 }).single('foto');
-
-/**
- * Middleware de subida de imágenes de productos.
- * Acepta JPG/PNG/WebP, máx 5MB.
- * Guarda el archivo en memoria (req.file.buffer) para subirlo a Cloudinary desde el controlador.
- */
-const uploadProducto = multer({
-  storage: multer.memoryStorage(),
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
-  fileFilter: (req, file, cb) => {
-    const formatosPermitidos = ['image/jpeg', 'image/png', 'image/webp'];
-    if (!formatosPermitidos.includes(file.mimetype)) {
-      return cb(new Error('Formato no permitido. Solo se aceptan JPG, PNG o WebP'));
-    }
-    return cb(null, true);
-  },
-}).single('fotoEvidencia');
 
 /**
  * Sube un buffer a Cloudinary y devuelve la URL segura.
@@ -104,5 +87,34 @@ function guardarEvidenciaLocal(buffer, mimetype, idPedido) {
   const port = process.env.PORT || 3000;
   return `http://localhost:${port}/api/uploads/evidencias/${nombreArchivo}`;
 }
+  const uploadProducto = multer({           // para POST /productos/imagen (campo fotoEvidencia)
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const formatosPermitidos = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!formatosPermitidos.includes(file.mimetype)) {
+      const error = new Error('Formato no permitido. Solo se aceptan JPG, PNG o WebP');
+      error.status = 400;
+      return cb(error);
+    }
+    return cb(null, true);
+  },
+}).single('fotoEvidencia');
 
-module.exports = { uploadEvidencia, uploadComprobante, uploadProducto, subirEvidenciaFotografica, guardarEvidenciaLocal };
+const uploadProductoImagen = multer({     // para POST/PUT /productos (campo imagen)
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const formatosPermitidos = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!formatosPermitidos.includes(file.mimetype)) {
+      const error = new Error('Formato no permitido. Solo se aceptan JPG, PNG o WebP');
+      error.status = 400;
+      return cb(error);
+    }
+    return cb(null, true);
+  },
+}).single('imagen');
+
+module.exports = { uploadEvidencia, uploadComprobante, uploadProducto, uploadProductoImagen, subirEvidenciaFotografica, guardarEvidenciaLocal };
+
+  

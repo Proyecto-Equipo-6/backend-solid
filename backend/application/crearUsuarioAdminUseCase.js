@@ -1,7 +1,14 @@
-const ErrorConflicto = require('./errors/ErrorConflicto');
 const ErrorValidacion = require('./errors/ErrorValidacion');
-const bcrypt = require('bcrypt');
+const ErrorConflicto = require('./errors/ErrorConflicto');
 const { ROL_REPARTIDOR } = require('../constants');
+const {
+  validarNombreObligatorio,
+  validarEmailFormato,
+  validarPasswordLongitud,
+  validarTelefono,
+  validarEmailUnico,
+  hashPassword,
+} = require('./usuarioValidationsHelper');
 
 const TIPOS_DOCUMENTO = new Set(['CC', 'Pasaporte', 'CE', 'Otro']);
 
@@ -19,18 +26,10 @@ class CrearUsuarioAdminUseCase {
   async execute(datos) {
     const { id_rol, nombre_apellido, tipo_documento, numero_documento, email, password, telefono, direccion } = datos;
 
-    if (!nombre_apellido || !String(nombre_apellido).trim()) {
-      throw new ErrorValidacion('El nombre es obligatorio');
-    }
-    if (!email || !String(email).includes('@')) {
-      throw new ErrorValidacion('Correo electrónico inválido');
-    }
-    if (!password || String(password).length < 8) {
-      throw new ErrorValidacion('La contraseña debe tener al menos 8 caracteres');
-    }
-    if (!telefono || !/^\d{10}$/.test(String(telefono))) {
-      throw new ErrorValidacion('El teléfono debe tener exactamente 10 dígitos');
-    }
+    validarNombreObligatorio(nombre_apellido);
+    validarEmailFormato(email);
+    validarPasswordLongitud(password, 'La contraseña debe tener entre 8 y 20 caracteres, una mayúscula, una minúscula y un número');
+    validarTelefono(telefono);
     if (id_rol === undefined || !Number(id_rol)) {
       throw new ErrorValidacion('El rol es obligatorio');
     }
@@ -38,10 +37,7 @@ class CrearUsuarioAdminUseCase {
       throw new ErrorValidacion('Tipo de documento no válido');
     }
 
-    const existenteEmail = await this.userRepository.findByEmail(email);
-    if (existenteEmail) {
-      throw new ErrorConflicto('El correo electrónico ya se encuentra registrado');
-    }
+    await validarEmailUnico(this.userRepository, email);
 
     if (numero_documento) {
       const existenteDocumento = await this.userRepository.findByNumeroDocumento(numero_documento);
@@ -50,8 +46,7 @@ class CrearUsuarioAdminUseCase {
       }
     }
 
-    const saltRounds = Number(process.env.BCRYPT_ROUNDS) || 10;
-    const passwordHash = await bcrypt.hash(String(password), saltRounds);
+    const passwordHash = await hashPassword(password);
 
     const guardado = await this.userRepository.save({
       id_rol: Number(id_rol),

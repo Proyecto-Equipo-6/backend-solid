@@ -62,7 +62,7 @@ describe('CU-026 CRUD usuarios (admin)', () => {
         .catch((e) => e);
 
       expect(error.status).toBe(400);
-      expect(error.message).toBe('La contraseña debe tener al menos 8 caracteres');
+      expect(error.message).toBe('La contraseña debe tener entre 8 y 20 caracteres, una mayúscula, una minúscula y un número');
     });
 
     it('rechaza teléfono inválido', async () => {

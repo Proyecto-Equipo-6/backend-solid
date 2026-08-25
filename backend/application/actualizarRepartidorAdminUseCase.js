@@ -3,7 +3,7 @@ const ErrorValidacion = require('./errors/ErrorValidacion');
 
 /**
  * Caso de Uso: ActualizarRepartidorAdminUseCase
- * Edita los datos del usuario repartidor y su vehículo.
+ * Edita los datos del usuario repartidor.
  */
 class ActualizarRepartidorAdminUseCase {
   constructor(userRepository, repartidorRepository) {
@@ -63,8 +63,6 @@ class ActualizarRepartidorAdminUseCase {
 
   construirDatosRepartidor(datos) {
     const datosRepartidor = {};
-    if (datos.vehiculo !== undefined) datosRepartidor.vehiculo = String(datos.vehiculo).trim();
-    if (datos.placa !== undefined) datosRepartidor.placa = String(datos.placa).trim();
     if (datos.estado !== undefined) datosRepartidor.estado = datos.estado;
     return datosRepartidor;
   }

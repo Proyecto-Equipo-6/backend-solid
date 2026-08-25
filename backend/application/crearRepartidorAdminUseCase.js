@@ -1,7 +1,12 @@
-const ErrorConflicto = require('./errors/ErrorConflicto');
-const ErrorValidacion = require('./errors/ErrorValidacion');
 const { ROL_REPARTIDOR } = require('../constants');
-const bcrypt = require('bcrypt');
+const {
+  validarNombreObligatorio,
+  validarEmailFormato,
+  validarPasswordLongitud,
+  validarTelefono,
+  validarEmailUnico,
+  hashPassword,
+} = require('./usuarioValidationsHelper');
 
 /**
  * Caso de Uso: CrearRepartidorAdminUseCase
@@ -14,28 +19,16 @@ class CrearRepartidorAdminUseCase {
   }
 
   async execute(datos) {
-    const { nombre_apellido, email, password, telefono, vehiculo = '', placa = '' } = datos;
+    const { nombre_apellido, email, password, telefono } = datos;
 
-    if (!nombre_apellido || !String(nombre_apellido).trim()) {
-      throw new ErrorValidacion('El nombre es obligatorio');
-    }
-    if (!email || !String(email).includes('@')) {
-      throw new ErrorValidacion('Correo electrónico inválido');
-    }
-    if (!password || String(password).length < 4) {
-      throw new ErrorValidacion('La contraseña debe tener al menos 4 caracteres');
-    }
-    if (!telefono || !/^\d{10}$/.test(String(telefono))) {
-      throw new ErrorValidacion('El teléfono debe tener exactamente 10 dígitos');
-    }
+    validarNombreObligatorio(nombre_apellido);
+    validarEmailFormato(email);
+    validarPasswordLongitud(password, 'La contraseña debe tener entre 8 y 20 caracteres, una mayúscula, una minúscula y un número');
+    validarTelefono(telefono);
 
-    const existenteEmail = await this.userRepository.findByEmail(email);
-    if (existenteEmail) {
-      throw new ErrorConflicto('El correo electrónico ya se encuentra registrado');
-    }
+    await validarEmailUnico(this.userRepository, email);
 
-    const saltRounds = Number(process.env.BCRYPT_ROUNDS) || 10;
-    const passwordHash = await bcrypt.hash(String(password), saltRounds);
+    const passwordHash = await hashPassword(password);
 
     const usuario = await this.userRepository.save({
       id_rol: ROL_REPARTIDOR,
@@ -50,11 +43,7 @@ class CrearRepartidorAdminUseCase {
     });
 
     const idUsuario = usuario.id ?? usuario.id_usuario;
-    await this.repartidorRepository.crear({
-      id_usuario: idUsuario,
-      vehiculo: String(vehiculo).trim(),
-      placa: String(placa).trim(),
-    });
+    await this.repartidorRepository.crear({ id_usuario: idUsuario });
 
     return { mensaje: 'Repartidor creado correctamente.', id_usuario: idUsuario };
   }

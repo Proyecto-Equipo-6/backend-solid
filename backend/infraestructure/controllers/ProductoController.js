@@ -1,6 +1,26 @@
 const { esNoEncontrado } = require('../helpers/responseHelpers');
 const { subirEvidenciaFotografica } = require('../middlewares/uploadMiddleware');
 
+function normalizarDatosProducto(cuerpo) {
+  return {
+    sku: cuerpo.sku,
+    id_categoria: Number(cuerpo.id_categoria),
+    id_proveedor: Number(cuerpo.id_proveedor),
+    nombre: cuerpo.nombre,
+    descripcion: cuerpo.descripcion,
+    precio: Number(cuerpo.precio),
+    stock: Number(cuerpo.stock),
+    garantia: cuerpo.garantia,
+    imagen_url: cuerpo.imagen_url || null,
+    estado: cuerpo.estado !== undefined ? Number(cuerpo.estado) : 1,
+  };
+}
+
+async function subirImagenProducto(buffer, mimetype) {
+  const resultado = await subirEvidenciaFotografica(buffer, 'nexbit/productos');
+  return resultado.secure_url || resultado.url;
+}
+
 /**
  * Adaptador de Infraestructura: ProductoController
  * Maneja las peticiones HTTP de productos y las delega a los Casos de Uso.
@@ -25,7 +45,7 @@ class ProductoController {
     this.eliminarProductoUseCase = eliminarProductoUseCase;
     this.ajustarStockProductoUseCase = ajustarStockProductoUseCase;
     this.buscarProductosUseCase = buscarProductosUseCase;
-  }
+  } 
 
   async listarPublicos(req, res) {
     try {
@@ -61,7 +81,13 @@ class ProductoController {
 
   async crear(req, res) {
     try {
-      const producto = await this.crearProductoUseCase.ejecutar(req.body);
+      const datos = normalizarDatosProducto(req.body);
+
+      if (req.file) {
+        datos.imagen_url = await subirImagenProducto(req.file.buffer, req.file.mimetype);
+      }
+
+      const producto = await this.crearProductoUseCase.ejecutar(datos);
       return res.status(201).json(producto);
     } catch (error) {
       return res.status(400).json({ error: error.message });
@@ -70,9 +96,15 @@ class ProductoController {
 
   async editar(req, res) {
     try {
+      const datos = normalizarDatosProducto(req.body);
+
+      if (req.file) {
+       datos.imagen_url = await subirImagenProducto(req.file.buffer, req.file.mimetype);
+      }
+
       const producto = await this.editarProductoUseCase.ejecutar(
         Number(req.params.id),
-        req.body
+        datos
       );
       return res.status(200).json(producto);
     } catch (error) {
