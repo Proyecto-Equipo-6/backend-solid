@@ -56,6 +56,46 @@ describe('CU-015: Ver Dashboard pedidos', () => {
     expect(dashboard.mensaje).toBe('No tienes pedidos asignados por el momento');
   });
 
+  test('CP-CU-015-03: Múltiples pedidos de prioridad similar, el más antiguo queda activo', async () => {
+  const hoy = new Date();
+  const mismaHora = new Date(hoy);
+  mismaHora.setHours(9, 0, 0, 0);
+
+  const pedidos = [
+    new Pedido({
+      id_pedido: 1,
+      id_usuario: 100,
+      id_repartidor: 10,
+      id_metodo_pago: 1,
+      direccion_entrega: 'Calle 1',
+      total: 50000,
+      estado: 'ASIGNADO',
+      fecha_pedido: mismaHora.toISOString(),
+      fecha_actualizacion: mismaHora.toISOString()
+    }),
+    new Pedido({
+      id_pedido: 2,
+      id_usuario: 101,
+      id_repartidor: 10,
+      id_metodo_pago: 1,
+      direccion_entrega: 'Calle 2',
+      total: 30000,
+      estado: 'ASIGNADO',
+      fecha_pedido: mismaHora.toISOString(), // misma prioridad
+      fecha_actualizacion: mismaHora.toISOString()
+    })
+  ];
+
+  const repo = new InMemoryPedidoRepartidorRepository(pedidos);
+  const useCase = new VerDashboardPedidosUseCase(repo);
+  const dashboard = await useCase.ejecutar(10);
+
+  expect(dashboard.conteoDelDia).toBe(2);
+  expect(dashboard.pedidoActivo.id_pedido).toBe(1); // el que se agregó primero con misma hora
+  expect(dashboard.pedidosEnCola).toHaveLength(1);
+  expect(dashboard.pedidosEnCola[0].id_pedido).toBe(2);
+  });
+
   test('CP-CU-015-06: Solo muestra pedidos asignados al repartidor autenticado', async () => {
     const hoy = new Date();
     const hora = new Date(hoy);

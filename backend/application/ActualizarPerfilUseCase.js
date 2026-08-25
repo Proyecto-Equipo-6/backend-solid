@@ -2,6 +2,7 @@ const bcrypt = require('bcrypt');
 const ErrorSesionExpirada = require('./errors/ErrorSesionExpirada');
 const ErrorNoAutorizado = require('./errors/ErrorNoAutorizado');
 const ErrorConflicto = require('./errors/ErrorConflicto');
+const ErrorValidacion = require('./errors/ErrorValidacion'); 
 
 const REGEX_EMAIL = /^[^\s@]+@[^\s@]+\.\w+$/;
 const REGEX_TELEFONO = /^\d{10}$/;
@@ -93,24 +94,24 @@ class ActualizarPerfilUseCase {
   }
 
   validar(datos) {
-    const faltantes = [];
+  const faltantes = [];
 
-    if (!datos.nombre_apellido) faltantes.push('nombre_apellido');
-    if (!datos.email) faltantes.push('email');
-    if (!datos.telefono) faltantes.push('telefono');
-    if (!datos.direccion) faltantes.push('direccion');
+  if (!datos.nombre_apellido) faltantes.push('nombre_apellido');
+  if (!datos.email) faltantes.push('email');
+  if (!datos.telefono) faltantes.push('telefono');
+  if (!datos.direccion) faltantes.push('direccion');
 
-    if (faltantes.length > 0) {
-      throw new Error(`Los campos ${faltantes.join(', ')} son obligatorios`);
-    }
+  if (faltantes.length > 0) {
+    throw new ErrorValidacion(`Los campos ${faltantes.join(', ')} son obligatorios`);
+  }
 
-    if (!REGEX_EMAIL.test(datos.email)) {
-      throw new Error('El correo electrónico no es válido');
-    }
+  if (!REGEX_EMAIL.test(datos.email)) {
+    throw new ErrorValidacion('El correo electrónico no es válido');
+  }
 
-    if (!REGEX_TELEFONO.test(datos.telefono)) {
-      throw new Error('El teléfono debe contener exactamente 10 dígitos');
-    }
+  if (!REGEX_TELEFONO.test(datos.telefono)) {
+    throw new ErrorValidacion('El teléfono debe contener exactamente 10 dígitos');
+  }
   }
 
   sinCambios(usuario, datos) {

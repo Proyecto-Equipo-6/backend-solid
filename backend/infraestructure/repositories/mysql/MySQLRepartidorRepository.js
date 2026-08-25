@@ -9,7 +9,7 @@ const pool = require('../../database/db');
 class MySQLRepartidorRepository extends RepartidorRepository {
   async findAll() {
     const [filas] = await pool.execute(
-      `SELECT r.id_repartidor, r.id_usuario, r.activo, r.vehiculo, r.placa,
+      `SELECT r.id_repartidor, r.id_usuario, r.activo,
               u.nombre_apellido AS nombre, '' AS apellidos,
               u.nombre_apellido AS nombre_apellido,
               u.telefono, u.email, u.direccion,
@@ -23,7 +23,7 @@ class MySQLRepartidorRepository extends RepartidorRepository {
 
   async buscarPorId(idRepartidor) {
     const [filas] = await pool.execute(
-      `SELECT r.id_repartidor, r.id_usuario, r.activo, r.vehiculo, r.placa,
+      `SELECT r.id_repartidor, r.id_usuario, r.activo,
               u.nombre_apellido AS nombre, '' AS apellidos,
               u.nombre_apellido AS nombre_apellido,
               u.telefono, u.email, u.direccion,
@@ -67,30 +67,14 @@ class MySQLRepartidorRepository extends RepartidorRepository {
       );
     }
 
-    if (datos.vehiculo !== undefined || datos.placa !== undefined) {
-      const campos = [];
-      const valores = [];
-      if (datos.vehiculo !== undefined) {
-        campos.push('vehiculo = ?');
-        valores.push(datos.vehiculo);
-      }
-      if (datos.placa !== undefined) {
-        campos.push('placa = ?');
-        valores.push(datos.placa);
-      }
-      valores.push(idRepartidor);
-      await pool.execute(
-        `UPDATE repartidores SET ${campos.join(', ')} WHERE id_usuario = ?`,
-        valores
-      );
-    }
+
     return this.buscarPorId(idRepartidor);
   }
 
-  async crear({ id_usuario, vehiculo = '', placa = '' }) {
+  async crear({ id_usuario }) {
     await pool.execute(
-      'INSERT INTO repartidores (id_usuario, vehiculo, placa, activo) VALUES (?, ?, ?, 1)',
-      [id_usuario, vehiculo, placa]
+      'INSERT INTO repartidores (id_usuario, activo) VALUES (?, 1)',
+      [id_usuario]
     );
     return this.buscarPorId(id_usuario);
   }

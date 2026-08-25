@@ -4,35 +4,47 @@ import ConsultarRepartidoresUseCase from '../application/consultarRepartidoresUs
 import Pedido from '../domain/models/Pedido.js';
 
 describe('Módulo Consultar Repartidores (CU-021)', () => {
-  test('CP-CU-021-01: Visualizar tabla de repartidores con métricas', async () => {
-    const repoRepartidores = new InMemoryRepartidorRepository([
-      { id_usuario: 10, nombre: 'Juan', apellidos: 'Pérez', telefono: '3001234567', email: 'juan@example.com', estado: 'DISPONIBLE' },
-      { id_usuario: 20, nombre: 'María', apellidos: 'Gómez', telefono: '3012345678', email: 'maria@example.com', estado: 'INACTIVO' }
-    ]);
+  test('CP-CU-021-01: Visualizar solo repartidores activos con métricas', async () => {
+  const repoRepartidores = new InMemoryRepartidorRepository([
+    { id_usuario: 10, nombre: 'Juan', apellidos: 'Pérez', telefono: '3001234567', email: 'juan@example.com', estado: 'DISPONIBLE' },
+    { id_usuario: 20, nombre: 'María', apellidos: 'Gómez', telefono: '3012345678', email: 'maria@example.com', estado: 'INACTIVO' }
+  ]);
 
-    const hoy = new Date();
-    const pedido1 = new Pedido({
-      id_pedido: 1,
-      id_usuario: 100,
-      id_repartidor: 10,
-      id_metodo_pago: 1,
-      direccion_entrega: 'Calle 123',
-      total: 50000,
-      estado: 'ENTREGADO',
-      fecha_pedido: hoy.toISOString(),
-      fecha_actualizacion: hoy.toISOString()
-    });
-
-    const repoPedidos = new InMemoryPedidoRepartidorRepository([pedido1]);
-    const useCase = new ConsultarRepartidoresUseCase(repoRepartidores, repoPedidos);
-    const lista = await useCase.ejecutar();
-
-    expect(lista).toHaveLength(2);
-    expect(lista[0].pedidos_hoy).toBe(1);
-    expect(lista[0].pedidos_semana).toBe(1);
-    expect(lista[0].pedidos_mes).toBe(1);
-    expect(lista[1].pedidos_hoy).toBe(0);
+  const hoy = new Date();
+  const pedido1 = new Pedido({
+    id_pedido: 1,
+    id_usuario: 100,
+    id_repartidor: 10,
+    id_metodo_pago: 1,
+    direccion_entrega: 'Calle 123',
+    total: 50000,
+    estado: 'ENTREGADO',
+    fecha_pedido: hoy.toISOString(),
+    fecha_actualizacion: hoy.toISOString()
   });
+
+  const repoPedidos = new InMemoryPedidoRepartidorRepository([pedido1]);
+  const useCase = new ConsultarRepartidoresUseCase(repoRepartidores, repoPedidos);
+  const lista = await useCase.ejecutar();
+
+  expect(lista).toHaveLength(1);
+  expect(lista[0].id_repartidor).toBe(10);
+  expect(lista[0].pedidos_hoy).toBe(1);
+  expect(lista[0].pedidos_semana).toBe(1);
+  expect(lista[0].pedidos_mes).toBe(1);
+});
+
+test('FA-002: El filtro "Todos" muestra activos e inactivos', async () => {
+  const repoRepartidores = new InMemoryRepartidorRepository([
+    { id_usuario: 10, nombre: 'Juan', apellidos: 'Pérez', telefono: '3001234567', email: 'juan@example.com', estado: 'DISPONIBLE' },
+    { id_usuario: 20, nombre: 'María', apellidos: 'Gómez', telefono: '3012345678', email: 'maria@example.com', estado: 'INACTIVO' }
+  ]);
+  const repoPedidos = new InMemoryPedidoRepartidorRepository();
+  const useCase = new ConsultarRepartidoresUseCase(repoRepartidores, repoPedidos);
+
+  const lista = await useCase.ejecutar({ estado: 'Todos' });
+  expect(lista).toHaveLength(2);
+});
 
   test('CP-CU-021-02: Buscar por ID o nombre', async () => {
     const repoRepartidores = new InMemoryRepartidorRepository([

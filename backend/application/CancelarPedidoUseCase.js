@@ -31,6 +31,11 @@ class CancelarPedidoUseCase {
       throw new ErrorValidacion('Debes indicar el motivo de la cancelación');
     }
 
+    // RN-057: el motivo tiene un máximo de 200 caracteres.
+    if (motivo.trim().length > 200) {
+      throw new ErrorValidacion('El motivo de cancelación no puede superar los 200 caracteres');
+    }
+
     // PC-002: el pedido debe pertenecer al usuario autenticado
     const pedido = await this.pedidoRepository.obtenerPedidoPorId(idPedido);
     if (!pedido) {
