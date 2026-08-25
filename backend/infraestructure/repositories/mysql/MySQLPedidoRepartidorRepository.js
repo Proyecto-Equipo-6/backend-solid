@@ -140,9 +140,9 @@ class MySQLPedidoRepartidorRepository extends PedidoRepartidorRepository {
     const [filas] = await pool.execute(
       `SELECT COUNT(*) AS total
        FROM pedidos
-       WHERE id_repartidor = ?
-         AND estado != 'CANCELADO'
-         AND DATE(fecha_actualizacion) = CURDATE()`,
+        WHERE id_repartidor = ?
+          AND estado IN ('ASIGNADO', 'EN_CAMINO')
+          AND DATE(COALESCE(fecha_actualizacion, fecha_pedido)) = CURDATE()`,
       [repartidorId]
     );
     return Number(filas[0]?.total) || 0;
