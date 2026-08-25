@@ -57,7 +57,7 @@ class EditarProveedorUseCase {
       razon_social: razon_social.trim(),
       telefono: telefono.trim(),
       email: email.trim(),
-      imagen_url: imagen_url || null,
+      imagen_url: imagen_url || proveedor.imagen_url || null,
       estado: estadoNumerico
     });
   }

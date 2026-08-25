@@ -27,7 +27,7 @@ function crearProveedor(repoProveedor, id = 1, nombre = 'Proveedor Test') {
 }
 
 describe('Módulo CRUD productos - Aseo (CU-023)', () => {
-  test('CP-CU-023-01: Crear producto feliz con SKU único, categoría y proveedor existentes, e imagen por defecto', async () => {
+  test('CP-CU-023-01: Crear producto feliz con SKU único, categoría y proveedor existentes, sin imagen por defecto', async () => {
     const repoProductos = new InMemoryProductoRepository();
     const repoCategorias = new InMemoryCategoriaRepository();
     const repoProveedores = new InMemoryProveedorRepository();
@@ -50,7 +50,7 @@ describe('Módulo CRUD productos - Aseo (CU-023)', () => {
     expect(producto.sku).toBe('ASE-JAB-01');
     expect(producto.nombre).toBe('Jabón Líquido');
     expect(producto.estado).toBe(1);
-    expect(producto.imagen_url).toBe('sin_imagen.jpg'); // se incluye CP-CU-023-02: Imagen por defecto
+    expect(producto.imagen_url).toBe('sin_imagen.jpg');
     expect(producto.fecha_creacion).toBeDefined();
   });
 

@@ -33,7 +33,7 @@ class CrearProductoUseCase {
     );
 
     const imagenFinal =
-      imagen_url && imagen_url.trim() !== '' ? imagen_url.trim() : 'sin_imagen.jpg';
+      imagen_url && imagen_url.trim() !== '' ? imagen_url.trim() : null;
 
     return await this.productoRepo.guardar({
       sku: sku.trim(),

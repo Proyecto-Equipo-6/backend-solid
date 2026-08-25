@@ -369,13 +369,15 @@ app.use((req, res) => {
 
 // --- Manejo de errores ---
 app.use((err, req, res, next) => {
-  const status = err.status || err.statusCode || 500;
+  const status = err.status || err.statusCode || (err.code === 'LIMIT_FILE_SIZE' ? 400 : 500);
   if (status >= 500) console.error(err);
   let message = 'Error interno del servidor';
   if (status < 500) {
     message = err.type === 'entity.parse.failed'
       ? 'JSON inválido en el cuerpo de la petición.'
-      : err.message;
+      : err.code === 'LIMIT_FILE_SIZE'
+        ? 'El archivo supera el tamaño máximo permitido.'
+        : err.message;
   }
   res.status(status).json({ error: message });
 });

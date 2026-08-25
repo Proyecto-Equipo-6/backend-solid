@@ -1,5 +1,4 @@
 const { esNoEncontrado } = require('../helpers/responseHelpers');
-const { subirEvidenciaFotografica } = require('../middlewares/uploadMiddleware');
 
 /**
  * Adaptador de Infraestructura: ProductoController
@@ -61,7 +60,13 @@ class ProductoController {
 
   async crear(req, res) {
     try {
-      const producto = await this.crearProductoUseCase.ejecutar(req.body);
+      const datos = normalizarDatosProducto(req.body);
+
+      if (req.file) {
+        datos.imagen_url = await subirImagenProducto(req.file.buffer, req.file.mimetype, 'producto');
+      }
+
+      const producto = await this.crearProductoUseCase.ejecutar(datos);
       return res.status(201).json(producto);
     } catch (error) {
       return res.status(400).json({ error: error.message });
@@ -70,9 +75,15 @@ class ProductoController {
 
   async editar(req, res) {
     try {
+      const datos = normalizarDatosProducto(req.body);
+
+      if (req.file) {
+        datos.imagen_url = await subirImagenProducto(req.file.buffer, req.file.mimetype, 'producto');
+      }
+
       const producto = await this.editarProductoUseCase.ejecutar(
         Number(req.params.id),
-        req.body
+        datos
       );
       return res.status(200).json(producto);
     } catch (error) {

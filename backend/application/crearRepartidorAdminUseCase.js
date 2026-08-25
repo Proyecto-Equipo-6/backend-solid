@@ -22,8 +22,8 @@ class CrearRepartidorAdminUseCase {
     if (!email || !String(email).includes('@')) {
       throw new ErrorValidacion('Correo electrónico inválido');
     }
-    if (!password || String(password).length < 4) {
-      throw new ErrorValidacion('La contraseña debe tener al menos 4 caracteres');
+    if (!password || String(password).length < 8 || String(password).length > 20) {
+      throw new ErrorValidacion('La contraseña debe tener entre 8 y 20 caracteres');
     }
     if (!telefono || !/^\d{10}$/.test(String(telefono))) {
       throw new ErrorValidacion('El teléfono debe tener exactamente 10 dígitos');
