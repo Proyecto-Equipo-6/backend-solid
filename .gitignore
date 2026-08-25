@@ -10,6 +10,7 @@ lerna-debug.log*
 .agents
 reports
 .env
+DB/sistema_comercial_completo.sql
 
 node_modules
 dist
