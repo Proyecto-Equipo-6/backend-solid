@@ -56,7 +56,7 @@ function crearAutenticador(jwtSecret, tokenBlacklistRepository = null) {
       return next();
     } catch (error) {
       // En producción evitar loguear detalles del token; solo auditoría genérica
-      console.warn('Token de sesión inválido o expirado');
+      console.warn('Token de sesión inválido o expirado:', error.message);
       return next(new ErrorSesionExpirada());
     }
   };
