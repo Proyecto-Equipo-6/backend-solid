@@ -24,6 +24,8 @@ class PedidoController {
     try {
       const resultado = await this.verPedidosUseCase.execute(req.usuario, {
         estado: req.query.estado || null,
+        pagina: req.query.pagina,
+        limite: req.query.limite,
       });
       return res.status(200).json(resultado);
     } catch (error) {

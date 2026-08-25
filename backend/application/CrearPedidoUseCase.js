@@ -31,12 +31,11 @@ class CrearPedidoUseCase {
       throw new ErrorValidacion('Debes indicar la dirección de entrega');
     }
 
-    // Validar método de pago (1 = Efectivo / Contraentrega, 2 = Nequi)
+    // Validar método de pago (1 = Efectivo / Contraentrega)
     const metodoPago = Number(idMetodoPago);
-    if (![1, 2].includes(metodoPago)) {
-      throw new ErrorValidacion('Método de pago no válido');
+    if (metodoPago !== 1) {
+    throw new ErrorValidacion('Solo está disponible el pago contraentrega');
     }
-
     // RN-047: el pedido se genera a partir del carrito completo (no parcial)
     const carrito = await this.carritoRepository.obtenerCarrito(usuario.id_usuario);
     if (!carrito?.items?.length) {

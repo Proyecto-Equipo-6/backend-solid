@@ -1,18 +1,26 @@
 const Producto = require('../domain/models/Producto');
 
+const LIMITE_POR_DEFECTO = 12; // RN-011: paginación por defecto a 12 ítems
+
 /**
  * Caso de Uso: ListarProductosPublicosUseCase
  * Obtiene los productos activos del catálogo con su ficha técnica
  * (categoría y proveedor). Solo depende de la abstracción (ProductoRepository).
+ * RN-011: la paginación se aplica en el servidor (server-side).
  */
 class ListarProductosPublicosUseCase {
   constructor(productoRepository) {
     this.productoRepository = productoRepository;
   }
 
-  async execute() {
+  async execute({ pagina = 1, limite = LIMITE_POR_DEFECTO } = {}) {
+    const paginaNumero = Math.max(1, Number(pagina) || 1);
+    const limiteNumero = Math.max(1, Number(limite) || LIMITE_POR_DEFECTO);
+
     const productos = await this.productoRepository.findActivos();
-    return productos.map((producto) => {
+    const total = productos.length;
+    const inicio = (paginaNumero - 1) * limiteNumero;
+    const items = productos.slice(inicio, inicio + limiteNumero).map((producto) => {
       const instancia = producto instanceof Producto ? producto : new Producto(producto);
       return {
         id_producto: instancia.id_producto,
@@ -28,6 +36,14 @@ class ListarProductosPublicosUseCase {
         proveedor: instancia.proveedor,
       };
     });
+
+    return {
+      items,
+      total,
+      pagina: paginaNumero,
+      limite: limiteNumero,
+      totalPaginas: Math.ceil(total / limiteNumero),
+    };
   }
 }
 

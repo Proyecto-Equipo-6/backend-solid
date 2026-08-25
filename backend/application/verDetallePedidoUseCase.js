@@ -15,10 +15,22 @@ class VerDetallePedidoUseCase {
   }
 
   async ejecutar(pedidoId, repartidorId) {
-    const pedido = await this.pedidoRepo.obtenerDetallePedido(pedidoId);
+    let pedido;
+
+    try {
+      // CP-CU-016-04: captura errores de conexión/consulta
+      pedido = await this.pedidoRepo.obtenerDetallePedido(pedidoId);
+    } catch (error) {
+      throw new Error('No se pudieron cargar los detalles del pedido');
+    }
 
     if (!pedido) {
-      throw new Error('Pedido no encontrado');
+      throw new PedidoNoEncontradoError();
+    }
+
+    // CP-CU-016-05: pedido cancelado no debe mostrarse
+    if (pedido.estado === 'CANCELADO') {
+      throw new Error('El pedido ya no está disponible');
     }
 
     if (pedido.id_repartidor !== repartidorId) {
@@ -34,7 +46,7 @@ class VerDetallePedidoUseCase {
       direccion_entrega: pedido.direccion_entrega,
       estado: pedido.estado,
       caracteristicasLogistica: pedido.caracteristicasLogistica,
-      diagramaSeguimiento: ['ASIGNADO', 'EN_CAMINO', 'ENTREGADO'],
+      diagramaSeguimiento: DIAGRAMA_SEGUIMIENTO,
       fecha_pedido: pedido.fecha_pedido,
       fecha_actualizacion: pedido.fecha_actualizacion,
       productos: detalles.map((d) => ({

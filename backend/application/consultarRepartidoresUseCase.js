@@ -4,19 +4,25 @@ class ConsultarRepartidoresUseCase {
     this.pedidoRepo = pedidoRepo;
   }
 
-  async ejecutar({ termino = '', estado = '' } = {}) {
+  async ejecutar({ termino = '', estado = 'Activo' } = {}) {
     let repartidores = await this.repartidorRepo.findAll();
 
+    // FP-005 / FA-002: filtro por estado.
+    // Por defecto se muestran solo activos (DISPONIBLE u OCUPADO).
+    // Deriva estado operativo real antes de filtrar
     repartidores = await this.derivarEstadoOperativo(repartidores);
 
-    // Filtro por estado
     if (estado === 'Activo') {
-      repartidores = repartidores.filter(r => r.estado === 'DISPONIBLE' || r.estado === 'OCUPADO');
+      repartidores = repartidores.filter(
+        r => r.estado === 'DISPONIBLE' || r.estado === 'OCUPADO'
+      );
     } else if (estado === 'Inactivo') {
       repartidores = repartidores.filter(r => r.estado === 'INACTIVO');
+    } else if (estado === 'Todos') {
+      // No se filtra, se dejan todos.
     }
 
-    // Búsqueda por ID o nombre
+    // FA-001: búsqueda por ID o nombre
     if (termino && termino.trim() !== '') {
       const t = termino.trim().toLowerCase();
       repartidores = repartidores.filter(r =>
@@ -44,7 +50,7 @@ class ConsultarRepartidoresUseCase {
           pedidos_mes: periodo.totalMes
         });
       } catch (error) {
-        console.error(`Error obteniendo métricas del repartidor ${repartidor.id_usuario}:`, error.message);
+        // FE-004: métricas en "-"
         resultado.push({
           id_repartidor: repartidor.id_usuario,
           nombre: `${repartidor.nombre} ${repartidor.apellidos}`.trim(),

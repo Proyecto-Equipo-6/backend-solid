@@ -1,4 +1,5 @@
 const express = require('express');
+const { uploadProducto } = require('../middlewares/uploadMiddleware');
 
 /**
  * Función que configura las rutas de productos.
@@ -9,6 +10,7 @@ function createProductoRouter(productoController, autenticar, requerirAdmin) {
   const router = express.Router();
 
   router.get('/publico', (req, res) => productoController.listarPublicos(req, res));
+  router.post('/imagen', autenticar, requerirAdmin, uploadProducto, (req, res) => productoController.subirImagen(req, res));
   router.get('/:id', (req, res) => productoController.obtenerPorId(req, res));
 
   router.get('/', autenticar, requerirAdmin, (req, res) => productoController.listarTodos(req, res));

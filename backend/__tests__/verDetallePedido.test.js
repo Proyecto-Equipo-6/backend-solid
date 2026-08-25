@@ -45,4 +45,22 @@ describe('CU-016: Ver detalles pedido', () => {
 
     await expect(useCase.ejecutar(1, 20)).rejects.toThrow('Acceso denegado');
   });
+
+  test('CP-CU-016-04: Error al cargar los detalles del pedido', async () => {
+  const repoFalso = {
+    obtenerDetallePedido: jest.fn().mockRejectedValue(new Error('Fallo de conexión'))
+  };
+
+  const useCase = new VerDetallePedidoUseCase(repoFalso);
+
+  await expect(useCase.ejecutar(1, 10)).rejects.toThrow('No se pudieron cargar los detalles del pedido');
+});
+
+  test('CP-CU-016-05: Pedido cancelado no está disponible', async () => {
+  const pedido = crearPedido(1, 10, 'CANCELADO');
+  const repo = new InMemoryPedidoRepartidorRepository([pedido]);
+  const useCase = new VerDetallePedidoUseCase(repo);
+
+  await expect(useCase.ejecutar(1, 10)).rejects.toThrow('El pedido ya no está disponible');
+  });
 });
