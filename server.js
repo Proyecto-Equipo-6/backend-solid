@@ -99,6 +99,7 @@ const ActualizarEstadoPedidoAdminUseCase = require('./backend/application/actual
 const CancelarPedidoAdminUseCase = require('./backend/application/cancelarPedidoAdminUseCase');
 const AsignarRepartidorUseCase = require('./backend/application/asignarRepartidorUseCase');
 const GenerarTicketPedidoUseCase = require('./backend/application/GenerarTicketPedidoUseCase');
+const EntregarPedidoAdminUseCase = require('./backend/application/entregarPedidoAdminUseCase');
 const PedidoAdminController = require('./backend/infraestructure/controllers/PedidoAdminController');
 const createPedidoAdminRouter = require('./backend/infraestructure/routes/pedidoAdminRoutes');
 
@@ -314,6 +315,7 @@ const asignarRepartidorUseCase = new AsignarRepartidorUseCase(pedidoRepartidorRe
 const DesasignarRepartidorUseCase = require('./backend/application/desasignarRepartidorUseCase');
 const desasignarRepartidorUseCase = new DesasignarRepartidorUseCase(pedidoRepartidorRepository, repartidorRepository);
 const generarTicketPedidoUseCase = new GenerarTicketPedidoUseCase(pedidoRepartidorRepository);
+const entregarPedidoAdminUseCase = new EntregarPedidoAdminUseCase(pedidoRepartidorRepository);
 const pedidoAdminController = new PedidoAdminController({
   obtenerTodosPedidosUseCase,
   obtenerDetallePedidoAdminUseCase,
@@ -321,6 +323,7 @@ const pedidoAdminController = new PedidoAdminController({
   cancelarPedidoAdminUseCase,
   asignarRepartidorUseCase,
   desasignarRepartidorUseCase,
+  entregarPedidoAdminUseCase,
   generarTicketPedidoUseCase,
 });
 

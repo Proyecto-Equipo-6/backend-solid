@@ -1,4 +1,5 @@
 const express = require('express');
+const { uploadEvidencia } = require('../middlewares/uploadMiddleware');
 
 /**
  * Rutas del módulo Admin de Pedidos (CU-027, CU-031).
@@ -9,6 +10,7 @@ const express = require('express');
  * PUT  /:id/cancelar           → cancelar pedido
  * PUT  /:id/asignar            → asignar repartidor
  * PUT  /:id/desasignar         → quitar repartidor asignado
+ * PUT  /:id/entregar           → marcar como entregado con comprobante (CU-017)
  */
 function createPedidoAdminRouter(pedidoAdminController, autenticar, requerirAdmin) {
   const router = express.Router();
@@ -23,6 +25,7 @@ function createPedidoAdminRouter(pedidoAdminController, autenticar, requerirAdmi
   router.put('/:id/cancelar', (req, res) => pedidoAdminController.cancelar(req, res));
   router.put('/:id/asignar', (req, res) => pedidoAdminController.asignarRepartidor(req, res));
   router.put('/:id/desasignar', (req, res) => pedidoAdminController.desasignarRepartidor(req, res));
+  router.put('/:id/entregar', uploadEvidencia, (req, res) => pedidoAdminController.entregarPedido(req, res));
 
   return router;
 }

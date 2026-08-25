@@ -59,6 +59,30 @@ class RepartidorController {
     }
   }
 
+  // CU-017: subir comprobante de entrega a Cloudinary
+  async subirComprobante(req, res) {
+    try {
+      const pedidoId = Number(req.params.pedidoId);
+
+      if (!req.file) {
+        return res.status(400).json({ message: 'La imagen es obligatoria' });
+      }
+
+      let comprobanteUrl = null;
+      try {
+        const subida = await subirEvidenciaFotografica(req.file.buffer, 'nexbit/comprobantes');
+        comprobanteUrl = subida.secure_url || subida.url || null;
+      } catch (cloudinaryError) {
+        console.error('Cloudinary no disponible, usando almacenamiento local:', cloudinaryError.message);
+        comprobanteUrl = guardarEvidenciaLocal(req.file.buffer, req.file.mimetype, pedidoId);
+      }
+
+      res.json({ comprobante_url: comprobanteUrl });
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  }
+
   // CU-017: actualizar estado (ASIGNADO → EN_CAMINO → ENTREGADO / NO_ENTREGADO)
   async estado(req, res) {
     try {
@@ -71,7 +95,7 @@ class RepartidorController {
         return res.status(400).json({ message: 'Estado y estadoAnterior son obligatorios' });
       }
 
-      let foto = req.body?.fotoEvidencia || null;
+      let foto = req.body?.fotoEvidencia || req.body?.comprobante_url || null;
 
       if (nuevoEstado === 'ENTREGADO') {
         if (req.file) {

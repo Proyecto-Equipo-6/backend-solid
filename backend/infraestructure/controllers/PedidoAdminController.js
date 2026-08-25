@@ -1,8 +1,10 @@
 const { esNoEncontrado } = require('../helpers/responseHelpers');
+const { EvidenciaFotograficaRequeridaError } = require('../../domain/errors/pedidoErrors');
+const { subirEvidenciaFotografica, guardarEvidenciaLocal } = require('../middlewares/uploadMiddleware');
 
 /**
  * Adaptador de Infraestructura: PedidoAdminController
- * Administra pedidos (CU-027): listar, ver detalle, actualizar estado, cancelar, asignar repartidor.
+ * Administra pedidos (CU-027): listar, ver detalle, actualizar estado, cancelar, asignar repartidor, entregar con comprobante.
  */
 class PedidoAdminController {
   constructor({
@@ -12,6 +14,7 @@ class PedidoAdminController {
     cancelarPedidoAdminUseCase,
     asignarRepartidorUseCase,
     desasignarRepartidorUseCase,
+    entregarPedidoAdminUseCase,
     generarTicketPedidoUseCase,
   }) {
     this.obtenerTodosPedidosUseCase = obtenerTodosPedidosUseCase;
@@ -20,6 +23,7 @@ class PedidoAdminController {
     this.cancelarPedidoAdminUseCase = cancelarPedidoAdminUseCase;
     this.asignarRepartidorUseCase = asignarRepartidorUseCase;
     this.desasignarRepartidorUseCase = desasignarRepartidorUseCase;
+    this.entregarPedidoAdminUseCase = entregarPedidoAdminUseCase;
     this.generarTicketPedidoUseCase = generarTicketPedidoUseCase;
   }
 
@@ -111,6 +115,36 @@ class PedidoAdminController {
       return res.status(200).json(pedido);
     } catch (error) {
       const status = esNoEncontrado(error.message) ? 404 : 400;
+      return res.status(status).json({ error: error.message });
+    }
+  }
+
+  async entregarPedido(req, res) {
+    try {
+      const id_pedido = Number(req.params.id);
+      const observacion = req.body?.observacion || null;
+
+      let foto = req.body?.fotoEvidencia || null;
+
+      if (req.file) {
+        try {
+          const subida = await subirEvidenciaFotografica(req.file.buffer, 'nexbit/evidencias');
+          foto = subida.secure_url || subida.url || null;
+        } catch (cloudinaryError) {
+          console.error('Cloudinary no disponible, usando almacenamiento local:', cloudinaryError.message);
+          foto = guardarEvidenciaLocal(req.file.buffer, req.file.mimetype, id_pedido);
+        }
+      } else if (!foto) {
+        return res.status(400).json({ error: 'La foto es obligatoria para confirmar la entrega' });
+      }
+
+      const pedido = await this.entregarPedidoAdminUseCase.ejecutar(id_pedido, foto, observacion);
+      return res.status(200).json(pedido);
+    } catch (error) {
+      const status = esNoEncontrado(error.message) ? 404 : 400;
+      if (error instanceof EvidenciaFotograficaRequeridaError) {
+        return res.status(400).json({ error: error.message });
+      }
       return res.status(status).json({ error: error.message });
     }
   }
