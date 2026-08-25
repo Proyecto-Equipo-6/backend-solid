@@ -3,7 +3,6 @@ const cloudinary = require('cloudinary').v2;
 const fs = require('fs');
 const path = require('path');
 
-// Configuración de Cloudinary (variables en .env)
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
@@ -33,6 +32,20 @@ const uploadEvidencia = multer({
     return cb(null, true);
   },
 }).single('fotoEvidencia');
+
+const uploadComprobante = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const formatosPermitidos = ['image/jpeg', 'image/png'];
+    if (!formatosPermitidos.includes(file.mimetype)) {
+      const error = new Error('Formato no permitido. Solo se aceptan JPG o PNG');
+      error.status = 400;
+      return cb(error);
+    }
+    return cb(null, true);
+  },
+}).single('foto');
 
 /**
  * Sube un buffer a Cloudinary y devuelve la URL segura.
@@ -74,5 +87,34 @@ function guardarEvidenciaLocal(buffer, mimetype, idPedido) {
   const port = process.env.PORT || 3000;
   return `http://localhost:${port}/api/uploads/evidencias/${nombreArchivo}`;
 }
+  const uploadProducto = multer({           // para POST /productos/imagen (campo fotoEvidencia)
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const formatosPermitidos = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!formatosPermitidos.includes(file.mimetype)) {
+      const error = new Error('Formato no permitido. Solo se aceptan JPG, PNG o WebP');
+      error.status = 400;
+      return cb(error);
+    }
+    return cb(null, true);
+  },
+}).single('fotoEvidencia');
 
-module.exports = { uploadEvidencia, subirEvidenciaFotografica, guardarEvidenciaLocal };
+const uploadProductoImagen = multer({     // para POST/PUT /productos (campo imagen)
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const formatosPermitidos = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!formatosPermitidos.includes(file.mimetype)) {
+      const error = new Error('Formato no permitido. Solo se aceptan JPG, PNG o WebP');
+      error.status = 400;
+      return cb(error);
+    }
+    return cb(null, true);
+  },
+}).single('imagen');
+
+module.exports = { uploadEvidencia, uploadComprobante, uploadProducto, uploadProductoImagen, subirEvidenciaFotografica, guardarEvidenciaLocal };
+
+  

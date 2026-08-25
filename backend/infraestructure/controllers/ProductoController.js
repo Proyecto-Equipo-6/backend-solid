@@ -1,4 +1,25 @@
 const { esNoEncontrado } = require('../helpers/responseHelpers');
+const { subirEvidenciaFotografica } = require('../middlewares/uploadMiddleware');
+
+function normalizarDatosProducto(cuerpo) {
+  return {
+    sku: cuerpo.sku,
+    id_categoria: Number(cuerpo.id_categoria),
+    id_proveedor: Number(cuerpo.id_proveedor),
+    nombre: cuerpo.nombre,
+    descripcion: cuerpo.descripcion,
+    precio: Number(cuerpo.precio),
+    stock: Number(cuerpo.stock),
+    garantia: cuerpo.garantia,
+    imagen_url: cuerpo.imagen_url || null,
+    estado: cuerpo.estado !== undefined ? Number(cuerpo.estado) : 1,
+  };
+}
+
+async function subirImagenProducto(buffer, mimetype) {
+  const resultado = await subirEvidenciaFotografica(buffer, 'nexbit/productos');
+  return resultado.secure_url || resultado.url;
+}
 
 /**
  * Adaptador de Infraestructura: ProductoController
@@ -24,7 +45,7 @@ class ProductoController {
     this.eliminarProductoUseCase = eliminarProductoUseCase;
     this.ajustarStockProductoUseCase = ajustarStockProductoUseCase;
     this.buscarProductosUseCase = buscarProductosUseCase;
-  }
+  } 
 
   async listarPublicos(req, res) {
     try {
@@ -63,7 +84,7 @@ class ProductoController {
       const datos = normalizarDatosProducto(req.body);
 
       if (req.file) {
-        datos.imagen_url = await subirImagenProducto(req.file.buffer, req.file.mimetype, 'producto');
+        datos.imagen_url = await subirImagenProducto(req.file.buffer, req.file.mimetype);
       }
 
       const producto = await this.crearProductoUseCase.ejecutar(datos);
@@ -78,7 +99,7 @@ class ProductoController {
       const datos = normalizarDatosProducto(req.body);
 
       if (req.file) {
-        datos.imagen_url = await subirImagenProducto(req.file.buffer, req.file.mimetype, 'producto');
+       datos.imagen_url = await subirImagenProducto(req.file.buffer, req.file.mimetype);
       }
 
       const producto = await this.editarProductoUseCase.ejecutar(

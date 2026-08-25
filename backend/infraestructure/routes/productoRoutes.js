@@ -1,4 +1,5 @@
-const express = require('express');
+ const express = require('express');
+ const { uploadProducto, uploadProductoImagen } = require('../middlewares/uploadMiddleware');
 
 /**
  * Función que configura las rutas de productos.
