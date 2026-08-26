@@ -26,7 +26,7 @@ describe('Selenium - Login', () => {
 
       await driver.wait(until.elementLocated(By.id('email')), 5000);
       await driver.findElement(By.id('email')).sendKeys('juan@email.com');
-      await driver.findElement(By.id('password')).sendKeys('admin123');
+      await driver.findElement(By.id('password')).sendKeys('Admin123');
       await driver.findElement(By.css('button[type="submit"]')).click();
       await driver.wait(until.urlContains('/cliente'), 8000);
 

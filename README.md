@@ -7,8 +7,7 @@ npx jest selenium/registroFlujo.test.js
 
 1. Ejecutar `DB/Schema.sql` (crea la base `sistema_comercial` y sus tablas).
 2. Ejecutar `DB/Triggers.sql` (disparadores de negocio).
-3. Ejecutar `npm run seed` para cargar los datos de prueba.
+3. Ejecutar `DB/Seed.sql` para cargar los datos de prueba.
 
-El script `DB/seed.js` genera el hash bcrypt de las contraseñas en tiempo de
-ejecución (por defecto `admin123`, configurable con `SEED_PASSWORD`), de modo
-que no se commitean hashes al repositorio (SonarQube S8215).
+Los usuarios de prueba usan la contraseña `Admin123` (hash bcrypt incluido en el
+seed).

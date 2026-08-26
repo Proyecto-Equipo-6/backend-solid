@@ -3,7 +3,7 @@ const { describe, test, expect, afterEach } = require('@jest/globals');
 
 const BASE_URL = 'http://localhost:5173';
 const CORREO = 'juan@email.com';
-const PASSWORD = 'admin123';
+const PASSWORD = 'Admin123';
 const CANTIDAD_PRODUCTOS = 3;
 
 async function esperarCargaInicial(driver) {

@@ -15,11 +15,9 @@ INSERT INTO roles (id_rol, nombre, descripcion) VALUES
 (3, 'Repartidor',    'Encargado de entregar pedidos a domicilio');
 
 -- =====================================================
--- 2. USUARIOS — Contraseña de prueba: "admin123"
--- El hash bcrypt NO se commitea (SonarQube S8215): lo genera
--- DB/seed.js en tiempo de ejecución reemplazando el marcador.
+-- 2. USUARIOS — Contraseña de prueba: "Admin123"
 -- =====================================================
-SET @PASSWORD_SEED = 'GENERADO_POR_SEED_JS';
+SET @PASSWORD_SEED = '$2b$10$7pkazUZkis3jjBaUxevfXuHdUs43XCjPesifSU6GDOhoCShOhSjX.';
 INSERT INTO usuarios (id_usuario, id_rol, nombre_apellido, tipo_documento, numero_documento, email, password, telefono, direccion) VALUES
 (1, 1, 'Sebastian Admin', 'CC', '1010', 'admin@remate.com', @PASSWORD_SEED, '3001000001', 'Calle 100 #15-20, Medellín'),
 (2, 2, 'Juan Cliente',    'CC', '2020', 'juan@email.com',   @PASSWORD_SEED, '3002000002', 'Carrera 7 # 45-10, Medellín'),

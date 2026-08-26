@@ -3,7 +3,7 @@ const { describe, test, expect, afterEach } = require('@jest/globals');
 
 const BASE_URL = 'http://localhost:5173';
 const CORREO_ADMIN = 'admin@remate.com';
-const PASSWORD_ADMIN = 'admin123';
+const PASSWORD_ADMIN = 'Admin123';
 
 // Genera datos únicos por ejecución (teléfono de 10 dígitos, sufijos únicos).
 function datosUnicos() {
@@ -112,7 +112,7 @@ describe('Selenium - Admin CRUD Usuarios', () => {
       await rellenarCampo(driver, 'Email', email);
       await rellenarCampo(driver, 'Teléfono', u.tel);
       await rellenarCampo(driver, 'Dirección', 'Calle 1 #2-3');
-      await rellenarCampo(driver, 'Contraseña', 'admin123');
+      await rellenarCampo(driver, 'Contraseña', 'Admin123');
       await guardarFormulario(driver);
 
       await esperarAlerta(driver, 'Usuario creado correctamente');
