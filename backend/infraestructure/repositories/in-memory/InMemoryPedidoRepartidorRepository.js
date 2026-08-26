@@ -168,6 +168,13 @@ class InMemoryPedidoRepartidorRepository extends PedidoRepartidorRepository {
   ).length;
   }
 
+  async contarPedidosActivos(repartidorId) {
+    return this.pedidos.filter(p =>
+      p.id_repartidor === repartidorId &&
+      (p.estado === 'ASIGNADO' || p.estado === 'EN_CAMINO')
+    ).length;
+  }
+
   async obtenerHistorialPedidos(repartidorId, filtros = {}) {
     const estadosFinales = new Set(['ENTREGADO', 'NO_ENTREGADO', 'CANCELADO']);
     let pedidos = this.pedidos.filter(p =>

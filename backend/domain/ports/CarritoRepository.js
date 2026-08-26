@@ -23,6 +23,10 @@ class CarritoRepository {
   async obtenerCantidad(idUsuario, idProducto) {
     throw new Error("Método 'obtenerCantidad' no implementado");
   }
+
+  async contarItems(idUsuario) {
+    throw new Error("Método 'contarItems' no implementado");
+  }
 }
 
 module.exports = CarritoRepository;

@@ -165,4 +165,5 @@ describe('CU-026 CRUD usuarios (admin)', () => {
       expect(error.message).toBe('No puedes desactivar tu propia cuenta. Solicita a otro administrador.');
     });
   });
-});
+
+  });

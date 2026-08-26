@@ -75,6 +75,10 @@ class InMemoryCarritoRepository extends CarritoRepository {
     const item = carrito.find((i) => i.idProducto === idProducto);
     return item ? item.cantidad : 0;
   }
+
+  async contarItems(idUsuario) {
+    return this._carritoDe(idUsuario).length;
+  }
 }
 
 module.exports = InMemoryCarritoRepository;

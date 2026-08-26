@@ -84,6 +84,17 @@ class MySQLCarritoRepository extends CarritoRepository {
     );
     return filas[0] ? Number(filas[0].cantidad) : 0;
   }
+
+  async contarItems(idUsuario) {
+    const [filas] = await pool.execute(
+      `SELECT COUNT(*) AS total
+       FROM carrito_detalles cd
+       INNER JOIN carrito c ON c.id_carrito = cd.id_carrito
+       WHERE c.id_usuario = ?`,
+      [idUsuario]
+    );
+    return Number(filas[0]?.total) || 0;
+  }
 }
 
 module.exports = MySQLCarritoRepository;

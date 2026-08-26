@@ -338,10 +338,16 @@ const CrearUsuarioAdminUseCase = require('./backend/application/crearUsuarioAdmi
 const ActualizarUsuarioAdminUseCase = require('./backend/application/actualizarUsuarioAdminUseCase');
 const EliminarUsuarioAdminUseCase = require('./backend/application/eliminarUsuarioAdminUseCase');
 const listarUsuariosAdminUseCase = new ListarUsuariosAdminUseCase(userRepository);
-const actualizarEstadoUsuarioUseCase = new ActualizarEstadoUsuarioUseCase(userRepository);
+const actualizarEstadoUsuarioUseCase = new ActualizarEstadoUsuarioUseCase(userRepository, repartidorRepository);
 const crearUsuarioAdminUseCase = new CrearUsuarioAdminUseCase(userRepository, repartidorRepository);
-const actualizarUsuarioAdminUseCase = new ActualizarUsuarioAdminUseCase(userRepository, repartidorRepository);
-const eliminarUsuarioAdminUseCase = new EliminarUsuarioAdminUseCase(userRepository);
+const actualizarUsuarioAdminUseCase = new ActualizarUsuarioAdminUseCase(
+  userRepository,
+  repartidorRepository,
+  carritoRepository,
+  pedidoRepository,
+  pedidoRepartidorRepository
+);
+const eliminarUsuarioAdminUseCase = new EliminarUsuarioAdminUseCase(userRepository, repartidorRepository);
 const adminUsuarioController = new AdminUsuarioController({
   listarUsuariosAdminUseCase,
   actualizarEstadoUsuarioUseCase,

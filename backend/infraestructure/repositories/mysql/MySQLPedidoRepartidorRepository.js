@@ -263,6 +263,18 @@ class MySQLPedidoRepartidorRepository extends PedidoRepartidorRepository {
     );
     return Number(filas[0]?.total) || 0;
   }
+
+  // Pedidos activos asignados al repartidor (ASIGNADO o EN_CAMINO), sin importar la fecha
+  async contarPedidosActivos(repartidorId) {
+    const [filas] = await pool.execute(
+      `SELECT COUNT(*) AS total
+       FROM pedidos
+       WHERE id_repartidor = ?
+         AND estado IN ('ASIGNADO', 'EN_CAMINO')`,
+      [repartidorId]
+    );
+    return Number(filas[0]?.total) || 0;
+  }
 }
 
 module.exports = MySQLPedidoRepartidorRepository;
