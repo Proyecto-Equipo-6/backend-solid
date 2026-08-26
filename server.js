@@ -267,7 +267,6 @@ const pedidoRepository = new MySQLPedidoRepository();
 const crearPedidoUseCase = new CrearPedidoUseCase(carritoRepository, pedidoRepository);
 const verPedidosUseCase = new VerPedidosUseCase(pedidoRepository);
 const cancelarPedidoUseCase = new CancelarPedidoUseCase(pedidoRepository);
-const pedidoController = new PedidoController({ crearPedidoUseCase, verPedidosUseCase, cancelarPedidoUseCase });
 
 // --- Constantes del sistema ---
 const { ROL_ADMIN, ROL_CLIENTE, ROL_REPARTIDOR } = require('./backend/constants');
@@ -279,6 +278,14 @@ const requerirAdmin = crearRequerirAdmin(ROL_ADMIN);
 
 // --- Inyección de Dependencias para Repartidor (DIP) ---
 const pedidoRepartidorRepository = new MySQLPedidoRepartidorRepository();
+const generarTicketPedidoUseCase = new GenerarTicketPedidoUseCase(pedidoRepartidorRepository);
+const pedidoController = new PedidoController({
+  crearPedidoUseCase,
+  verPedidosUseCase,
+  cancelarPedidoUseCase,
+  generarTicketPedidoUseCase,
+  pedidoRepository,
+});
 
 // --- Controller de Repartidor (CU-015 a CU-018) con casos de uso inyectados (DIP) ---
 const repartidorController = new RepartidorController({
@@ -314,7 +321,6 @@ const cancelarPedidoAdminUseCase = new CancelarPedidoAdminUseCase(pedidoRepartid
 const asignarRepartidorUseCase = new AsignarRepartidorUseCase(pedidoRepartidorRepository, repartidorRepository);
 const DesasignarRepartidorUseCase = require('./backend/application/desasignarRepartidorUseCase');
 const desasignarRepartidorUseCase = new DesasignarRepartidorUseCase(pedidoRepartidorRepository, repartidorRepository);
-const generarTicketPedidoUseCase = new GenerarTicketPedidoUseCase(pedidoRepartidorRepository);
 const entregarPedidoAdminUseCase = new EntregarPedidoAdminUseCase(pedidoRepartidorRepository);
 const pedidoAdminController = new PedidoAdminController({
   obtenerTodosPedidosUseCase,

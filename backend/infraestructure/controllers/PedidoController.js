@@ -4,10 +4,12 @@
  * El usuario autenticado ya viene adjuntado por el middleware (req.usuario).
  */
 class PedidoController {
-  constructor({ crearPedidoUseCase, verPedidosUseCase, cancelarPedidoUseCase }) {
+  constructor({ crearPedidoUseCase, verPedidosUseCase, cancelarPedidoUseCase, generarTicketPedidoUseCase, pedidoRepository }) {
     this.crearPedidoUseCase = crearPedidoUseCase;
     this.verPedidosUseCase = verPedidosUseCase;
     this.cancelarPedidoUseCase = cancelarPedidoUseCase;
+    this.generarTicketPedidoUseCase = generarTicketPedidoUseCase;
+    this.pedidoRepository = pedidoRepository;
   }
 
   async crear(req, res) {
@@ -41,6 +43,24 @@ class PedidoController {
         motivo: req.body.motivo,
       });
       return res.status(200).json(resultado);
+    } catch (error) {
+      const status = error.status || 500;
+      return res.status(status).json({ error: error.message });
+    }
+  }
+
+  async ticket(req, res) {
+    try {
+      const idPedido = Number(req.params.id);
+
+      // Verifica que el pedido pertenezca al cliente autenticado (RN-037/RN-039).
+      const pedido = await this.pedidoRepository.obtenerPedidoPorId(idPedido);
+      if (!pedido || pedido.id_usuario !== req.usuario.id_usuario) {
+        return res.status(404).json({ error: 'Pedido no encontrado' });
+      }
+
+      const ticket = await this.generarTicketPedidoUseCase.execute(idPedido);
+      return res.status(200).json(ticket);
     } catch (error) {
       const status = error.status || 500;
       return res.status(status).json({ error: error.message });
