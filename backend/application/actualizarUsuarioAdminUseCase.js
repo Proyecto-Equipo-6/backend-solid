@@ -55,38 +55,62 @@ class ActualizarUsuarioAdminUseCase {
   }
 
   async validarCambioDeRol(idUsuario) {
-    if (this.carritoRepository && typeof this.carritoRepository.contarItems === 'function') {
-      const totalItems = await this.carritoRepository.contarItems(idUsuario);
-      if (totalItems > 0) {
-        throw new ErrorValidacion('No se puede cambiar el rol: el usuario tiene productos en el carrito');
-      }
-    }
+    await this.validarCarrito(idUsuario);
+    await this.validarPedidosDelCliente(idUsuario);
+    await this.validarPedidosDelRepartidor(idUsuario);
+  }
 
-    if (this.pedidoRepository && typeof this.pedidoRepository.obtenerPedidosPorUsuario === 'function') {
-      const pedidos = await this.pedidoRepository.obtenerPedidosPorUsuario(idUsuario);
-      if (pedidos.length > 0) {
-        const tienePendientes = pedidos.some((p) => ESTADOS_PEDIDO_ACTIVOS.includes(p.estado));
-        throw new ErrorValidacion(
-          tienePendientes
-            ? 'No se puede cambiar el rol: el usuario tiene pedidos pendientes'
-            : 'No se puede cambiar el rol: el usuario tiene historial de pedidos'
-        );
-      }
+  async validarCarrito(idUsuario) {
+    if (!this.carritoRepository || typeof this.carritoRepository.contarItems !== 'function') {
+      return;
     }
+    const totalItems = await this.carritoRepository.contarItems(idUsuario);
+    if (totalItems > 0) {
+      throw new ErrorValidacion('No se puede cambiar el rol: el usuario tiene productos en el carrito');
+    }
+  }
 
-    if (this.pedidoRepartidorRepository) {
-      if (typeof this.pedidoRepartidorRepository.contarPedidosActivos === 'function') {
-        const activos = await this.pedidoRepartidorRepository.contarPedidosActivos(idUsuario);
-        if (activos > 0) {
-          throw new ErrorValidacion('No se puede cambiar el rol: el repartidor tiene pedidos activos asignados');
-        }
-      }
-      if (typeof this.pedidoRepartidorRepository.obtenerHistorialPedidos === 'function') {
-        const historial = await this.pedidoRepartidorRepository.obtenerHistorialPedidos(idUsuario);
-        if (historial.length > 0) {
-          throw new ErrorValidacion('No se puede cambiar el rol: el repartidor tiene historial de pedidos');
-        }
-      }
+  async validarPedidosDelCliente(idUsuario) {
+    if (!this.pedidoRepository || typeof this.pedidoRepository.obtenerPedidosPorUsuario !== 'function') {
+      return;
+    }
+    const pedidos = await this.pedidoRepository.obtenerPedidosPorUsuario(idUsuario);
+    if (pedidos.length === 0) {
+      return;
+    }
+    const tienePendientes = pedidos.some((p) => ESTADOS_PEDIDO_ACTIVOS.includes(p.estado));
+    throw new ErrorValidacion(
+      tienePendientes
+        ? 'No se puede cambiar el rol: el usuario tiene pedidos pendientes'
+        : 'No se puede cambiar el rol: el usuario tiene historial de pedidos'
+    );
+  }
+
+  async validarPedidosDelRepartidor(idUsuario) {
+    if (!this.pedidoRepartidorRepository) {
+      return;
+    }
+    await this.validarPedidosActivosDelRepartidor(idUsuario);
+    await this.validarHistorialDelRepartidor(idUsuario);
+  }
+
+  async validarPedidosActivosDelRepartidor(idUsuario) {
+    if (typeof this.pedidoRepartidorRepository.contarPedidosActivos !== 'function') {
+      return;
+    }
+    const activos = await this.pedidoRepartidorRepository.contarPedidosActivos(idUsuario);
+    if (activos > 0) {
+      throw new ErrorValidacion('No se puede cambiar el rol: el repartidor tiene pedidos activos asignados');
+    }
+  }
+
+  async validarHistorialDelRepartidor(idUsuario) {
+    if (typeof this.pedidoRepartidorRepository.obtenerHistorialPedidos !== 'function') {
+      return;
+    }
+    const historial = await this.pedidoRepartidorRepository.obtenerHistorialPedidos(idUsuario);
+    if (historial.length > 0) {
+      throw new ErrorValidacion('No se puede cambiar el rol: el repartidor tiene historial de pedidos');
     }
   }
 
