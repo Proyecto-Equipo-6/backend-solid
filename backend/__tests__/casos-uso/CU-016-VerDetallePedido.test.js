@@ -1,29 +1,10 @@
 const InMemoryPedidoRepartidorRepository = require('../../infraestructure/repositories/in-memory/InMemoryPedidoRepartidorRepository.js');
 const VerDetallePedidoUseCase = require('../../application/verDetallePedidoUseCase.js');
-const Pedido = require('../../domain/models/Pedido.js');
-
-// Helper para crear un pedido activo asignado al repartidor
-const crearPedido = (id_pedido, id_repartidor, estado = 'ASIGNADO') => new Pedido({
-  id_pedido,
-  id_usuario: 100,
-  id_repartidor,
-  id_metodo_pago: 1,
-  direccion_entrega: 'Calle 123',
-  total: 50000,
-  estado,
-  comprobante_url: null,
-  observaciones: null,
-  motivo_cancelacion: null,
-  fecha_pedido: new Date().toISOString(),
-  fecha_actualizacion: new Date().toISOString(),
-  clienteNombre: 'María',
-  clienteTelefono: '3001234567',
-  caracteristicasLogistica: 'Frágil'
-});
+const { crearPedido } = require('../helpers/pedidos');
 
 describe('CU-016: Ver detalles pedido', () => {
   test('Flujo feliz, el repartidor asignado ve todos los detalles excepto productos', async () => {
-    const pedido = crearPedido(1, 10);
+    const pedido = crearPedido({ id_pedido: 1, id_repartidor: 10 });
     const repo = new InMemoryPedidoRepartidorRepository([pedido]);
     const useCase = new VerDetallePedidoUseCase(repo);
 
@@ -39,7 +20,7 @@ describe('CU-016: Ver detalles pedido', () => {
   });
 
   test('Flujo de seguridad, otro repartidor no puede ver los datos', async () => {
-    const pedido = crearPedido(1, 10);
+    const pedido = crearPedido({ id_pedido: 1, id_repartidor: 10 });
     const repo = new InMemoryPedidoRepartidorRepository([pedido]);
     const useCase = new VerDetallePedidoUseCase(repo);
 
@@ -57,7 +38,7 @@ describe('CU-016: Ver detalles pedido', () => {
 });
 
   test('Pedido cancelado no está disponible', async () => {
-  const pedido = crearPedido(1, 10, 'CANCELADO');
+    const pedido = crearPedido({ id_pedido: 1, id_repartidor: 10, estado: 'CANCELADO' });
   const repo = new InMemoryPedidoRepartidorRepository([pedido]);
   const useCase = new VerDetallePedidoUseCase(repo);
 

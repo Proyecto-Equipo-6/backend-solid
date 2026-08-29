@@ -6,28 +6,7 @@ import AsignarRepartidorUseCase from '../../application/asignarRepartidorUseCase
 import CancelarPedidoAdminUseCase from '../../application/cancelarPedidoAdminUseCase.js';
 import ActualizarEstadoPedidoAdminUseCase from '../../application/actualizarEstadoPedidoAdminUseCase.js';
 import ObtenerDetallePedidoAdminUseCase from '../../application/obtenerDetallePedidoAdminUseCase.js';
-import Pedido from '../../domain/models/Pedido.js';
-
-const crearPedido = (
-  id_pedido,
-  estado = 'PENDIENTE',
-  id_usuario = 100,
-  id_repartidor = null,
-  fecha_pedido = new Date().toISOString()
-) => new Pedido({
-  id_pedido,
-  id_usuario,
-  id_repartidor,
-  id_metodo_pago: 1,
-  direccion_entrega: 'Calle 123',
-  total: 50000,
-  estado,
-  comprobante_url: null,
-  observaciones: null,
-  motivo_cancelacion: null,
-  fecha_pedido,
-  fecha_actualizacion: new Date().toISOString()
-});
+const { crearPedido } = require('../helpers/pedidos');
 
 const crearRepoRepartidores = (ids = [10, 20, 30, 40]) => {
   return new InMemoryRepartidorRepository(
@@ -62,9 +41,9 @@ const crearDetallePedido = (id_pedido, id_producto, cantidad) => ({
 describe('Módulo administración de pedidos (CU-019, CU-020, CU-027)', () => {
   test('Filtrado multi-criterio de pedidos por estado y fecha - CP-CU-027-03', async () => {
   const repo = new InMemoryPedidoRepartidorRepository([
-    crearPedido(1, 'PENDIENTE', 100, null, '2026-08-15T08:00:00'),
-    crearPedido(2, 'CONFIRMADO', 101, null, '2026-08-15T09:00:00'),
-    crearPedido(3, 'ENTREGADO', 100, 10, '2026-08-14T10:00:00')
+    crearPedido({ id_pedido: 1, estado: 'PENDIENTE', id_usuario: 100, id_repartidor: null, fecha_pedido: '2026-08-15T08:00:00' }),
+    crearPedido({ id_pedido: 2, estado: 'CONFIRMADO', id_usuario: 101, id_repartidor: null, fecha_pedido: '2026-08-15T09:00:00' }),
+    crearPedido({ id_pedido: 3, estado: 'ENTREGADO', id_usuario: 100, id_repartidor: 10, fecha_pedido: '2026-08-14T10:00:00' })
   ]);
   const useCase = new ObtenerTodosPedidosUseCase(repo);
 
@@ -82,7 +61,7 @@ describe('Módulo administración de pedidos (CU-019, CU-020, CU-027)', () => {
   });
 
   test('Transición válida PENDIENTE -> CONFIRMADO', async () => {
-    const repo = new InMemoryPedidoRepartidorRepository([crearPedido(1, 'PENDIENTE', 100)]);
+    const repo = new InMemoryPedidoRepartidorRepository([crearPedido({ id_pedido: 1, estado: 'PENDIENTE', id_usuario: 100 })]);
     const useCase = new ActualizarEstadoPedidoAdminUseCase(repo);
 
     const pedidoActualizado = await useCase.ejecutar(1, 'CONFIRMADO');
@@ -90,7 +69,7 @@ describe('Módulo administración de pedidos (CU-019, CU-020, CU-027)', () => {
   });
 
   test('Bloqueo de saltos ilógicos', async () => {
-    const repo = new InMemoryPedidoRepartidorRepository([crearPedido(1, 'PENDIENTE', 100)]);
+    const repo = new InMemoryPedidoRepartidorRepository([crearPedido({ id_pedido: 1, estado: 'PENDIENTE', id_usuario: 100 })]);
     const useCase = new ActualizarEstadoPedidoAdminUseCase(repo);
 
     await expect(
@@ -99,7 +78,7 @@ describe('Módulo administración de pedidos (CU-019, CU-020, CU-027)', () => {
   });
 
   test('Asignación exitosa de un pedido CONFIRMADO - CP-CU-019-01 / CP-RF010.2-01', async () => {
-    const repoPedidos = new InMemoryPedidoRepartidorRepository([crearPedido(1, 'CONFIRMADO', 100)]);
+    const repoPedidos = new InMemoryPedidoRepartidorRepository([crearPedido({ id_pedido: 1, estado: 'CONFIRMADO', id_usuario: 100 })]);
     const repoRepartidores = crearRepoRepartidores();
     const useCase = new AsignarRepartidorUseCase(repoPedidos, repoRepartidores);
 
@@ -115,7 +94,7 @@ describe('Módulo administración de pedidos (CU-019, CU-020, CU-027)', () => {
   });
 
   test('Bloqueo si el repartidor no está disponible - CP-RF010.2-02', async () => {
-    const repoPedidos = new InMemoryPedidoRepartidorRepository([crearPedido(1, 'CONFIRMADO', 100)]);
+    const repoPedidos = new InMemoryPedidoRepartidorRepository([crearPedido({ id_pedido: 1, estado: 'CONFIRMADO', id_usuario: 100 })]);
     const repoRepartidores = new InMemoryRepartidorRepository([{ id_usuario: 10, estado: 'OCUPADO' }]);
     const useCase = new AsignarRepartidorUseCase(repoPedidos, repoRepartidores);
 
@@ -123,7 +102,7 @@ describe('Módulo administración de pedidos (CU-019, CU-020, CU-027)', () => {
   });
 
   test('Reasignación permitida si el repartidor es distinto', async () => {
-    const repoPedidos = new InMemoryPedidoRepartidorRepository([crearPedido(1, 'CONFIRMADO', 100, 10)]);
+    const repoPedidos = new InMemoryPedidoRepartidorRepository([crearPedido({ id_pedido: 1, estado: 'CONFIRMADO', id_usuario: 100, id_repartidor: 10 })]);
     const repoRepartidores = crearRepoRepartidores();
     const useCase = new AsignarRepartidorUseCase(repoPedidos, repoRepartidores);
 
@@ -134,10 +113,10 @@ describe('Módulo administración de pedidos (CU-019, CU-020, CU-027)', () => {
 
   test('Bloqueo si el repartidor alcanzó 3 pedidos diarios - CP-CU-019-05', async () => {
     const repoPedidos = new InMemoryPedidoRepartidorRepository([
-      crearPedido(1, 'CONFIRMADO', 100),
-      crearPedido(2, 'CONFIRMADO', 101),
-      crearPedido(3, 'CONFIRMADO', 102),
-      crearPedido(4, 'CONFIRMADO', 103)
+      crearPedido({ id_pedido: 1, estado: 'CONFIRMADO', id_usuario: 100 }),
+      crearPedido({ id_pedido: 2, estado: 'CONFIRMADO', id_usuario: 101 }),
+      crearPedido({ id_pedido: 3, estado: 'CONFIRMADO', id_usuario: 102 }),
+      crearPedido({ id_pedido: 4, estado: 'CONFIRMADO', id_usuario: 103 })
     ]);
     const repoRepartidores = crearRepoRepartidores();
     const useCase = new AsignarRepartidorUseCase(repoPedidos, repoRepartidores);
@@ -150,7 +129,7 @@ describe('Módulo administración de pedidos (CU-019, CU-020, CU-027)', () => {
   });
 
   test('Cancelación directa exitosa con motivo predefinido - CP-CU-020-01', async () => {
-    const repoPedidos = new InMemoryPedidoRepartidorRepository([crearPedido(1, 'CONFIRMADO', 100)]);
+    const repoPedidos = new InMemoryPedidoRepartidorRepository([crearPedido({ id_pedido: 1, estado: 'CONFIRMADO', id_usuario: 100 })]);
     const repoProductos = new InMemoryProductoRepository([crearProducto(1, 10)]);
     const repoRepartidores = crearRepoRepartidores();
     const useCase = new CancelarPedidoAdminUseCase(repoPedidos, repoProductos, repoRepartidores);
@@ -161,7 +140,7 @@ describe('Módulo administración de pedidos (CU-019, CU-020, CU-027)', () => {
   });
 
   test('Validación de observación obligatoria para motivo "Otro" - CP-CU-020-02', async () => {
-    const repoPedidos = new InMemoryPedidoRepartidorRepository([crearPedido(1, 'CONFIRMADO', 100)]);
+    const repoPedidos = new InMemoryPedidoRepartidorRepository([crearPedido({ id_pedido: 1, estado: 'CONFIRMADO', id_usuario: 100 })]);
     const repoProductos = new InMemoryProductoRepository([crearProducto(1, 10)]);
     const repoRepartidores = crearRepoRepartidores();
     const useCase = new CancelarPedidoAdminUseCase(repoPedidos, repoProductos, repoRepartidores);
@@ -172,7 +151,7 @@ describe('Módulo administración de pedidos (CU-019, CU-020, CU-027)', () => {
   });
 
   test('Bloqueo de cancelación en estado EN_CAMINO - CU-020', async () => {
-    const repoPedidos = new InMemoryPedidoRepartidorRepository([crearPedido(1, 'EN_CAMINO', 100, 10)]);
+    const repoPedidos = new InMemoryPedidoRepartidorRepository([crearPedido({ id_pedido: 1, estado: 'EN_CAMINO', id_usuario: 100, id_repartidor: 10 })]);
     const repoProductos = new InMemoryProductoRepository([crearProducto(1, 10)]);
     const repoRepartidores = crearRepoRepartidores();
     const useCase = new CancelarPedidoAdminUseCase(repoPedidos, repoProductos, repoRepartidores);
@@ -183,7 +162,7 @@ describe('Módulo administración de pedidos (CU-019, CU-020, CU-027)', () => {
   });
 
   test('Cancelación de pedido NO_ENTREGADO con revisión de observación', async () => {
-    const repoPedidos = new InMemoryPedidoRepartidorRepository([crearPedido(1, 'NO_ENTREGADO', 100, 10)]);
+    const repoPedidos = new InMemoryPedidoRepartidorRepository([crearPedido({ id_pedido: 1, estado: 'NO_ENTREGADO', id_usuario: 100, id_repartidor: 10 })]);
     const repoProductos = new InMemoryProductoRepository([crearProducto(1, 10)]);
     const repoRepartidores = crearRepoRepartidores();
     const useCase = new CancelarPedidoAdminUseCase(repoPedidos, repoProductos, repoRepartidores);
@@ -194,13 +173,13 @@ describe('Módulo administración de pedidos (CU-019, CU-020, CU-027)', () => {
   });
 
   test('Mantener pedido activo no modifica el estado', async () => {
-    const repoPedidos = new InMemoryPedidoRepartidorRepository([crearPedido(1, 'NO_ENTREGADO', 100, 10)]);
+    const repoPedidos = new InMemoryPedidoRepartidorRepository([crearPedido({ id_pedido: 1, estado: 'NO_ENTREGADO', id_usuario: 100, id_repartidor: 10 })]);
     const pedido = await repoPedidos.obtenerDetallePedido(1);
     expect(pedido.estado).toBe('NO_ENTREGADO');
   });
 
   test('Cancelación exitosa con reversión atómica de stock', async () => {
-    const pedido = crearPedido(1, 'CONFIRMADO', 100);
+    const pedido = crearPedido({ id_pedido: 1, estado: 'CONFIRMADO', id_usuario: 100 });
     const producto = crearProducto(1, 10);
 
     const repoPedidos = new InMemoryPedidoRepartidorRepository(
@@ -222,7 +201,7 @@ describe('Módulo administración de pedidos (CU-019, CU-020, CU-027)', () => {
   });
 
   test('Bloqueo por inmutabilidad de pedido en estado terminal ENTREGADO', async () => {
-    const repoPedidos = new InMemoryPedidoRepartidorRepository([crearPedido(1, 'ENTREGADO', 100, 10)]);
+    const repoPedidos = new InMemoryPedidoRepartidorRepository([crearPedido({ id_pedido: 1, estado: 'ENTREGADO', id_usuario: 100, id_repartidor: 10 })]);
     const repoProductos = new InMemoryProductoRepository([crearProducto(1, 10)]);
     const repoRepartidores = crearRepoRepartidores();
 
@@ -234,7 +213,7 @@ describe('Módulo administración de pedidos (CU-019, CU-020, CU-027)', () => {
   });
 
   test('Cancelación sin devolución de stock en caso de mermas', async () => {
-    const pedido = crearPedido(1, 'CONFIRMADO', 100);
+    const pedido = crearPedido({ id_pedido: 1, estado: 'CONFIRMADO', id_usuario: 100 });
     const producto = crearProducto(1, 10);
 
     const repoPedidos = new InMemoryPedidoRepartidorRepository(
@@ -257,7 +236,7 @@ describe('Módulo administración de pedidos (CU-019, CU-020, CU-027)', () => {
 
   test('Liberación del repartidor al cancelar un pedido con repartidor asignado', async () => {
     const repoPedidos = new InMemoryPedidoRepartidorRepository(
-      [crearPedido(1, 'CONFIRMADO', 100, 10)],
+      [crearPedido({ id_pedido: 1, estado: 'CONFIRMADO', id_usuario: 100, id_repartidor: 10 })],
       [crearDetallePedido(1, 1, 2)]
     );
     const repoProductos = new InMemoryProductoRepository([crearProducto(1, 10)]);
@@ -276,7 +255,7 @@ describe('Módulo administración de pedidos (CU-019, CU-020, CU-027)', () => {
 
   test('Verificar la visualización completa del detalle de una orden administrativa', async () => {
   // Pedido ficticio
-  const pedido = crearPedido(1, 'CONFIRMADO', 100, null, '2026-08-15T08:00:00');
+  const pedido = crearPedido({ id_pedido: 1, estado: 'CONFIRMADO', id_usuario: 100, id_repartidor: null, fecha_pedido: '2026-08-15T08:00:00' });
   pedido.clienteNombre = 'María Pérez';
   pedido.clienteTelefono = '3001234567';
 
@@ -310,10 +289,10 @@ describe('Módulo administración de pedidos (CU-019, CU-020, CU-027)', () => {
 
   test('Verificar la consulta de órdenes con paginación y filtrado por estado CONFIRMADO', async () => {
   const repo = new InMemoryPedidoRepartidorRepository([
-    crearPedido(1, 'CONFIRMADO', 100, null, '2026-08-15T08:00:00'),
-    crearPedido(2, 'CONFIRMADO', 101, null, '2026-08-15T09:00:00'),
-    crearPedido(3, 'CONFIRMADO', 102, null, '2026-08-15T10:00:00'),
-    crearPedido(4, 'PENDIENTE', 103, null, '2026-08-15T11:00:00')
+    crearPedido({ id_pedido: 1, estado: 'CONFIRMADO', id_usuario: 100, id_repartidor: null, fecha_pedido: '2026-08-15T08:00:00' }),
+    crearPedido({ id_pedido: 2, estado: 'CONFIRMADO', id_usuario: 101, id_repartidor: null, fecha_pedido: '2026-08-15T09:00:00' }),
+    crearPedido({ id_pedido: 3, estado: 'CONFIRMADO', id_usuario: 102, id_repartidor: null, fecha_pedido: '2026-08-15T10:00:00' }),
+    crearPedido({ id_pedido: 4, estado: 'PENDIENTE', id_usuario: 103, id_repartidor: null, fecha_pedido: '2026-08-15T11:00:00' })
   ]);
 
   const useCase = new ObtenerTodosPedidosUseCase(repo);
@@ -334,7 +313,7 @@ describe('Módulo administración de pedidos (CU-019, CU-020, CU-027)', () => {
 
   test('Falla al liberar repartidor, pero el pedido se cancela y el error se propaga', async () => {
   const repoPedidos = new InMemoryPedidoRepartidorRepository(
-    [crearPedido(1, 'CONFIRMADO', 100, 10)],
+    [crearPedido({ id_pedido: 1, estado: 'CONFIRMADO', id_usuario: 100, id_repartidor: 10 })],
     [crearDetallePedido(1, 1, 2)]
   );
   const repoProductos = new InMemoryProductoRepository([crearProducto(1, 10)]);

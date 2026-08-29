@@ -1,6 +1,6 @@
 import bcrypt from 'bcrypt';
 import ActualizarPerfilUseCase from '../../application/ActualizarPerfilUseCase';
-import InMemoryUserRepository from '../../infraestructure/repositories/in-memory/InMemoryUserRepository';
+import { crearRepositorio } from '../helpers/usuarios';
 
 const datosValidos = {
   nombre_apellido: 'Ana María Torres',
@@ -8,10 +8,6 @@ const datosValidos = {
   telefono: '3109876543',
   direccion: 'Av. El Poblado # 1-10, Medellín',
 };
-
-function crearRepositorio() {
-  return new InMemoryUserRepository();
-}
 
 function crearCasoUso(repositorio) {
   return new ActualizarPerfilUseCase(repositorio);

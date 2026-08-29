@@ -1,24 +1,6 @@
 const InMemoryPedidoRepartidorRepository = require('../../infraestructure/repositories/in-memory/InMemoryPedidoRepartidorRepository.js');
 const VerHistorialPedidosUseCase = require('../../application/verHistorialPedidosUseCase.js');
-const Pedido = require('../../domain/models/Pedido.js');
-
-const crearPedidoFinalizado = (id_pedido, id_repartidor, estado, fecha) => new Pedido({
-  id_pedido,
-  id_usuario: 100,
-  id_repartidor,
-  id_metodo_pago: 1,
-  direccion_entrega: 'Calle 123',
-  total: 50000,
-  estado,
-  comprobante_url: null,
-  observaciones: null,
-  motivo_cancelacion: null,
-  fecha_pedido: fecha.toISOString(),
-  fecha_actualizacion: fecha.toISOString(),
-  clienteNombre: 'María',
-  clienteTelefono: '3001234567',
-  caracteristicasLogistica: 'Frágil'
-});
+const { crearPedido } = require('../helpers/pedidos');
 
 // Inicio de la semana calendario (lunes), consistente con el repositorio.
 const inicioDeSemana = (fecha) => {
@@ -41,9 +23,9 @@ describe('CU-018: Ver historial pedidos', () => {
     const haceUnosDias = fechaEnPeriodoActual(hoy);
 
     const pedidos = [
-      crearPedidoFinalizado(1, 10, 'ENTREGADO', hoy),
-      crearPedidoFinalizado(2, 10, 'NO_ENTREGADO', haceUnosDias),
-      crearPedidoFinalizado(3, 20, 'ENTREGADO', hoy) // otro repartidor
+      crearPedido({ id_pedido: 1, id_repartidor: 10, estado: 'ENTREGADO', fecha_pedido: hoy.toISOString(), fecha_actualizacion: hoy.toISOString() }),
+      crearPedido({ id_pedido: 2, id_repartidor: 10, estado: 'NO_ENTREGADO', fecha_pedido: haceUnosDias.toISOString(), fecha_actualizacion: haceUnosDias.toISOString() }),
+      crearPedido({ id_pedido: 3, id_repartidor: 20, estado: 'ENTREGADO', fecha_pedido: hoy.toISOString(), fecha_actualizacion: hoy.toISOString() })
     ];
 
     const repo = new InMemoryPedidoRepartidorRepository(pedidos);
@@ -72,8 +54,8 @@ describe('CU-018: Ver historial pedidos', () => {
     const hoy = new Date();
 
     const pedidos = [
-      crearPedidoFinalizado(1, 10, 'ENTREGADO', hoy),
-      crearPedidoFinalizado(2, 10, 'NO_ENTREGADO', hoy)
+      crearPedido({ id_pedido: 1, id_repartidor: 10, estado: 'ENTREGADO', fecha_pedido: hoy.toISOString(), fecha_actualizacion: hoy.toISOString() }),
+      crearPedido({ id_pedido: 2, id_repartidor: 10, estado: 'NO_ENTREGADO', fecha_pedido: hoy.toISOString(), fecha_actualizacion: hoy.toISOString() })
     ];
 
     const repo = new InMemoryPedidoRepartidorRepository(pedidos);
@@ -90,8 +72,8 @@ describe('CU-018: Ver historial pedidos', () => {
     haceUnaSemana.setDate(hoy.getDate() - 5);
 
     const pedidos = [
-      crearPedidoFinalizado(1, 10, 'ENTREGADO', hoy),
-      crearPedidoFinalizado(2, 10, 'ENTREGADO', haceUnaSemana)
+      crearPedido({ id_pedido: 1, id_repartidor: 10, estado: 'ENTREGADO', fecha_pedido: hoy.toISOString(), fecha_actualizacion: hoy.toISOString() }),
+      crearPedido({ id_pedido: 2, id_repartidor: 10, estado: 'ENTREGADO', fecha_pedido: haceUnaSemana.toISOString(), fecha_actualizacion: haceUnaSemana.toISOString() })
     ];
 
     const repo = new InMemoryPedidoRepartidorRepository(pedidos);
@@ -103,26 +85,11 @@ describe('CU-018: Ver historial pedidos', () => {
 
   test('Solo muestra pedidos finalizados del historial', async () => {
     const hoy = new Date();
-    const pedidoFinalizado = crearPedidoFinalizado(1, 10, 'ENTREGADO', hoy);
-    const pedidoCancelado = crearPedidoFinalizado(2, 10, 'CANCELADO', hoy);
+    const pedidoFinalizado = crearPedido({ id_pedido: 1, id_repartidor: 10, estado: 'ENTREGADO', fecha_pedido: hoy.toISOString(), fecha_actualizacion: hoy.toISOString() });
+    const pedidoCancelado = crearPedido({ id_pedido: 2, id_repartidor: 10, estado: 'CANCELADO', fecha_pedido: hoy.toISOString(), fecha_actualizacion: hoy.toISOString() });
     // Se agrega un pedido PENDIENTE que debe ser ignorado por el repositorio
     const repo = new InMemoryPedidoRepartidorRepository([pedidoFinalizado, pedidoCancelado]);
-    repo.pedidos.push(
-      new Pedido({
-        id_pedido: 3,
-        id_usuario: 100,
-        id_repartidor: 10,
-        id_metodo_pago: 1,
-        direccion_entrega: 'Calle 123',
-        total: 50000,
-        estado: 'PENDIENTE',
-        comprobante_url: null,
-        observaciones: null,
-        motivo_cancelacion: null,
-        fecha_pedido: hoy.toISOString(),
-        fecha_actualizacion: hoy.toISOString()
-      })
-    );
+    repo.pedidos.push(crearPedido({ id_pedido: 3, id_repartidor: 10, estado: 'PENDIENTE', fecha_pedido: hoy.toISOString(), fecha_actualizacion: hoy.toISOString() }));
 
     const useCase = new VerHistorialPedidosUseCase(repo);
     const historial = await useCase.ejecutar(10);

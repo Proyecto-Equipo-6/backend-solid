@@ -1,37 +1,6 @@
 import bcrypt from 'bcrypt';
 import ObtenerPerfilUseCase from '../../application/ObtenerPerfilUseCase';
-import InMemoryUserRepository from '../../infraestructure/repositories/in-memory/InMemoryUserRepository';
-
-function crearRepositorio() {
-  return new InMemoryUserRepository();
-}
-
-async function crearUsuario(repositorio, {
-  id = 1,
-  id_rol = 2,
-  nombre_apellido = 'Ana Torres',
-  tipo_documento = 'CC',
-  numero_documento = '1000000001',
-  email = 'ana@example.com',
-  password = 'Abcd1234',
-  telefono = '3001234567',
-  direccion = 'Calle 10 # 5-20, Medellín',
-  activo = 1,
-} = {}) {
-  const usuario = {
-    id,
-    id_rol,
-    nombre_apellido,
-    tipo_documento,
-    numero_documento,
-    email,
-    password: await bcrypt.hash(password, 4),
-    telefono,
-    direccion,
-    activo,
-  };
-  return repositorio.save(usuario);
-}
+import { crearRepositorio, crearUsuario } from '../helpers/usuarios';
 
 function crearCasoUso(repositorio) {
   return new ObtenerPerfilUseCase(repositorio);
@@ -43,7 +12,7 @@ describe('CU-004 Visualizar perfil (ObtenerPerfilUseCase)', () => {
 
   beforeEach(async () => {
     repositorio = crearRepositorio();
-    await crearUsuario(repositorio);
+    await crearUsuario(repositorio, { email: 'ana@example.com', password: 'Abcd1234' });
     casoUso = crearCasoUso(repositorio);
   });
 
@@ -60,7 +29,7 @@ describe('CU-004 Visualizar perfil (ObtenerPerfilUseCase)', () => {
       id_rol: 2,
       nombre_apellido: 'Ana Torres',
       tipo_documento: 'CC',
-      numero_documento: '1000000001',
+      numero_documento: '100000000',
       email: 'ana@example.com',
       telefono: '3001234567',
       direccion: 'Calle 10 # 5-20, Medellín',

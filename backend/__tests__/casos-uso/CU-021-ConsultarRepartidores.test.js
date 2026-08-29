@@ -1,7 +1,7 @@
-import InMemoryRepartidorRepository from '../../infraestructure/repositories/in-memory/InMemoryRepartidorRepository.js';
-import InMemoryPedidoRepartidorRepository from '../../infraestructure/repositories/in-memory/InMemoryPedidoRepartidorRepository.js';
-import ConsultarRepartidoresUseCase from '../../application/consultarRepartidoresUseCase.js';
-import Pedido from '../../domain/models/Pedido.js';
+const InMemoryRepartidorRepository = require('../../infraestructure/repositories/in-memory/InMemoryRepartidorRepository.js');
+const InMemoryPedidoRepartidorRepository = require('../../infraestructure/repositories/in-memory/InMemoryPedidoRepartidorRepository.js');
+const ConsultarRepartidoresUseCase = require('../../application/consultarRepartidoresUseCase.js');
+const { crearPedido } = require('../helpers/pedidos');
 
 describe('Módulo Consultar Repartidores (CU-021)', () => {
   test('Visualizar solo repartidores activos con métricas', async () => {
@@ -11,16 +11,11 @@ describe('Módulo Consultar Repartidores (CU-021)', () => {
   ]);
 
   const hoy = new Date();
-  const pedido1 = new Pedido({
+  const pedido1 = crearPedido({
     id_pedido: 1,
-    id_usuario: 100,
     id_repartidor: 10,
-    id_metodo_pago: 1,
-    direccion_entrega: 'Calle 123',
-    total: 50000,
     estado: 'ENTREGADO',
     fecha_pedido: hoy.toISOString(),
-    fecha_actualizacion: hoy.toISOString()
   });
 
   const repoPedidos = new InMemoryPedidoRepartidorRepository([pedido1]);
@@ -75,28 +70,18 @@ test('FA-002: El filtro "Todos" muestra activos e inactivos', async () => {
       { id_usuario: 10, nombre: 'Juan', apellidos: 'Pérez', telefono: '3001234567', email: 'juan@example.com', estado: 'DISPONIBLE' }
     ]);
 
-    const pedidoViejo = new Pedido({
+    const pedidoViejo = crearPedido({
       id_pedido: 1,
-      id_usuario: 100,
       id_repartidor: 10,
-      id_metodo_pago: 1,
-      direccion_entrega: 'Calle 1',
-      total: 10000,
       estado: 'ENTREGADO',
       fecha_pedido: new Date('2026-08-14').toISOString(),
-      fecha_actualizacion: new Date('2026-08-14').toISOString()
     });
 
-    const pedidoReciente = new Pedido({
+    const pedidoReciente = crearPedido({
       id_pedido: 2,
-      id_usuario: 101,
       id_repartidor: 10,
-      id_metodo_pago: 1,
-      direccion_entrega: 'Calle 2',
-      total: 20000,
       estado: 'ENTREGADO',
       fecha_pedido: new Date('2026-08-16').toISOString(),
-      fecha_actualizacion: new Date('2026-08-16').toISOString()
     });
 
     const repoPedidos = new InMemoryPedidoRepartidorRepository([pedidoViejo, pedidoReciente]);

@@ -1,7 +1,7 @@
 import InMemoryRepartidorRepository from '../../infraestructure/repositories/in-memory/InMemoryRepartidorRepository.js';
 import InMemoryPedidoRepartidorRepository from '../../infraestructure/repositories/in-memory/InMemoryPedidoRepartidorRepository.js';
 import CambiarEstadoOperativoRepartidorUseCase from '../../application/cambiarEstadoOperativoRepartidorUseCase.js';
-import Pedido from '../../domain/models/Pedido.js';
+const { crearPedido } = require('../helpers/pedidos');
 
 describe('HU-010.2: Gestión de Estado Operativo de Repartidor', () => {
   test('Cambiar estado de Inactivo a Disponible', async () => {
@@ -22,16 +22,10 @@ describe('HU-010.2: Gestión de Estado Operativo de Repartidor', () => {
     ]);
 
     // Pedido en estado EN_CAMINO asignado al repartidor 10
-    const pedido = new Pedido({
+    const pedido = crearPedido({
       id_pedido: 1,
-      id_usuario: 100,
       id_repartidor: 10,
-      id_metodo_pago: 1,
-      direccion_entrega: 'Calle 123',
-      total: 50000,
       estado: 'EN_CAMINO',
-      fecha_pedido: new Date().toISOString(),
-      fecha_actualizacion: new Date().toISOString()
     });
 
     const repoPedidos = new InMemoryPedidoRepartidorRepository([pedido]);

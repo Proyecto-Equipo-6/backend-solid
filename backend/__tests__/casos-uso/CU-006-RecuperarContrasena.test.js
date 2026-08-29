@@ -1,14 +1,10 @@
 import bcrypt from 'bcrypt';
 import SolicitarRecuperacionUseCase from '../../application/SolicitarRecuperacionUseCase';
 import RestablecerContrasenaUseCase from '../../application/RestablecerContrasenaUseCase';
-import InMemoryUserRepository from '../../infraestructure/repositories/in-memory/InMemoryUserRepository';
 import InMemoryTokensRecuperacionRepository from '../../infraestructure/repositories/in-memory/InMemoryTokensRecuperacionRepository';
+import { crearRepositorio, crearUsuario } from '../helpers/usuarios';
 
 const MENSAJE_GENERICO = 'Recibirá un enlace de recuperación a su correo electrónico';
-
-function crearRepositorio() {
-  return new InMemoryUserRepository();
-}
 
 function crearTokensRepositorio() {
   return new InMemoryTokensRecuperacionRepository();
@@ -16,22 +12,6 @@ function crearTokensRepositorio() {
 
 function crearEmailSender() {
   return { enviarRecuperacion: jest.fn().mockResolvedValue(true) };
-}
-
-async function crearUsuario(repositorio, { email = 'ana@example.com', password = 'Abcd1234' } = {}) {
-  const usuario = {
-    id: repositorio.users.length + 1,
-    id_rol: 2,
-    nombre_apellido: 'Ana Torres',
-    tipo_documento: 'CC',
-    numero_documento: `10000000${repositorio.users.length}`,
-    email,
-    password: await bcrypt.hash(password, 4),
-    telefono: '3001234567',
-    direccion: 'Calle 10 # 5-20, Medellín',
-    activo: 1,
-  };
-  return repositorio.save(usuario);
 }
 
 describe('CU-006 Recuperar contraseña (SolicitarRecuperacionUseCase)', () => {
@@ -49,7 +29,7 @@ describe('CU-006 Recuperar contraseña (SolicitarRecuperacionUseCase)', () => {
 
   it('genera token válido y envía correo', async () => {
     // Arrange
-    await crearUsuario(repositorio);
+    await crearUsuario(repositorio, { email: 'ana@example.com', password: 'Abcd1234' });
     const antes = Date.now();
 
     // Act
@@ -91,7 +71,7 @@ describe('CU-006 Recuperar contraseña (SolicitarRecuperacionUseCase)', () => {
 
   it('lanza error cuando el envío del correo falla', async () => {
     // Arrange
-    await crearUsuario(repositorio);
+    await crearUsuario(repositorio, { email: 'ana@example.com', password: 'Abcd1234' });
     emailSender.enviarRecuperacion = jest.fn().mockRejectedValue(new Error('Fallo SMTP'));
 
     // Act & Assert
@@ -111,7 +91,7 @@ describe('CU-006 Recuperar contraseña (RestablecerContrasenaUseCase)', () => {
     repositorio = crearRepositorio();
     tokensRepositorio = crearTokensRepositorio();
     casoUso = new RestablecerContrasenaUseCase(repositorio, tokensRepositorio);
-    usuario = await crearUsuario(repositorio);
+    usuario = await crearUsuario(repositorio, { email: 'ana@example.com', password: 'Abcd1234' });
   });
 
   async function guardarToken(token = 'token-valido-123', expiraEn = null) {
