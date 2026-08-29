@@ -2,10 +2,14 @@ const InMemoryPedidoRepartidorRepository = require('../../infraestructure/reposi
 const ActualizarEstadoPedidoUseCase = require('../../application/actualizarEstadoPedidoUseCase.js');
 const { crearPedido } = require('../helpers/pedidos');
 
+function crearUseCase(estado) {
+  const repo = new InMemoryPedidoRepartidorRepository([crearPedido({ estado })]);
+  return new ActualizarEstadoPedidoUseCase(repo);
+}
+
 describe('ActualizarEstadoPedidoUseCase', () => {
   test('Flujo feliz 1: ASIGNADO -> EN_CAMINO', async () => {
-    const repo = new InMemoryPedidoRepartidorRepository([crearPedido({ estado: 'ASIGNADO' })]);
-    const useCase = new ActualizarEstadoPedidoUseCase(repo);
+    const useCase = crearUseCase('ASIGNADO');
 
     const pedidoActualizado = await useCase.ejecutar(1, 'EN_CAMINO', 'ASIGNADO');
 
@@ -13,20 +17,18 @@ describe('ActualizarEstadoPedidoUseCase', () => {
   });
 
   test('Flujo feliz 2: EN_CAMINO -> ENTREGADO con foto válida', async () => {
-  const repo = new InMemoryPedidoRepartidorRepository([crearPedido({ estado: 'EN_CAMINO' })]);
-  const useCase = new ActualizarEstadoPedidoUseCase(repo);
+    const useCase = crearUseCase('EN_CAMINO');
 
-  const pedidoActualizado = await useCase.ejecutar(1, 'ENTREGADO', 'EN_CAMINO', {
-    foto: { formato: 'jpg', tamano: 102400 }
+    const pedidoActualizado = await useCase.ejecutar(1, 'ENTREGADO', 'EN_CAMINO', {
+      foto: { formato: 'jpg', tamano: 102400 }
+    });
+
+    expect(pedidoActualizado.estado).toBe('ENTREGADO');
+    expect(pedidoActualizado.comprobante_url).toContain('evidencia_1');
   });
 
-  expect(pedidoActualizado.estado).toBe('ENTREGADO');
-  expect(pedidoActualizado.comprobante_url).toContain('evidencia_1');
-});
-
   test('Flujo de excepción 1: ENTREGADO sin foto debe fallar', async () => {
-    const repo = new InMemoryPedidoRepartidorRepository([crearPedido({ estado: 'EN_CAMINO' })]);
-    const useCase = new ActualizarEstadoPedidoUseCase(repo);
+    const useCase = crearUseCase('EN_CAMINO');
 
     await expect(
       useCase.ejecutar(1, 'ENTREGADO', 'EN_CAMINO')
@@ -34,8 +36,7 @@ describe('ActualizarEstadoPedidoUseCase', () => {
   });
 
   test('Flujo de excepción 2: NO_ENTREGADO sin observación debe fallar', async () => {
-    const repo = new InMemoryPedidoRepartidorRepository([crearPedido({ estado: 'EN_CAMINO' })]);
-    const useCase = new ActualizarEstadoPedidoUseCase(repo);
+    const useCase = crearUseCase('EN_CAMINO');
 
     await expect(
       useCase.ejecutar(1, 'NO_ENTREGADO', 'EN_CAMINO')
@@ -43,8 +44,7 @@ describe('ActualizarEstadoPedidoUseCase', () => {
   });
 
   test('No permite modificar un pedido finalizado', async () => {
-    const repo = new InMemoryPedidoRepartidorRepository([crearPedido({ estado: 'ENTREGADO' })]);
-    const useCase = new ActualizarEstadoPedidoUseCase(repo);
+    const useCase = crearUseCase('ENTREGADO');
 
     await expect(
       useCase.ejecutar(1, 'EN_CAMINO', 'ENTREGADO')
@@ -52,13 +52,12 @@ describe('ActualizarEstadoPedidoUseCase', () => {
   });
 
   test('Flujo exitoso: EN_CAMINO -> NO_ENTREGADO con observación', async () => {
-  const repo = new InMemoryPedidoRepartidorRepository([crearPedido({ estado: 'EN_CAMINO' })]);
-  const useCase = new ActualizarEstadoPedidoUseCase(repo);
+    const useCase = crearUseCase('EN_CAMINO');
 
-  const pedidoActualizado = await useCase.ejecutar(1, 'NO_ENTREGADO', 'EN_CAMINO', {
-    observacion: 'Cliente no responde'
+    const pedidoActualizado = await useCase.ejecutar(1, 'NO_ENTREGADO', 'EN_CAMINO', {
+      observacion: 'Cliente no responde'
+    });
+
+    expect(pedidoActualizado.estado).toBe('NO_ENTREGADO');
   });
-
-  expect(pedidoActualizado.estado).toBe('NO_ENTREGADO');
-});
 });

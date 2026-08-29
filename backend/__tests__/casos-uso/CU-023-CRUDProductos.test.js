@@ -7,14 +7,18 @@ import EliminarProductoUseCase from '../../application/eliminarProductoUseCase.j
 import AjustarStockProductoUseCase from '../../application/ajustarStockProductoUseCase.js';
 import { crearCategoria, crearProveedor } from '../helpers/productos.js';
 
+async function crearRepositorios({ conCategoria = true, conProveedor = true } = {}) {
+  const repoProductos = new InMemoryProductoRepository();
+  const repoCategorias = new InMemoryCategoriaRepository();
+  const repoProveedores = new InMemoryProveedorRepository();
+  const categoria = conCategoria ? await crearCategoria(repoCategorias) : null;
+  if (conProveedor) crearProveedor(repoProveedores, 1, 'Proveedor Test');
+  return { repoProductos, repoCategorias, repoProveedores, categoria };
+}
+
 describe('Módulo CRUD productos - Aseo (CU-023)', () => {
   test('Crear producto feliz con SKU único, categoría y proveedor existentes, sin imagen por defecto', async () => {
-    const repoProductos = new InMemoryProductoRepository();
-    const repoCategorias = new InMemoryCategoriaRepository();
-    const repoProveedores = new InMemoryProveedorRepository();
-
-    const categoria = await crearCategoria(repoCategorias);
-    crearProveedor(repoProveedores, 1, 'Proveedor Test');
+    const { repoProductos, repoCategorias, repoProveedores, categoria } = await crearRepositorios();
 
     const useCase = new CrearProductoUseCase(repoProductos, repoCategorias, repoProveedores);
     const producto = await useCase.ejecutar({
@@ -36,12 +40,7 @@ describe('Módulo CRUD productos - Aseo (CU-023)', () => {
   });
 
   test('Rechazar creación si el SKU ya existe (FA-02)', async () => {
-    const repoProductos = new InMemoryProductoRepository();
-    const repoCategorias = new InMemoryCategoriaRepository();
-    const repoProveedores = new InMemoryProveedorRepository();
-
-    const categoria = await crearCategoria(repoCategorias);
-    crearProveedor(repoProveedores, 1, 'Proveedor Test');
+    const { repoProductos, repoCategorias, repoProveedores, categoria } = await crearRepositorios();
 
     const useCase = new CrearProductoUseCase(repoProductos, repoCategorias, repoProveedores);
 
@@ -69,12 +68,7 @@ describe('Módulo CRUD productos - Aseo (CU-023)', () => {
   });
 
   test('Rechazar si el nombre está duplicado', async () => {
-    const repoProductos = new InMemoryProductoRepository();
-    const repoCategorias = new InMemoryCategoriaRepository();
-    const repoProveedores = new InMemoryProveedorRepository();
-
-    const categoria = await crearCategoria(repoCategorias);
-    crearProveedor(repoProveedores, 1, 'Proveedor Test');
+    const { repoProductos, repoCategorias, repoProveedores, categoria } = await crearRepositorios();
 
     const useCase = new CrearProductoUseCase(repoProductos, repoCategorias, repoProveedores);
 
@@ -102,12 +96,7 @@ describe('Módulo CRUD productos - Aseo (CU-023)', () => {
   });
 
   test('Rechazar precio cero o stock negativo', async () => {
-    const repoProductos = new InMemoryProductoRepository();
-    const repoCategorias = new InMemoryCategoriaRepository();
-    const repoProveedores = new InMemoryProveedorRepository();
-
-    const categoria = await crearCategoria(repoCategorias);
-    crearProveedor(repoProveedores, 1, 'Proveedor Test');
+    const { repoProductos, repoCategorias, repoProveedores, categoria } = await crearRepositorios();
 
     const useCase = new CrearProductoUseCase(repoProductos, repoCategorias, repoProveedores);
 
@@ -137,11 +126,7 @@ describe('Módulo CRUD productos - Aseo (CU-023)', () => {
   });
 
   test('Rechazar si la categoría asociada no existe', async () => {
-    const repoProductos = new InMemoryProductoRepository();
-    const repoCategorias = new InMemoryCategoriaRepository();
-    const repoProveedores = new InMemoryProveedorRepository();
-
-    crearProveedor(repoProveedores, 1, 'Proveedor Test');
+    const { repoProductos, repoCategorias, repoProveedores } = await crearRepositorios({ conCategoria: false });
 
     const useCase = new CrearProductoUseCase(repoProductos, repoCategorias, repoProveedores);
 
@@ -159,11 +144,7 @@ describe('Módulo CRUD productos - Aseo (CU-023)', () => {
   });
 
   test('Rechazar si el proveedor asociado no existe', async () => {
-    const repoProductos = new InMemoryProductoRepository();
-    const repoCategorias = new InMemoryCategoriaRepository();
-    const repoProveedores = new InMemoryProveedorRepository();
-
-    const categoria = await crearCategoria(repoCategorias);
+    const { repoProductos, repoCategorias, repoProveedores, categoria } = await crearRepositorios({ conProveedor: false });
 
     const useCase = new CrearProductoUseCase(repoProductos, repoCategorias, repoProveedores);
 
@@ -181,12 +162,7 @@ describe('Módulo CRUD productos - Aseo (CU-023)', () => {
   });
 
   test('Editar producto actualiza sus datos y estado', async () => {
-    const repoProductos = new InMemoryProductoRepository();
-    const repoCategorias = new InMemoryCategoriaRepository();
-    const repoProveedores = new InMemoryProveedorRepository();
-
-    const categoria = await crearCategoria(repoCategorias);
-    crearProveedor(repoProveedores, 1, 'Proveedor Test');
+    const { repoProductos, repoCategorias, repoProveedores, categoria } = await crearRepositorios();
 
     const crear = new CrearProductoUseCase(repoProductos, repoCategorias, repoProveedores);
     const editar = new EditarProductoUseCase(repoProductos, repoCategorias, repoProveedores);
@@ -217,35 +193,30 @@ describe('Módulo CRUD productos - Aseo (CU-023)', () => {
   });
 
   test('Eliminar producto con historial de ventas lo desactiva y devuelve mensaje informativo', async () => {
-  const repoProductos = new InMemoryProductoRepository();
-  const repoCategorias = new InMemoryCategoriaRepository();
-  const repoProveedores = new InMemoryProveedorRepository();
+    const { repoProductos, repoCategorias, repoProveedores, categoria } = await crearRepositorios();
 
-  const categoria = await crearCategoria(repoCategorias);
-  crearProveedor(repoProveedores, 1, 'Proveedor Test');
+    const crear = new CrearProductoUseCase(repoProductos, repoCategorias, repoProveedores);
+    const producto = await crear.ejecutar({
+      sku: 'ASE-ESC-10',
+      id_categoria: categoria.id_categoria,
+      id_proveedor: 1,
+      nombre: 'Escoba',
+      descripcion: 'Cerdas suaves',
+      precio: 8000,
+      stock: 20
+    });
 
-  const crear = new CrearProductoUseCase(repoProductos, repoCategorias, repoProveedores);
-  const producto = await crear.ejecutar({
-    sku: 'ASE-ESC-10',
-    id_categoria: categoria.id_categoria,
-    id_proveedor: 1,
-    nombre: 'Escoba',
-    descripcion: 'Cerdas suaves',
-    precio: 8000,
-    stock: 20
+    // Simulamos que tiene historial de ventas
+    repoProductos.marcarConHistorial(producto.id_producto);
+
+    const eliminar = new EliminarProductoUseCase(repoProductos);
+    const resultado = await eliminar.ejecutar(producto.id_producto);
+
+    expect(resultado.mensaje).toBe('El producto registra ventas en el historial; se ha inactivado del catálogo comercial.');
+
+    const productoDesactivado = await repoProductos.findById(producto.id_producto);
+    expect(productoDesactivado.estado).toBe(0);
   });
-
-  // Simulamos que tiene historial de ventas
-  repoProductos.marcarConHistorial(producto.id_producto);
-
-  const eliminar = new EliminarProductoUseCase(repoProductos);
-  const resultado = await eliminar.ejecutar(producto.id_producto);
-
-  expect(resultado.mensaje).toBe('El producto registra ventas en el historial; se ha inactivado del catálogo comercial.');
-
-  const productoDesactivado = await repoProductos.findById(producto.id_producto);
-  expect(productoDesactivado.estado).toBe(0);
-});
 
   test('Ejecutar un ajuste rápido de stock con éxito y verificar auditoría', async () => {
     const repoProductos = new InMemoryProductoRepository([
@@ -283,39 +254,39 @@ describe('Módulo CRUD productos - Aseo (CU-023)', () => {
       motivo: 'Ingreso de mercancía'
     });
   });
+
   test('Productos inactivos no se retornan en catálogo público', async () => {
-  const repoProductos = new InMemoryProductoRepository([
-    {
-      id_producto: 1,
-      sku: 'ASE-ACT-01',
-      id_categoria: 1,
-      id_proveedor: 1,
-      nombre: 'Producto Activo',
-      descripcion: 'Desc',
-      precio: 1000,
-      stock: 10,
-      estado: 1,
-      imagen_url: null,
-      fecha_creacion: new Date().toISOString()
-    },
-    {
-      id_producto: 2,
-      sku: 'ASE-INA-02',
-      id_categoria: 1,
-      id_proveedor: 1,
-      nombre: 'Producto Inactivo',
-      descripcion: 'Desc',
-      precio: 2000,
-      stock: 5,
-      estado: 0,
-      imagen_url: null,
-      fecha_creacion: new Date().toISOString()
-    }
-  ]);
+    const repoProductos = new InMemoryProductoRepository([
+      {
+        id_producto: 1,
+        sku: 'ASE-ACT-01',
+        id_categoria: 1,
+        id_proveedor: 1,
+        nombre: 'Producto Activo',
+        descripcion: 'Desc',
+        precio: 1000,
+        stock: 10,
+        estado: 1,
+        imagen_url: null,
+        fecha_creacion: new Date().toISOString()
+      },
+      {
+        id_producto: 2,
+        sku: 'ASE-INA-02',
+        id_categoria: 1,
+        id_proveedor: 1,
+        nombre: 'Producto Inactivo',
+        descripcion: 'Desc',
+        precio: 2000,
+        stock: 5,
+        estado: 0,
+        imagen_url: null,
+        fecha_creacion: new Date().toISOString()
+      }
+    ]);
 
-  const activos = await repoProductos.findActivos();
-  expect(activos).toHaveLength(1);
-  expect(activos[0].id_producto).toBe(1);
+    const activos = await repoProductos.findActivos();
+    expect(activos).toHaveLength(1);
+    expect(activos[0].id_producto).toBe(1);
   });
-
 });

@@ -2,13 +2,16 @@ const InMemoryPedidoRepartidorRepository = require('../../infraestructure/reposi
 const VerDashboardPedidosUseCase = require('../../application/verDashboardPedidosUseCase.js');
 const { crearPedido } = require('../helpers/pedidos');
 
+function crearHora(hora, minutos = 0) {
+  const d = new Date();
+  d.setHours(hora, minutos, 0, 0);
+  return d;
+}
+
 describe('CU-015: Ver Dashboard pedidos', () => {
   test('Dashboard con pedido activo y en cola', async () => {
-    const hoy = new Date();
-    const horaTemprana = new Date(hoy);
-    horaTemprana.setHours(8, 0, 0, 0);
-    const horaTarde = new Date(hoy);
-    horaTarde.setHours(10, 0, 0, 0);
+    const horaTemprana = crearHora(8);
+    const horaTarde = crearHora(10);
 
     const pedidos = [
       crearPedido({
@@ -57,49 +60,45 @@ describe('CU-015: Ver Dashboard pedidos', () => {
   });
 
   test('Múltiples pedidos de prioridad similar, el más antiguo queda activo', async () => {
-  const hoy = new Date();
-  const mismaHora = new Date(hoy);
-  mismaHora.setHours(9, 0, 0, 0);
+    const mismaHora = crearHora(9);
 
-  const pedidos = [
-    crearPedido({
-      id_pedido: 1,
-      id_usuario: 100,
-      id_repartidor: 10,
-      id_metodo_pago: 1,
-      direccion_entrega: 'Calle 1',
-      total: 50000,
-      estado: 'ASIGNADO',
-      fecha_pedido: mismaHora.toISOString(),
-      fecha_actualizacion: mismaHora.toISOString()
-    }),
-    crearPedido({
-      id_pedido: 2,
-      id_usuario: 101,
-      id_repartidor: 10,
-      id_metodo_pago: 1,
-      direccion_entrega: 'Calle 2',
-      total: 30000,
-      estado: 'ASIGNADO',
-      fecha_pedido: mismaHora.toISOString(), // misma prioridad
-      fecha_actualizacion: mismaHora.toISOString()
-    })
-  ];
+    const pedidos = [
+      crearPedido({
+        id_pedido: 1,
+        id_usuario: 100,
+        id_repartidor: 10,
+        id_metodo_pago: 1,
+        direccion_entrega: 'Calle 1',
+        total: 50000,
+        estado: 'ASIGNADO',
+        fecha_pedido: mismaHora.toISOString(),
+        fecha_actualizacion: mismaHora.toISOString()
+      }),
+      crearPedido({
+        id_pedido: 2,
+        id_usuario: 101,
+        id_repartidor: 10,
+        id_metodo_pago: 1,
+        direccion_entrega: 'Calle 2',
+        total: 30000,
+        estado: 'ASIGNADO',
+        fecha_pedido: mismaHora.toISOString(), // misma prioridad
+        fecha_actualizacion: mismaHora.toISOString()
+      })
+    ];
 
-  const repo = new InMemoryPedidoRepartidorRepository(pedidos);
-  const useCase = new VerDashboardPedidosUseCase(repo);
-  const dashboard = await useCase.ejecutar(10);
+    const repo = new InMemoryPedidoRepartidorRepository(pedidos);
+    const useCase = new VerDashboardPedidosUseCase(repo);
+    const dashboard = await useCase.ejecutar(10);
 
-  expect(dashboard.conteoDelDia).toBe(2);
-  expect(dashboard.pedidoActivo.id_pedido).toBe(1); // el que se agregó primero con misma hora
-  expect(dashboard.pedidosEnCola).toHaveLength(1);
-  expect(dashboard.pedidosEnCola[0].id_pedido).toBe(2);
+    expect(dashboard.conteoDelDia).toBe(2);
+    expect(dashboard.pedidoActivo.id_pedido).toBe(1); // el que se agregó primero con misma hora
+    expect(dashboard.pedidosEnCola).toHaveLength(1);
+    expect(dashboard.pedidosEnCola[0].id_pedido).toBe(2);
   });
 
   test('Solo muestra pedidos asignados al repartidor autenticado', async () => {
-    const hoy = new Date();
-    const hora = new Date(hoy);
-    hora.setHours(9, 0, 0, 0);
+    const hora = crearHora(9);
 
     const pedidos = [
       crearPedido({
