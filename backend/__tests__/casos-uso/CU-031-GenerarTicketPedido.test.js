@@ -1,16 +1,5 @@
 const GenerarTicketPedidoUseCase = require('../../application/GenerarTicketPedidoUseCase');
 
-function crearRepositorio(pedido, detalles) {
-  return {
-    async obtenerDetallePedido() {
-      return pedido;
-    },
-    async obtenerDetallesPorPedido() {
-      return detalles;
-    },
-  };
-}
-
 describe('CU-031 GenerarTicketPedidoUseCase', () => {
   const PEDIDO = {
     id_pedido: 42,
@@ -30,12 +19,19 @@ describe('CU-031 GenerarTicketPedidoUseCase', () => {
     { id_producto: 2, producto_nombre: 'Control remoto', cantidad: 1, precio_unitario: 50000, subtotal: 50000 },
   ];
 
+  function crearRepositorio(pedido = PEDIDO, detalles = DETALLES) {
+    return {
+      async obtenerDetallePedido() { return pedido; },
+      async obtenerDetallesPorPedido() { return detalles; },
+    };
+  }
+
   async function generarTicket(pedido = PEDIDO, detalles = DETALLES) {
     const casoUso = new GenerarTicketPedidoUseCase(crearRepositorio(pedido, detalles));
     return casoUso.execute(pedido.id_pedido);
   }
 
-  it('CP-CU-031-01: genera el recibo con la información del establecimiento', async () => {
+  it('genera el recibo con la información del establecimiento', async () => {
     const resultado = await generarTicket();
 
     expect(resultado.nombreArchivo).toBe('Ticket_Pedido_42.pdf');
@@ -44,7 +40,7 @@ describe('CU-031 GenerarTicketPedidoUseCase', () => {
     expect(resultado.html).toContain('Tel: 11223344');
   });
 
-  it('CP-CU-031-02: lista los artículos con cantidad, unitario y subtotal', async () => {
+  it('lista los artículos con cantidad, unitario y subtotal', async () => {
     const resultado = await generarTicket();
 
     expect(resultado.html).toContain('Televisor 43"');
@@ -54,7 +50,7 @@ describe('CU-031 GenerarTicketPedidoUseCase', () => {
     expect(resultado.html).toContain('$50.000');
   });
 
-  it('CP-CU-031-03: resume el pago con TOTAL, Efectivo y Cambio', async () => {
+  it('resume el pago con TOTAL, Efectivo y Cambio', async () => {
     const resultado = await generarTicket();
 
     expect(resultado.html).toContain('TOTAL');
@@ -64,19 +60,16 @@ describe('CU-031 GenerarTicketPedidoUseCase', () => {
     expect(resultado.html).toContain('>$0<');
   });
 
-  it('CP-CU-031-04: no incluye la sección bancaria (pago contraentrega)', async () => {
+  it('no incluye la sección bancaria (pago contraentrega)', async () => {
     const resultado = await generarTicket();
 
     expect(resultado.html).not.toContain('Tarjeta bancaria');
     expect(resultado.html).not.toContain('Código de aprobación');
   });
 
-  it('CP-CU-031-05: lanza error si el pedido no existe', async () => {
-    const casoUso = new GenerarTicketPedidoUseCase({
-      async obtenerDetallePedido() {
-        return null;
-      },
-    });
+  it('lanza error si el pedido no existe', async () => {
+    const repo = { async obtenerDetallePedido() { return null; } };
+    const casoUso = new GenerarTicketPedidoUseCase(repo);
 
     await expect(casoUso.execute(999)).rejects.toThrow('Pedido no encontrado');
   });
