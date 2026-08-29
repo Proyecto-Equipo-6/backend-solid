@@ -1,30 +1,11 @@
 import InMemoryProductoRepository from '../../infraestructure/repositories/in-memory/InMemoryProductoRepository.js';
 import InMemoryCategoriaRepository from '../../infraestructure/repositories/in-memory/InMemoryCategoriaRepository.js';
 import InMemoryProveedorRepository from '../../infraestructure/repositories/in-memory/InMemoryProveedorRepository.js';
-import CrearCategoriaUseCase from '../../application/crearCategoriaUseCase.js';
 import CrearProductoUseCase from '../../application/crearProductoUseCase.js';
 import EditarProductoUseCase from '../../application/editarProductoUseCase.js';
 import EliminarProductoUseCase from '../../application/eliminarProductoUseCase.js';
 import AjustarStockProductoUseCase from '../../application/ajustarStockProductoUseCase.js';
-
-// Helpers
-
-async function crearCategoria(repoCategoria, nombre = 'Aseo') {
-  const useCase = new CrearCategoriaUseCase(repoCategoria);
-  return await useCase.ejecutar({ nombre, descripcion: 'Productos de limpieza' });
-}
-
-function crearProveedor(repoProveedor, id = 1, nombre = 'Proveedor Test') {
-  repoProveedor.proveedores.push({
-    id_proveedor: id,
-    nit_proveedor: '900123456-7',
-    razon_social: nombre,
-    telefono: '6012345678',
-    email: 'proveedor@test.com',
-    estado: 1,
-    fecha_creacion: new Date().toISOString()
-  });
-}
+import { crearCategoria, crearProveedor } from '../helpers/productos.js';
 
 describe('Módulo CRUD productos - Aseo (CU-023)', () => {
   test('Crear producto feliz con SKU único, categoría y proveedor existentes, sin imagen por defecto', async () => {

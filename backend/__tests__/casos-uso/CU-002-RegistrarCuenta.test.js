@@ -1,20 +1,7 @@
 import bcrypt from 'bcrypt';
 import CreateUserUseCase from '../../application/CreateUserUseCase';
-import InMemoryUserRepository from '../../infraestructure/repositories/in-memory/InMemoryUserRepository';
-
-const datosValidos = {
-  nombre_apellido: 'Ana Torres',
-  tipo_documento: 'CC',
-  numero_documento: '1000000001',
-  email: 'ana@example.com',
-  password: 'Abcd1234', // 8 caracteres, mayúscula y número
-  telefono: '3001234567',
-  direccion: 'Calle 10 # 5-20, Medellín',
-};
-
-function crearRepositorio() {
-  return new InMemoryUserRepository();
-}
+import { datosValidos, crearRepositorio } from '../helpers/usuarios.js';
+import { configurarBcryptRounds } from '../helpers/bcryptSetup.js';
 
 function crearCasoUso(repositorio) {
   return new CreateUserUseCase(repositorio);
@@ -23,20 +10,8 @@ function crearCasoUso(repositorio) {
 describe('CU-002 Registrar cuenta (CreateUserUseCase)', () => {
   let repositorio;
   let casoUso;
-  let roundsOriginal;
 
-  beforeAll(() => {
-    roundsOriginal = process.env.BCRYPT_ROUNDS;
-    process.env.BCRYPT_ROUNDS = '4';
-  });
-
-  afterAll(() => {
-    if (roundsOriginal === undefined) {
-      delete process.env.BCRYPT_ROUNDS;
-    } else {
-      process.env.BCRYPT_ROUNDS = roundsOriginal;
-    }
-  });
+  configurarBcryptRounds();
 
   beforeEach(() => {
     repositorio = crearRepositorio();

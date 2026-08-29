@@ -1,51 +1,19 @@
-import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import LoginUseCase from '../../application/LoginUseCase';
-import InMemoryUserRepository from '../../infraestructure/repositories/in-memory/InMemoryUserRepository';
+import { crearRepositorio, crearUsuario } from '../helpers/usuarios.js';
+import { configurarBcryptRounds } from '../helpers/bcryptSetup.js';
 
 const JWT_SECRET_PRUEBA = 'secreto-de-prueba';
-
-function crearRepositorio() {
-  return new InMemoryUserRepository();
-}
 
 function crearCasoUso(repositorio) {
   return new LoginUseCase(repositorio, JWT_SECRET_PRUEBA);
 }
 
-async function crearUsuario(repositorio, { email, password, activo = 1, id_rol = 2 }) {
-  const usuario = {
-    id: repositorio.users.length + 1,
-    id_rol,
-    nombre_apellido: 'Ana Torres',
-    tipo_documento: 'CC',
-    numero_documento: `10000000${repositorio.users.length}`,
-    email,
-    password: await bcrypt.hash(password, 4),
-    telefono: '3001234567',
-    direccion: 'Calle 10 # 5-20, Medellín',
-    activo,
-  };
-  return repositorio.save(usuario);
-}
-
 describe('CU-003 Iniciar sesión (LoginUseCase)', () => {
   let repositorio;
   let casoUso;
-  let roundsOriginal;
 
-  beforeAll(() => {
-    roundsOriginal = process.env.BCRYPT_ROUNDS;
-    process.env.BCRYPT_ROUNDS = '4';
-  });
-
-  afterAll(() => {
-    if (roundsOriginal === undefined) {
-      delete process.env.BCRYPT_ROUNDS;
-    } else {
-      process.env.BCRYPT_ROUNDS = roundsOriginal;
-    }
-  });
+  configurarBcryptRounds();
 
   beforeEach(() => {
     repositorio = crearRepositorio();

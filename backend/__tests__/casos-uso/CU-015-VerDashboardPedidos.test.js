@@ -1,6 +1,6 @@
 const InMemoryPedidoRepartidorRepository = require('../../infraestructure/repositories/in-memory/InMemoryPedidoRepartidorRepository.js');
 const VerDashboardPedidosUseCase = require('../../application/verDashboardPedidosUseCase.js');
-const Pedido = require('../../domain/models/Pedido.js');
+const { crearPedido } = require('../helpers/pedidos');
 
 describe('CU-015: Ver Dashboard pedidos', () => {
   test('Dashboard con pedido activo y en cola', async () => {
@@ -11,7 +11,7 @@ describe('CU-015: Ver Dashboard pedidos', () => {
     horaTarde.setHours(10, 0, 0, 0);
 
     const pedidos = [
-      new Pedido({
+      crearPedido({
         id_pedido: 2,
         id_usuario: 101,
         id_repartidor: 10,
@@ -22,7 +22,7 @@ describe('CU-015: Ver Dashboard pedidos', () => {
         fecha_pedido: horaTarde.toISOString(),
         fecha_actualizacion: horaTarde.toISOString()
       }),
-      new Pedido({
+      crearPedido({
         id_pedido: 1,
         id_usuario: 100,
         id_repartidor: 10,
@@ -62,7 +62,7 @@ describe('CU-015: Ver Dashboard pedidos', () => {
   mismaHora.setHours(9, 0, 0, 0);
 
   const pedidos = [
-    new Pedido({
+    crearPedido({
       id_pedido: 1,
       id_usuario: 100,
       id_repartidor: 10,
@@ -73,7 +73,7 @@ describe('CU-015: Ver Dashboard pedidos', () => {
       fecha_pedido: mismaHora.toISOString(),
       fecha_actualizacion: mismaHora.toISOString()
     }),
-    new Pedido({
+    crearPedido({
       id_pedido: 2,
       id_usuario: 101,
       id_repartidor: 10,
@@ -102,7 +102,7 @@ describe('CU-015: Ver Dashboard pedidos', () => {
     hora.setHours(9, 0, 0, 0);
 
     const pedidos = [
-      new Pedido({
+      crearPedido({
         id_pedido: 1,
         id_usuario: 100,
         id_repartidor: 10,
@@ -113,7 +113,7 @@ describe('CU-015: Ver Dashboard pedidos', () => {
         fecha_pedido: hora.toISOString(),
         fecha_actualizacion: hora.toISOString()
       }),
-      new Pedido({
+      crearPedido({
         id_pedido: 2,
         id_usuario: 101,
         id_repartidor: 20,
