@@ -24,7 +24,7 @@ function crearCasoUso(carritoRepo, productoRepo) {
 }
 
 describe('CU-010 Agregar producto al carrito (AgregarAlCarritoUseCase)', () => {
-  it('CP-CU-010-01 / CP-HU-004.2-01: agrega un producto al carrito exitosamente', async () => {
+  it('agrega un producto al carrito exitosamente', async () => {
     // Arrange
     const { carritoRepository, productoRepository } = crearRepositorios();
     const casoUso = crearCasoUso(carritoRepository, productoRepository);
@@ -39,7 +39,7 @@ describe('CU-010 Agregar producto al carrito (AgregarAlCarritoUseCase)', () => {
     expect(resultado.carrito.total).toBe(500000);
   });
 
-  it('CP-CU-010-02 / CP-RF-004.2-02 / CP-HU-004.2-03: rechaza stock insuficiente', async () => {
+  it('rechaza stock insuficiente', async () => {
     // Arrange
     const { carritoRepository, productoRepository } = crearRepositorios(5);
     const casoUso = crearCasoUso(carritoRepository, productoRepository);
@@ -53,7 +53,7 @@ describe('CU-010 Agregar producto al carrito (AgregarAlCarritoUseCase)', () => {
     ).rejects.toThrow('No hay unidades suficientes');
   });
 
-  it('CP-CU-010-03 / CP-RF-004.2-01 / CP-HU-004.2-02: no duplica producto, incrementa cantidad', async () => {
+  it('no duplica producto, incrementa cantidad', async () => {
     // Arrange
     const { carritoRepository, productoRepository } = crearRepositorios();
     const casoUso = crearCasoUso(carritoRepository, productoRepository);
@@ -98,7 +98,7 @@ describe('CU-010 Agregar producto al carrito (AgregarAlCarritoUseCase)', () => {
     ).rejects.toThrow('Producto no encontrado');
   });
 
-  it('CP-CU-010-04: maneja error de conexión al agregar', async () => {
+  it('maneja error de conexión al agregar', async () => {
     // Arrange
     const carritoRepositoryFalso = {
     obtenerCantidad: jest.fn().mockResolvedValue(0),
@@ -114,7 +114,7 @@ describe('CU-010 Agregar producto al carrito (AgregarAlCarritoUseCase)', () => {
     ).rejects.toThrow('Error de conexión');
   });
 
-  it('CP-CU-010-05: rechaza usuario sin sesión', async () => {
+  it('rechaza usuario sin sesión', async () => {
     // Arrange
     const { carritoRepository, productoRepository } = crearRepositorios();
     const casoUso = crearCasoUso(carritoRepository, productoRepository);
@@ -128,7 +128,7 @@ describe('CU-010 Agregar producto al carrito (AgregarAlCarritoUseCase)', () => {
     ).rejects.toThrow(/iniciar sesión/i);
   });
 
-  it('CP-CU-010-06: el carrito persiste entre instancias del caso de uso', async () => {
+  it('el carrito persiste entre instancias del caso de uso', async () => {
     // Arrange
     const { carritoRepository, productoRepository } = crearRepositorios();
     const casoUso = crearCasoUso(carritoRepository, productoRepository);

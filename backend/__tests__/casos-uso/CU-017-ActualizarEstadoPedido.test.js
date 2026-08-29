@@ -1,6 +1,6 @@
-const InMemoryPedidoRepartidorRepository = require('../infraestructure/repositories/in-memory/InMemoryPedidoRepartidorRepository.js');
-const ActualizarEstadoPedidoUseCase = require('../application/actualizarEstadoPedidoUseCase.js');
-const Pedido = require('../domain/models/Pedido.js');
+const InMemoryPedidoRepartidorRepository = require('../../infraestructure/repositories/in-memory/InMemoryPedidoRepartidorRepository.js');
+const ActualizarEstadoPedidoUseCase = require('../../application/actualizarEstadoPedidoUseCase.js');
+const Pedido = require('../../domain/models/Pedido.js');
 
 const crearPedido = (estado = 'ASIGNADO') => new Pedido({
   id_pedido: 1,
@@ -60,7 +60,7 @@ describe('ActualizarEstadoPedidoUseCase', () => {
     ).rejects.toThrow('La observación es obligatoria para marcar No Entregado');
   });
 
-  test('CP-CU-017-08: No permite modificar un pedido finalizado', async () => {
+  test('No permite modificar un pedido finalizado', async () => {
     const repo = new InMemoryPedidoRepartidorRepository([crearPedido('ENTREGADO')]);
     const useCase = new ActualizarEstadoPedidoUseCase(repo);
 

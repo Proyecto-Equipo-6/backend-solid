@@ -1,6 +1,6 @@
-const CrearPedidoUseCase = require('../application/CrearPedidoUseCase');
-const InMemoryCarritoRepository = require('../infraestructure/repositories/in-memory/InMemoryCarritoRepository');
-const InMemoryPedidoRepository = require('../infraestructure/repositories/in-memory/InMemoryPedidoRepository');
+const CrearPedidoUseCase = require('../../application/CrearPedidoUseCase');
+const InMemoryCarritoRepository = require('../../infraestructure/repositories/in-memory/InMemoryCarritoRepository');
+const InMemoryPedidoRepository = require('../../infraestructure/repositories/in-memory/InMemoryPedidoRepository');
 
 const CLIENTE = { id_usuario: 2, id_rol: 2, email: 'juan@email.com' };
 
@@ -118,7 +118,7 @@ describe('CrearPedidoUseCase', () => {
   });
   });
 
-  it('CP-CU-012-03: maneja error de conexión o fallo de transacción', async () => {
+  it('maneja error de conexión o fallo de transacción', async () => {
     const carritoRepository = crearCarritoConProducto(PRODUCTO, 1);
     // Repositorio falso cuyo crearPedidoConTransaccion falla (simula error de BD / rollback)
     const pedidoRepositoryFalso = {

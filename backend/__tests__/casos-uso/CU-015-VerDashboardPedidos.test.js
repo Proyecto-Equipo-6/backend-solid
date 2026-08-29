@@ -1,9 +1,9 @@
-const InMemoryPedidoRepartidorRepository = require('../infraestructure/repositories/in-memory/InMemoryPedidoRepartidorRepository.js');
-const VerDashboardPedidosUseCase = require('../application/verDashboardPedidosUseCase.js');
-const Pedido = require('../domain/models/Pedido.js');
+const InMemoryPedidoRepartidorRepository = require('../../infraestructure/repositories/in-memory/InMemoryPedidoRepartidorRepository.js');
+const VerDashboardPedidosUseCase = require('../../application/verDashboardPedidosUseCase.js');
+const Pedido = require('../../domain/models/Pedido.js');
 
 describe('CU-015: Ver Dashboard pedidos', () => {
-  test('CP-CU-015-01: Dashboard con pedido activo y en cola', async () => {
+  test('Dashboard con pedido activo y en cola', async () => {
     const hoy = new Date();
     const horaTemprana = new Date(hoy);
     horaTemprana.setHours(8, 0, 0, 0);
@@ -45,7 +45,7 @@ describe('CU-015: Ver Dashboard pedidos', () => {
     expect(dashboard.pedidosEnCola[0].id_pedido).toBe(2);
   });
 
-  test('CP-CU-015-02: Dashboard vacío cuando no hay pedidos asignados', async () => {
+  test('Dashboard vacío cuando no hay pedidos asignados', async () => {
     const repo = new InMemoryPedidoRepartidorRepository([]);
     const useCase = new VerDashboardPedidosUseCase(repo);
     const dashboard = await useCase.ejecutar(10);
@@ -56,7 +56,7 @@ describe('CU-015: Ver Dashboard pedidos', () => {
     expect(dashboard.mensaje).toBe('No tienes pedidos asignados por el momento');
   });
 
-  test('CP-CU-015-03: Múltiples pedidos de prioridad similar, el más antiguo queda activo', async () => {
+  test('Múltiples pedidos de prioridad similar, el más antiguo queda activo', async () => {
   const hoy = new Date();
   const mismaHora = new Date(hoy);
   mismaHora.setHours(9, 0, 0, 0);
@@ -96,7 +96,7 @@ describe('CU-015: Ver Dashboard pedidos', () => {
   expect(dashboard.pedidosEnCola[0].id_pedido).toBe(2);
   });
 
-  test('CP-CU-015-06: Solo muestra pedidos asignados al repartidor autenticado', async () => {
+  test('Solo muestra pedidos asignados al repartidor autenticado', async () => {
     const hoy = new Date();
     const hora = new Date(hoy);
     hora.setHours(9, 0, 0, 0);
@@ -135,7 +135,7 @@ describe('CU-015: Ver Dashboard pedidos', () => {
     expect(dashboard.pedidosEnCola).toHaveLength(0);
   });
 
-  test('CP-CU-015-04: maneja error de conexión con la BD', async () => {
+  test('maneja error de conexión con la BD', async () => {
     const pedidoRepoFalso = {
       obtenerPedidosDelDia: jest.fn().mockRejectedValue(new Error('Error de conexión')),
     };
@@ -144,7 +144,7 @@ describe('CU-015: Ver Dashboard pedidos', () => {
     await expect(useCase.ejecutar(10)).rejects.toThrow('Error de conexión');
   });
 
-  test('CP-CU-015-05: maneja excepción por sesión expirada', async () => {
+  test('maneja excepción por sesión expirada', async () => {
     // Simula que el repartidor ya no tiene sesión válida (error de autenticación)
     const pedidoRepoFalso = {
       obtenerPedidosDelDia: jest.fn().mockRejectedValue(new Error('Su sesión ha expirado')),

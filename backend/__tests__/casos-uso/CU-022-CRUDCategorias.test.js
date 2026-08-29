@@ -1,7 +1,7 @@
-import InMemoryCategoriaRepository from '../infraestructure/repositories/in-memory/InMemoryCategoriaRepository.js';
-import CrearCategoriaUseCase from '../application/crearCategoriaUseCase.js';
-import EditarCategoriaUseCase from '../application/editarCategoriaUseCase.js';
-import EliminarCategoriaUseCase from '../application/eliminarCategoriaUseCase.js';
+import InMemoryCategoriaRepository from '../../infraestructure/repositories/in-memory/InMemoryCategoriaRepository.js';
+import CrearCategoriaUseCase from '../../application/crearCategoriaUseCase.js';
+import EditarCategoriaUseCase from '../../application/editarCategoriaUseCase.js';
+import EliminarCategoriaUseCase from '../../application/eliminarCategoriaUseCase.js';
 
 describe('Módulo CRUD categorías (CU-022)', () => {
   test('Registrar categoría con éxito y fecha_creacion automática', async () => {
@@ -41,7 +41,7 @@ describe('Módulo CRUD categorías (CU-022)', () => {
     ).rejects.toThrow('No se puede eliminar: la categoría tiene 3 productos asociados');
   });
 
-  test('CP-CU-022-03: Editar categoría cambia descripción y estado', async () => {
+  test('Editar categoría cambia descripción y estado', async () => {
   const repo = new InMemoryCategoriaRepository();
   const crear = new CrearCategoriaUseCase(repo);
   const editar = new EditarCategoriaUseCase(repo);
@@ -66,7 +66,7 @@ describe('Módulo CRUD categorías (CU-022)', () => {
   expect(editada.estado).toBe(0); // Inactivo
 });
 
-  test('CP-CU-022-05: Desactivar categoría sin productos asociados (borrado lógico)', async () => {
+  test('Desactivar categoría sin productos asociados (borrado lógico)', async () => {
   const repo = new InMemoryCategoriaRepository();
   const crear = new CrearCategoriaUseCase(repo);
   const eliminar = new EliminarCategoriaUseCase(repo);

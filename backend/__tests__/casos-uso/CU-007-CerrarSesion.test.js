@@ -14,7 +14,7 @@ function crearRespuestaFalsa() {
 }
 
 describe('CU-007 Cerrar sesión (LogoutUseCase + AuthController.logout)', () => {
-  it('CP-CU-007-01 / CP-RF-002.3-01 / CP-HU-002.3-01: revoca token y limpia cookie', async () => {
+  it('revoca token y limpia cookie', async () => {
     // Arrange
     const blacklist = new InMemoryTokenBlacklistRepository();
     const logoutUseCase = new LogoutUseCase(blacklist);
@@ -33,7 +33,7 @@ describe('CU-007 Cerrar sesión (LogoutUseCase + AuthController.logout)', () => 
     expect(res.json).toHaveBeenCalledWith({ mensaje: 'Sesión cerrada correctamente' });
   });
 
-  it('CP-CU-007-03: no falla si no hay token en la cookie', async () => {
+  it('no falla si no hay token en la cookie', async () => {
     // Arrange
     const blacklist = new InMemoryTokenBlacklistRepository();
     const logoutUseCase = new LogoutUseCase(blacklist);
@@ -48,7 +48,7 @@ describe('CU-007 Cerrar sesión (LogoutUseCase + AuthController.logout)', () => 
     expect(res.status).toHaveBeenCalledWith(200);
   });
 
-  it('CP-HU-002.3-02: middleware rechaza token revocado con 401', async () => {
+  it('middleware rechaza token revocado con 401', async () => {
     // Arrange
     const blacklist = new InMemoryTokenBlacklistRepository();
     const autenticar = crearAutenticador('secreto', blacklist);

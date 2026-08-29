@@ -47,7 +47,7 @@ describe('CU-006 Recuperar contraseña (SolicitarRecuperacionUseCase)', () => {
     casoUso = new SolicitarRecuperacionUseCase(repositorio, tokensRepositorio, emailSender);
   });
 
-  it('CP-CU-006-01 / CP-RF-002.2-01 / CP-HU-002.2-01: genera token válido y envía correo', async () => {
+  it('genera token válido y envía correo', async () => {
     // Arrange
     await crearUsuario(repositorio);
     const antes = Date.now();
@@ -76,7 +76,7 @@ describe('CU-006 Recuperar contraseña (SolicitarRecuperacionUseCase)', () => {
     expect(token).toBe(registro.token);
   });
 
-  it('CP-CU-006-04 / CP-HU-002.2-03: no revela si el correo no existe', async () => {
+  it('no revela si el correo no existe', async () => {
     // Arrange
     const email = 'nadie@example.com';
 
@@ -89,7 +89,7 @@ describe('CU-006 Recuperar contraseña (SolicitarRecuperacionUseCase)', () => {
     expect(emailSender.enviarRecuperacion).not.toHaveBeenCalled();
   });
 
-  it('CP-CU-006-05: lanza error cuando el envío del correo falla', async () => {
+  it('lanza error cuando el envío del correo falla', async () => {
     // Arrange
     await crearUsuario(repositorio);
     emailSender.enviarRecuperacion = jest.fn().mockRejectedValue(new Error('Fallo SMTP'));
@@ -122,7 +122,7 @@ describe('CU-006 Recuperar contraseña (RestablecerContrasenaUseCase)', () => {
     });
   }
 
-  it('CP-CU-006-01 / CP-RF-002.2-01 / CP-HU-002.2-01: restablece contraseña y invalida token', async () => {
+  it('restablece contraseña y invalida token', async () => {
     // Arrange
     await guardarToken();
     const passwordOriginal = usuario.password;
@@ -140,7 +140,7 @@ describe('CU-006 Recuperar contraseña (RestablecerContrasenaUseCase)', () => {
     expect(await bcrypt.compare('Nueva1234', repositorio.users[0].password)).toBe(true);
   });
 
-  it('CP-CU-006-02 / CP-RF-002.2-02 / CP-HU-002.2-02: rechaza token expirado', async () => {
+  it('rechaza token expirado', async () => {
     // Arrange
     await guardarToken('token-expirado', new Date(Date.now() - 1000));
 
@@ -181,7 +181,7 @@ describe('CU-006 Recuperar contraseña (RestablecerContrasenaUseCase)', () => {
     ).rejects.toThrow('El token de recuperación ha expirado. Solicitelo nuevamente');
   });
 
-  it('CP-CU-006-03: rechaza contraseña débil', async () => {
+  it('rechaza contraseña débil', async () => {
     // Arrange
     await guardarToken();
     const casos = ['abcdefg1', 'Abcdefgh', 'Ab1'];

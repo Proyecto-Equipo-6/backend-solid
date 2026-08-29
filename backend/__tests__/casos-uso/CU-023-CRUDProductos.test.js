@@ -1,11 +1,11 @@
-import InMemoryProductoRepository from '../infraestructure/repositories/in-memory/InMemoryProductoRepository.js';
-import InMemoryCategoriaRepository from '../infraestructure/repositories/in-memory/InMemoryCategoriaRepository.js';
-import InMemoryProveedorRepository from '../infraestructure/repositories/in-memory/InMemoryProveedorRepository.js';
-import CrearCategoriaUseCase from '../application/crearCategoriaUseCase.js';
-import CrearProductoUseCase from '../application/crearProductoUseCase.js';
-import EditarProductoUseCase from '../application/editarProductoUseCase.js';
-import EliminarProductoUseCase from '../application/eliminarProductoUseCase.js';
-import AjustarStockProductoUseCase from '../application/ajustarStockProductoUseCase.js';
+import InMemoryProductoRepository from '../../infraestructure/repositories/in-memory/InMemoryProductoRepository.js';
+import InMemoryCategoriaRepository from '../../infraestructure/repositories/in-memory/InMemoryCategoriaRepository.js';
+import InMemoryProveedorRepository from '../../infraestructure/repositories/in-memory/InMemoryProveedorRepository.js';
+import CrearCategoriaUseCase from '../../application/crearCategoriaUseCase.js';
+import CrearProductoUseCase from '../../application/crearProductoUseCase.js';
+import EditarProductoUseCase from '../../application/editarProductoUseCase.js';
+import EliminarProductoUseCase from '../../application/eliminarProductoUseCase.js';
+import AjustarStockProductoUseCase from '../../application/ajustarStockProductoUseCase.js';
 
 // Helpers
 
@@ -27,7 +27,7 @@ function crearProveedor(repoProveedor, id = 1, nombre = 'Proveedor Test') {
 }
 
 describe('Módulo CRUD productos - Aseo (CU-023)', () => {
-  test('CP-CU-023-01: Crear producto feliz con SKU único, categoría y proveedor existentes, sin imagen por defecto', async () => {
+  test('Crear producto feliz con SKU único, categoría y proveedor existentes, sin imagen por defecto', async () => {
     const repoProductos = new InMemoryProductoRepository();
     const repoCategorias = new InMemoryCategoriaRepository();
     const repoProveedores = new InMemoryProveedorRepository();
@@ -235,7 +235,7 @@ describe('Módulo CRUD productos - Aseo (CU-023)', () => {
     expect(editado.estado).toBe(0);
   });
 
-  test('CP-RF-007.2-02: Eliminar producto con historial de ventas lo desactiva y devuelve mensaje informativo', async () => {
+  test('Eliminar producto con historial de ventas lo desactiva y devuelve mensaje informativo', async () => {
   const repoProductos = new InMemoryProductoRepository();
   const repoCategorias = new InMemoryCategoriaRepository();
   const repoProveedores = new InMemoryProveedorRepository();
@@ -266,7 +266,7 @@ describe('Módulo CRUD productos - Aseo (CU-023)', () => {
   expect(productoDesactivado.estado).toBe(0);
 });
 
-  test('CP-HU007.2-03: Ejecutar un ajuste rápido de stock con éxito y verificar auditoría', async () => {
+  test('Ejecutar un ajuste rápido de stock con éxito y verificar auditoría', async () => {
     const repoProductos = new InMemoryProductoRepository([
       {
         id_producto: 1,
@@ -302,7 +302,7 @@ describe('Módulo CRUD productos - Aseo (CU-023)', () => {
       motivo: 'Ingreso de mercancía'
     });
   });
-  test('CP-HU007.2-04: Productos inactivos no se retornan en catálogo público', async () => {
+  test('Productos inactivos no se retornan en catálogo público', async () => {
   const repoProductos = new InMemoryProductoRepository([
     {
       id_producto: 1,

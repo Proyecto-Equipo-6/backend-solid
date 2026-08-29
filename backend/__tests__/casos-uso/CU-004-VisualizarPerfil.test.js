@@ -47,7 +47,7 @@ describe('CU-004 Visualizar perfil (ObtenerPerfilUseCase)', () => {
     casoUso = crearCasoUso(repositorio);
   });
 
-  it('CP-CU-004-01 / CP-CU-004-02: devuelve los datos del perfil sin contraseña', async () => {
+  it('devuelve los datos del perfil sin contraseña', async () => {
     // Arrange
     const idUsuario = 1;
 
@@ -69,7 +69,7 @@ describe('CU-004 Visualizar perfil (ObtenerPerfilUseCase)', () => {
     expect(perfil.password).toBeUndefined();
   });
 
-  it('CP-CU-004-03: devuelve perfil sin datos opcionales (perfil incompleto)', async () => {
+  it('devuelve perfil sin datos opcionales (perfil incompleto)', async () => {
     // Arrange
     const repositorioIncompleto = crearRepositorio();
     await repositorioIncompleto.save({
@@ -95,7 +95,7 @@ describe('CU-004 Visualizar perfil (ObtenerPerfilUseCase)', () => {
     expect(perfil.nombre_apellido).toBe('Usuario Incompleto');
   });
 
-  it('CP-CU-004-04: lanza 401 si la sesión expiró (usuario no existe)', async () => {
+  it('lanza 401 si la sesión expiró (usuario no existe)', async () => {
     // Arrange
     const idUsuarioInexistente = 999;
 
@@ -108,7 +108,7 @@ describe('CU-004 Visualizar perfil (ObtenerPerfilUseCase)', () => {
     ).rejects.toThrow('Su sesión ha expirado. Inicie sesión nuevamente');
   });
 
-  it('CP-CU-004-05: maneja error de conexión con la BD', async () => {
+  it('maneja error de conexión con la BD', async () => {
     // Arrange
     const repositorioFalso = {
       findById: jest.fn().mockRejectedValue(new Error('Error de conexión')),

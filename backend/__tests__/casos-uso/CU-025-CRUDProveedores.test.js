@@ -1,8 +1,8 @@
-import InMemoryProveedorRepository from '../infraestructure/repositories/in-memory/InMemoryProveedorRepository.js';
-import CrearProveedorUseCase from '../application/crearProveedorUseCase.js';
-import EditarProveedorUseCase from '../application/editarProveedorUseCase.js';
-import EliminarProveedorUseCase from '../application/eliminarProveedorUseCase.js';
-import ListarProveedoresActivosUseCase from '../application/listarProveedoresActivosUseCase.js';
+import InMemoryProveedorRepository from '../../infraestructure/repositories/in-memory/InMemoryProveedorRepository.js';
+import CrearProveedorUseCase from '../../application/crearProveedorUseCase.js';
+import EditarProveedorUseCase from '../../application/editarProveedorUseCase.js';
+import EliminarProveedorUseCase from '../../application/eliminarProveedorUseCase.js';
+import ListarProveedoresActivosUseCase from '../../application/listarProveedoresActivosUseCase.js';
 
 describe('Módulo CRUD proveedores (CU-025)', () => {
   test('Registrar proveedor con éxito (flujo feliz, estado 1 y fecha automática)', async () => {
@@ -154,7 +154,7 @@ describe('Módulo CRUD proveedores (CU-025)', () => {
     expect(editado.imagen_url).toBe('https://cloudinary.com/nueva_imagen.jpg');
   });
 
-  test('CP-CU-025-03: Solo proveedores activos aparecen en selectores de productos', async () => {
+  test('Solo proveedores activos aparecen en selectores de productos', async () => {
   const repo = new InMemoryProveedorRepository();
   const crear = new CrearProveedorUseCase(repo);
   const listar = new ListarProveedoresActivosUseCase(repo);

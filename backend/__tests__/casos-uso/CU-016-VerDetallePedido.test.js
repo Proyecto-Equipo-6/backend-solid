@@ -1,6 +1,6 @@
-const InMemoryPedidoRepartidorRepository = require('../infraestructure/repositories/in-memory/InMemoryPedidoRepartidorRepository.js');
-const VerDetallePedidoUseCase = require('../application/verDetallePedidoUseCase.js');
-const Pedido = require('../domain/models/Pedido.js');
+const InMemoryPedidoRepartidorRepository = require('../../infraestructure/repositories/in-memory/InMemoryPedidoRepartidorRepository.js');
+const VerDetallePedidoUseCase = require('../../application/verDetallePedidoUseCase.js');
+const Pedido = require('../../domain/models/Pedido.js');
 
 // Helper para crear un pedido activo asignado al repartidor
 const crearPedido = (id_pedido, id_repartidor, estado = 'ASIGNADO') => new Pedido({
@@ -22,7 +22,7 @@ const crearPedido = (id_pedido, id_repartidor, estado = 'ASIGNADO') => new Pedid
 });
 
 describe('CU-016: Ver detalles pedido', () => {
-  test('CP-CU-016-01 / CP-CU-016-02 / CP-CU-016-03: Flujo feliz, el repartidor asignado ve todos los detalles excepto productos', async () => {
+  test('Flujo feliz, el repartidor asignado ve todos los detalles excepto productos', async () => {
     const pedido = crearPedido(1, 10);
     const repo = new InMemoryPedidoRepartidorRepository([pedido]);
     const useCase = new VerDetallePedidoUseCase(repo);
@@ -38,7 +38,7 @@ describe('CU-016: Ver detalles pedido', () => {
     expect(detalle.productos).toEqual([]);
   });
 
-  test('CP-CU-016-06: Flujo de seguridad, otro repartidor no puede ver los datos', async () => {
+  test('Flujo de seguridad, otro repartidor no puede ver los datos', async () => {
     const pedido = crearPedido(1, 10);
     const repo = new InMemoryPedidoRepartidorRepository([pedido]);
     const useCase = new VerDetallePedidoUseCase(repo);
@@ -46,7 +46,7 @@ describe('CU-016: Ver detalles pedido', () => {
     await expect(useCase.ejecutar(1, 20)).rejects.toThrow('Acceso denegado');
   });
 
-  test('CP-CU-016-04: Error al cargar los detalles del pedido', async () => {
+  test('Error al cargar los detalles del pedido', async () => {
   const repoFalso = {
     obtenerDetallePedido: jest.fn().mockRejectedValue(new Error('Fallo de conexión'))
   };
@@ -56,7 +56,7 @@ describe('CU-016: Ver detalles pedido', () => {
   await expect(useCase.ejecutar(1, 10)).rejects.toThrow('No se pudieron cargar los detalles del pedido');
 });
 
-  test('CP-CU-016-05: Pedido cancelado no está disponible', async () => {
+  test('Pedido cancelado no está disponible', async () => {
   const pedido = crearPedido(1, 10, 'CANCELADO');
   const repo = new InMemoryPedidoRepartidorRepository([pedido]);
   const useCase = new VerDetallePedidoUseCase(repo);

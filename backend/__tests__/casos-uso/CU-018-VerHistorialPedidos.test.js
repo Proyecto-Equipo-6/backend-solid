@@ -1,6 +1,6 @@
-const InMemoryPedidoRepartidorRepository = require('../infraestructure/repositories/in-memory/InMemoryPedidoRepartidorRepository.js');
-const VerHistorialPedidosUseCase = require('../application/verHistorialPedidosUseCase.js');
-const Pedido = require('../domain/models/Pedido.js');
+const InMemoryPedidoRepartidorRepository = require('../../infraestructure/repositories/in-memory/InMemoryPedidoRepartidorRepository.js');
+const VerHistorialPedidosUseCase = require('../../application/verHistorialPedidosUseCase.js');
+const Pedido = require('../../domain/models/Pedido.js');
 
 const crearPedidoFinalizado = (id_pedido, id_repartidor, estado, fecha) => new Pedido({
   id_pedido,
@@ -36,7 +36,7 @@ const fechaEnPeriodoActual = (hoy) => {
 };
 
 describe('CU-018: Ver historial pedidos', () => {
-  test('CP-CU-018-01: Historial con pedidos finalizados y métricas', async () => {
+  test('Historial con pedidos finalizados y métricas', async () => {
     const hoy = new Date();
     const haceUnosDias = fechaEnPeriodoActual(hoy);
 
@@ -57,7 +57,7 @@ describe('CU-018: Ver historial pedidos', () => {
     expect(historial.pedidos[0].id_pedido).toBe(1); // reciente primero
   });
 
-  test('CP-CU-018-02: Historial vacío devuelve mensaje', async () => {
+  test('Historial vacío devuelve mensaje', async () => {
     const repo = new InMemoryPedidoRepartidorRepository([]);
     const useCase = new VerHistorialPedidosUseCase(repo);
     const historial = await useCase.ejecutar(10);
@@ -68,7 +68,7 @@ describe('CU-018: Ver historial pedidos', () => {
     expect(historial.mensaje).toBe('Aún no tienes pedidos registrados en tu historial');
   });
 
-  test('CP-CU-018-03: Filtro por estado NO_ENTREGADO', async () => {
+  test('Filtro por estado NO_ENTREGADO', async () => {
     const hoy = new Date();
 
     const pedidos = [
@@ -84,7 +84,7 @@ describe('CU-018: Ver historial pedidos', () => {
     expect(historial.pedidos[0].estado).toBe('NO_ENTREGADO');
   });
 
-  test('CP-CU-018-04: Orden antiguo primero', async () => {
+  test('Orden antiguo primero', async () => {
     const hoy = new Date();
     const haceUnaSemana = new Date(hoy);
     haceUnaSemana.setDate(hoy.getDate() - 5);
@@ -101,7 +101,7 @@ describe('CU-018: Ver historial pedidos', () => {
     expect(historial.pedidos[0].id_pedido).toBe(2); // el más antiguo primero
   });
 
-  test('CP-CU-018-08: Solo muestra pedidos finalizados del historial', async () => {
+  test('Solo muestra pedidos finalizados del historial', async () => {
     const hoy = new Date();
     const pedidoFinalizado = crearPedidoFinalizado(1, 10, 'ENTREGADO', hoy);
     const pedidoCancelado = crearPedidoFinalizado(2, 10, 'CANCELADO', hoy);
@@ -134,7 +134,7 @@ describe('CU-018: Ver historial pedidos', () => {
     expect(estados).not.toContain('PENDIENTE');
   });
 
-  test('CP-CU-018-06: maneja error de conexión con la BD', async () => {
+  test('maneja error de conexión con la BD', async () => {
     const pedidoRepoFalso = {
       obtenerHistorialPedidos: jest.fn().mockRejectedValue(new Error('Error de conexión')),
       contarPedidosDelPeriodo: jest.fn().mockResolvedValue({ totalMes: 0, totalSemana: 0 }),
