@@ -1,4 +1,4 @@
-const GenerarTicketPedidoUseCase = require('../application/GenerarTicketPedidoUseCase');
+const GenerarTicketPedidoUseCase = require('../../application/GenerarTicketPedidoUseCase');
 
 function crearRepositorio(pedido, detalles) {
   return {
