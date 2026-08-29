@@ -37,6 +37,39 @@ describe('Módulo CRUD productos - Aseo (CU-023)', () => {
     expect(producto.fecha_creacion).toBeDefined();
   });
 
+  test('Generar SKU automáticamente (CAT-NOM-N) cuando no se envía SKU', async () => {
+    const repoProductos = new InMemoryProductoRepository(
+      Array.from({ length: 5 }, (_, i) => ({
+        id_producto: i + 1,
+        sku: `PROD-${i + 1}`,
+        id_categoria: 1,
+        id_proveedor: 1,
+        nombre: `Producto ${i + 1}`,
+        descripcion: '',
+        precio: 10000,
+        stock: 10,
+        estado: 1
+      }))
+    );
+    const repoCategorias = new InMemoryCategoriaRepository();
+    const repoProveedores = new InMemoryProveedorRepository();
+
+    const categoria = await crearCategoria(repoCategorias, 'Cocina');
+    crearProveedor(repoProveedores, 1, 'Proveedor Test');
+
+    const useCase = new CrearProductoUseCase(repoProductos, repoCategorias, repoProveedores);
+    const producto = await useCase.ejecutar({
+      id_categoria: categoria.id_categoria,
+      id_proveedor: 1,
+      nombre: 'Licuadora',
+      descripcion: 'Potente',
+      precio: 120000,
+      stock: 15
+    });
+
+    expect(producto.sku).toBe('COC-LICU-6');
+  });
+
   test('Rechazar creación si el SKU ya existe (FA-02)', async () => {
     const { repoProductos, repoCategorias, repoProveedores, categoria } = await crearRepositorios();
 

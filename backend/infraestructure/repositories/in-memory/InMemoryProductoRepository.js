@@ -23,6 +23,10 @@ class InMemoryProductoRepository extends ProductoRepository {
     return this.productos.filter(p => p.estado === 1);
   }
 
+  async contar() {
+    return this.productos.length;
+  }
+
   async findActivosPorCategoria(id_categoria) {
     return this.productos.filter(
       p => p.estado === 1 && p.id_categoria === Number(id_categoria)

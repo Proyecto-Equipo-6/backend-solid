@@ -279,11 +279,17 @@ const requerirAdmin = crearRequerirAdmin(ROL_ADMIN);
 // --- Inyección de Dependencias para Repartidor (DIP) ---
 const pedidoRepartidorRepository = new MySQLPedidoRepartidorRepository();
 const generarTicketPedidoUseCase = new GenerarTicketPedidoUseCase(pedidoRepartidorRepository);
+const ObtenerDetallePedidoClienteUseCase = require('./backend/application/ObtenerDetallePedidoClienteUseCase');
+const obtenerDetallePedidoClienteUseCase = new ObtenerDetallePedidoClienteUseCase(
+  pedidoRepository,
+  pedidoRepartidorRepository
+);
 const pedidoController = new PedidoController({
   crearPedidoUseCase,
   verPedidosUseCase,
   cancelarPedidoUseCase,
   generarTicketPedidoUseCase,
+  obtenerDetallePedidoClienteUseCase,
   pedidoRepository,
 });
 

@@ -12,6 +12,14 @@ class ProductoRepository {
   throw new Error("Método 'findActivosPorCategoria' no implementado");
   }
   
+  async findAll() {
+    throw new Error("Método 'findAll' no implementado");
+  }
+
+  async contar() {
+    throw new Error("Método 'contar' no implementado");
+  }
+
   async findById(id) {
     throw new Error("Método 'findById' no implementado");
   }

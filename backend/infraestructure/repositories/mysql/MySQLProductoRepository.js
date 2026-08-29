@@ -39,6 +39,11 @@ class MySQLProductoRepository extends ProductoRepository {
     return rows;
   }
 
+  async contar() {
+    const [rows] = await pool.execute('SELECT COUNT(*) AS total FROM productos');
+    return Number(rows[0]?.total) || 0;
+  }
+
   async findById(id) {
     const query = `${SELECT_BASE} WHERE p.id_producto = ? LIMIT 1`;
     const [rows] = await pool.execute(query, [id]);
