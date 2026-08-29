@@ -33,7 +33,7 @@ function crearRepositorioConCategorias(categorias) {
 }
 
 describe('CU-001 Visualizar catálogo (ListarProductosPublicosUseCase)', () => {
-  it('devuelve solo los productos activos (RN-001) en orden de registro', async () => {
+  it('CP-CU-001-01: devuelve solo los productos activos (RN-001) en orden de registro', async () => {
     // Arrange
     const repositorio = crearRepositorioConProductos([
       PRODUCTO_ACTIVO,
@@ -55,7 +55,7 @@ describe('CU-001 Visualizar catálogo (ListarProductosPublicosUseCase)', () => {
     expect(resultado.totalPaginas).toBe(1);
   });
 
-  it('devuelve lista vacía si no hay productos activos', async () => {
+  it('CP-CU-001-01: devuelve lista vacía si no hay productos activos', async () => {
     // Arrange
     const repositorio = crearRepositorioConProductos([
       { ...PRODUCTO_ACTIVO, id_producto: 1, estado: 0 },
@@ -70,7 +70,7 @@ describe('CU-001 Visualizar catálogo (ListarProductosPublicosUseCase)', () => {
     expect(resultado.total).toBe(0);
   });
 
-  it('aplica paginación server-side con límite por defecto de 12 (RN-011)', async () => {
+  it('CP-RF-002.1-01: aplica paginación server-side con límite por defecto de 12 (RN-011)', async () => {
     // Arrange
     const repositorio = crearRepositorioConProductos(
       Array.from({ length: 15 }, (_, i) => ({
@@ -105,7 +105,7 @@ describe('CU-001 Visualizar catálogo (ListarProductosPublicosUseCase)', () => {
 });
 
 describe('CU-001 Visualizar catálogo (ObtenerProductoPublicoUseCase)', () => {
-  it('devuelve el producto activo con su ficha técnica', async () => {
+  it('CP-RF-002.3-01: devuelve el producto activo con su ficha técnica', async () => {
     // Arrange
     const repositorio = crearRepositorioConProductos([PRODUCTO_ACTIVO]);
     const casoUso = new ObtenerProductoPublicoUseCase(repositorio);
@@ -140,7 +140,7 @@ describe('CU-001 Visualizar catálogo (ObtenerProductoPublicoUseCase)', () => {
     await expect(casoUso.execute({ id: 1 })).rejects.toMatchObject({ status: 404 });
   });
 
-  it('CP-HU-003.3-02: devuelve garantia null cuando no hay ficha técnica', async () => {
+  it('CP-HU-002.3-02: devuelve garantia null cuando no hay ficha técnica', async () => {
     // Arrange
     const productoIncompleto = {
       ...PRODUCTO_ACTIVO,
@@ -160,7 +160,7 @@ describe('CU-001 Visualizar catálogo (ObtenerProductoPublicoUseCase)', () => {
 });
 
 describe('CU-001 Visualizar catálogo (ListarCategoriasUseCase)', () => {
-  it('devuelve solo las categorías activas', async () => {
+  it('CP-RF-002.1-01: devuelve solo las categorías activas', async () => {
     // Arrange
     const repositorio = crearRepositorioConCategorias([
       { id_categoria: 1, nombre: 'Cocina', descripcion: 'Artículos de cocina', estado: 1 },
@@ -225,7 +225,7 @@ describe('CU-001 Visualizar catálogo (filtro por categoría y búsqueda)', () =
     expect(productos).toEqual([]);
   });
 
-  it('CP-HU-003.1-01: filtra por categoría y ordena por menor precio', async () => {
+  it('CP-HU-002.1-01: filtra por categoría y ordena por menor precio', async () => {
   // Arrange
   const repositorio = crearRepositorioConProductos([
     { ...PRODUCTO_ACTIVO, id_producto: 1, nombre: 'Café Suave', id_categoria: 1, precio: 10000, estado: 1 },
@@ -248,7 +248,7 @@ describe('CU-001 Visualizar catálogo (filtro por categoría y búsqueda)', () =
   expect(resultado.items[2].id_producto).toBe(1); // 10000
 });
 
-it('CP-HU-003.1-04: filtros sin resultados devuelve array vacío y total 0', async () => {
+it('CP-HU-002.1-04: filtros sin resultados devuelve array vacío y total 0', async () => {
   // Arrange
   const repositorio = crearRepositorioConProductos([
     { ...PRODUCTO_ACTIVO, id_producto: 1, nombre: 'Juego Utensilios Pro', id_categoria: 1, precio: 250000, estado: 1 },
@@ -267,7 +267,7 @@ it('CP-HU-003.1-04: filtros sin resultados devuelve array vacío y total 0', asy
   expect(resultado.total).toBe(0);
   });
 
-  it('CP-RF-003.2-02: excluye productos inactivos de sugerencias y resultados', async () => {
+  it('CP-RF-002.2-02: excluye productos inactivos de sugerencias y resultados', async () => {
     // Arrange
     const repositorio = crearRepositorioConProductos([
       { ...PRODUCTO_ACTIVO, id_producto: 1, nombre: 'Juego Utensilios Pro', estado: 1 },
@@ -284,7 +284,7 @@ it('CP-HU-003.1-04: filtros sin resultados devuelve array vacío y total 0', asy
     expect(resultado.items[0].id_producto).toBe(1);
   });
 
-  it('CP-HU-003.2-02: búsqueda insensible a mayúsculas y tildes', async () => {
+  it('CP-HU-002.2-02: búsqueda insensible a mayúsculas y tildes', async () => {
     // Arrange
     const repositorio = crearRepositorioConProductos([
       { ...PRODUCTO_ACTIVO, id_producto: 1, nombre: 'Café' },
@@ -299,7 +299,7 @@ it('CP-HU-003.1-04: filtros sin resultados devuelve array vacío y total 0', asy
     expect(resultado.items[0].nombre).toBe('Café');
   });
 
-  it('CP-HU-003.2-03: rechaza búsqueda con menos de 3 caracteres', async () => {
+  it('CP-HU-002.2-03: rechaza búsqueda con menos de 3 caracteres', async () => {
     // Arrange
     const repositorio = crearRepositorioConProductos([PRODUCTO_ACTIVO]);
     const casoUso = new BuscarProductosUseCase(repositorio);
