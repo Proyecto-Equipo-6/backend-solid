@@ -8,34 +8,27 @@ function crearHora(hora, minutos = 0) {
   return d;
 }
 
+function pedidoDashboard(id, id_usuario, hora, overrides = {}) {
+  return crearPedido({
+    id_pedido: id,
+    id_usuario,
+    id_repartidor: 10,
+    id_metodo_pago: 1,
+    estado: 'ASIGNADO',
+    fecha_pedido: hora.toISOString(),
+    fecha_actualizacion: hora.toISOString(),
+    ...overrides
+  });
+}
+
 describe('CU-015: Ver Dashboard pedidos', () => {
   test('Dashboard con pedido activo y en cola', async () => {
     const horaTemprana = crearHora(8);
     const horaTarde = crearHora(10);
 
     const pedidos = [
-      crearPedido({
-        id_pedido: 2,
-        id_usuario: 101,
-        id_repartidor: 10,
-        id_metodo_pago: 1,
-        direccion_entrega: 'Calle 45',
-        total: 30000,
-        estado: 'ASIGNADO',
-        fecha_pedido: horaTarde.toISOString(),
-        fecha_actualizacion: horaTarde.toISOString()
-      }),
-      crearPedido({
-        id_pedido: 1,
-        id_usuario: 100,
-        id_repartidor: 10,
-        id_metodo_pago: 2,
-        direccion_entrega: 'Carrera 12',
-        total: 50000,
-        estado: 'ASIGNADO',
-        fecha_pedido: horaTemprana.toISOString(),
-        fecha_actualizacion: horaTemprana.toISOString()
-      })
+      pedidoDashboard(2, 101, horaTarde, { direccion_entrega: 'Calle 45', total: 30000 }),
+      pedidoDashboard(1, 100, horaTemprana, { id_metodo_pago: 2, direccion_entrega: 'Carrera 12' })
     ];
 
     const repo = new InMemoryPedidoRepartidorRepository(pedidos);
@@ -63,28 +56,8 @@ describe('CU-015: Ver Dashboard pedidos', () => {
     const mismaHora = crearHora(9);
 
     const pedidos = [
-      crearPedido({
-        id_pedido: 1,
-        id_usuario: 100,
-        id_repartidor: 10,
-        id_metodo_pago: 1,
-        direccion_entrega: 'Calle 1',
-        total: 50000,
-        estado: 'ASIGNADO',
-        fecha_pedido: mismaHora.toISOString(),
-        fecha_actualizacion: mismaHora.toISOString()
-      }),
-      crearPedido({
-        id_pedido: 2,
-        id_usuario: 101,
-        id_repartidor: 10,
-        id_metodo_pago: 1,
-        direccion_entrega: 'Calle 2',
-        total: 30000,
-        estado: 'ASIGNADO',
-        fecha_pedido: mismaHora.toISOString(), // misma prioridad
-        fecha_actualizacion: mismaHora.toISOString()
-      })
+      pedidoDashboard(1, 100, mismaHora, { direccion_entrega: 'Calle 1' }),
+      pedidoDashboard(2, 101, mismaHora, { direccion_entrega: 'Calle 2', total: 30000 })
     ];
 
     const repo = new InMemoryPedidoRepartidorRepository(pedidos);
@@ -101,28 +74,8 @@ describe('CU-015: Ver Dashboard pedidos', () => {
     const hora = crearHora(9);
 
     const pedidos = [
-      crearPedido({
-        id_pedido: 1,
-        id_usuario: 100,
-        id_repartidor: 10,
-        id_metodo_pago: 1,
-        direccion_entrega: 'Calle 123',
-        total: 50000,
-        estado: 'ASIGNADO',
-        fecha_pedido: hora.toISOString(),
-        fecha_actualizacion: hora.toISOString()
-      }),
-      crearPedido({
-        id_pedido: 2,
-        id_usuario: 101,
-        id_repartidor: 20,
-        id_metodo_pago: 2,
-        direccion_entrega: 'Carrera 45',
-        total: 30000,
-        estado: 'ASIGNADO',
-        fecha_pedido: hora.toISOString(),
-        fecha_actualizacion: hora.toISOString()
-      })
+      pedidoDashboard(1, 100, hora),
+      pedidoDashboard(2, 101, hora, { id_repartidor: 20, id_metodo_pago: 2, direccion_entrega: 'Carrera 45', total: 30000 })
     ];
 
     const repo = new InMemoryPedidoRepartidorRepository(pedidos);

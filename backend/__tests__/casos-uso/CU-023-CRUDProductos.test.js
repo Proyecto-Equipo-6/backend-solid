@@ -16,20 +16,18 @@ async function crearRepositorios({ conCategoria = true, conProveedor = true } = 
   return { repoProductos, repoCategorias, repoProveedores, categoria };
 }
 
+function datosProducto(catId, overrides) {
+  return { id_categoria: catId, id_proveedor: 1, ...overrides };
+}
+
 describe('Módulo CRUD productos - Aseo (CU-023)', () => {
   test('Crear producto feliz con SKU único, categoría y proveedor existentes, sin imagen por defecto', async () => {
     const { repoProductos, repoCategorias, repoProveedores, categoria } = await crearRepositorios();
 
     const useCase = new CrearProductoUseCase(repoProductos, repoCategorias, repoProveedores);
-    const producto = await useCase.ejecutar({
-      sku: 'ASE-JAB-01',
-      id_categoria: categoria.id_categoria,
-      id_proveedor: 1,
-      nombre: 'Jabón Líquido',
-      descripcion: 'Rinde 5 litros',
-      precio: 15000,
-      stock: 50
-    });
+    const producto = await useCase.ejecutar(datosProducto(categoria.id_categoria, {
+      sku: 'ASE-JAB-01', nombre: 'Jabón Líquido', descripcion: 'Rinde 5 litros', precio: 15000, stock: 50
+    }));
 
     expect(producto.id_producto).toBe(1);
     expect(producto.sku).toBe('ASE-JAB-01');
@@ -43,27 +41,16 @@ describe('Módulo CRUD productos - Aseo (CU-023)', () => {
     const { repoProductos, repoCategorias, repoProveedores, categoria } = await crearRepositorios();
 
     const useCase = new CrearProductoUseCase(repoProductos, repoCategorias, repoProveedores);
+    const cat = categoria.id_categoria;
 
-    await useCase.ejecutar({
-      sku: 'ASE-DET-02',
-      id_categoria: categoria.id_categoria,
-      id_proveedor: 1,
-      nombre: 'Detergente en Polvo',
-      descripcion: 'Bolsa 3 kg',
-      precio: 25000,
-      stock: 30
-    });
+    await useCase.ejecutar(datosProducto(cat, {
+      sku: 'ASE-DET-02', nombre: 'Detergente en Polvo', descripcion: 'Bolsa 3 kg', precio: 25000, stock: 30
+    }));
 
     await expect(
-      useCase.ejecutar({
-        sku: 'ASE-DET-02',
-        id_categoria: categoria.id_categoria,
-        id_proveedor: 1,
-        nombre: 'Detergente Líquido',
-        descripcion: 'Botella 2 L',
-        precio: 20000,
-        stock: 20
-      })
+      useCase.ejecutar(datosProducto(cat, {
+        sku: 'ASE-DET-02', nombre: 'Detergente Líquido', descripcion: 'Botella 2 L', precio: 20000, stock: 20
+      }))
     ).rejects.toThrow('Ya existe un producto con ese SKU');
   });
 
@@ -71,27 +58,16 @@ describe('Módulo CRUD productos - Aseo (CU-023)', () => {
     const { repoProductos, repoCategorias, repoProveedores, categoria } = await crearRepositorios();
 
     const useCase = new CrearProductoUseCase(repoProductos, repoCategorias, repoProveedores);
+    const cat = categoria.id_categoria;
 
-    await useCase.ejecutar({
-      sku: 'ASE-POL-03',
-      id_categoria: categoria.id_categoria,
-      id_proveedor: 1,
-      nombre: 'Detergente en Polvo',
-      descripcion: 'Bolsa 3 kg',
-      precio: 25000,
-      stock: 30
-    });
+    await useCase.ejecutar(datosProducto(cat, {
+      sku: 'ASE-POL-03', nombre: 'Detergente en Polvo', descripcion: 'Bolsa 3 kg', precio: 25000, stock: 30
+    }));
 
     await expect(
-      useCase.ejecutar({
-        sku: 'ASE-POL-04',
-        id_categoria: categoria.id_categoria,
-        id_proveedor: 1,
-        nombre: 'Detergente en Polvo',
-        descripcion: 'Bolsa 5 kg',
-        precio: 40000,
-        stock: 15
-      })
+      useCase.ejecutar(datosProducto(cat, {
+        sku: 'ASE-POL-04', nombre: 'Detergente en Polvo', descripcion: 'Bolsa 5 kg', precio: 40000, stock: 15
+      }))
     ).rejects.toThrow('Ya existe un producto con ese nombre');
   });
 
@@ -99,29 +75,18 @@ describe('Módulo CRUD productos - Aseo (CU-023)', () => {
     const { repoProductos, repoCategorias, repoProveedores, categoria } = await crearRepositorios();
 
     const useCase = new CrearProductoUseCase(repoProductos, repoCategorias, repoProveedores);
+    const cat = categoria.id_categoria;
 
     await expect(
-      useCase.ejecutar({
-        sku: 'ASE-VID-05',
-        id_categoria: categoria.id_categoria,
-        id_proveedor: 1,
-        nombre: 'Limpiavidrios',
-        descripcion: 'Frasco 500 ml',
-        precio: 0,
-        stock: 10
-      })
+      useCase.ejecutar(datosProducto(cat, {
+        sku: 'ASE-VID-05', nombre: 'Limpiavidrios', descripcion: 'Frasco 500 ml', precio: 0, stock: 10
+      }))
     ).rejects.toThrow('El precio debe ser mayor a cero');
 
     await expect(
-      useCase.ejecutar({
-        sku: 'ASE-CLO-06',
-        id_categoria: categoria.id_categoria,
-        id_proveedor: 1,
-        nombre: 'Cloro',
-        descripcion: 'Galón 1 L',
-        precio: 5000,
-        stock: -2
-      })
+      useCase.ejecutar(datosProducto(cat, {
+        sku: 'ASE-CLO-06', nombre: 'Cloro', descripcion: 'Galón 1 L', precio: 5000, stock: -2
+      }))
     ).rejects.toThrow('El stock no puede ser negativo');
   });
 
@@ -131,15 +96,9 @@ describe('Módulo CRUD productos - Aseo (CU-023)', () => {
     const useCase = new CrearProductoUseCase(repoProductos, repoCategorias, repoProveedores);
 
     await expect(
-      useCase.ejecutar({
-        sku: 'ASE-DES-07',
-        id_categoria: 999,
-        id_proveedor: 1,
-        nombre: 'Desinfectante',
-        descripcion: 'Aroma floral',
-        precio: 12000,
-        stock: 40
-      })
+      useCase.ejecutar(datosProducto(999, {
+        sku: 'ASE-DES-07', nombre: 'Desinfectante', descripcion: 'Aroma floral', precio: 12000, stock: 40
+      }))
     ).rejects.toThrow('La categoría asociada no existe');
   });
 
@@ -149,15 +108,9 @@ describe('Módulo CRUD productos - Aseo (CU-023)', () => {
     const useCase = new CrearProductoUseCase(repoProductos, repoCategorias, repoProveedores);
 
     await expect(
-      useCase.ejecutar({
-        sku: 'ASE-DES-08',
-        id_categoria: categoria.id_categoria,
-        id_proveedor: 999,
-        nombre: 'Desinfectante',
-        descripcion: 'Aroma floral',
-        precio: 12000,
-        stock: 40
-      })
+      useCase.ejecutar(datosProducto(categoria.id_categoria, {
+        sku: 'ASE-DES-08', nombre: 'Desinfectante', descripcion: 'Aroma floral', precio: 12000, stock: 40, id_proveedor: 999
+      }))
     ).rejects.toThrow('El proveedor asociado no existe');
   });
 
@@ -166,27 +119,15 @@ describe('Módulo CRUD productos - Aseo (CU-023)', () => {
 
     const crear = new CrearProductoUseCase(repoProductos, repoCategorias, repoProveedores);
     const editar = new EditarProductoUseCase(repoProductos, repoCategorias, repoProveedores);
+    const cat = categoria.id_categoria;
 
-    const producto = await crear.ejecutar({
-      sku: 'ASE-CEP-09',
-      id_categoria: categoria.id_categoria,
-      id_proveedor: 1,
-      nombre: 'Cepillo de dientes',
-      descripcion: 'Suave',
-      precio: 5000,
-      stock: 100
-    });
+    const producto = await crear.ejecutar(datosProducto(cat, {
+      sku: 'ASE-CEP-09', nombre: 'Cepillo de dientes', descripcion: 'Suave', precio: 5000, stock: 100
+    }));
 
-    const editado = await editar.ejecutar(producto.id_producto, {
-      sku: 'ASE-CEP-09',
-      id_categoria: categoria.id_categoria,
-      id_proveedor: 1,
-      nombre: 'Cepillo de dientes Premium',
-      descripcion: 'Suave con protector',
-      precio: 7000,
-      stock: 80,
-      estado: 'Inactivo'
-    });
+    const editado = await editar.ejecutar(producto.id_producto, datosProducto(cat, {
+      sku: 'ASE-CEP-09', nombre: 'Cepillo de dientes Premium', descripcion: 'Suave con protector', precio: 7000, stock: 80, estado: 'Inactivo'
+    }));
 
     expect(editado.nombre).toBe('Cepillo de dientes Premium');
     expect(editado.estado).toBe(0);
@@ -196,15 +137,9 @@ describe('Módulo CRUD productos - Aseo (CU-023)', () => {
     const { repoProductos, repoCategorias, repoProveedores, categoria } = await crearRepositorios();
 
     const crear = new CrearProductoUseCase(repoProductos, repoCategorias, repoProveedores);
-    const producto = await crear.ejecutar({
-      sku: 'ASE-ESC-10',
-      id_categoria: categoria.id_categoria,
-      id_proveedor: 1,
-      nombre: 'Escoba',
-      descripcion: 'Cerdas suaves',
-      precio: 8000,
-      stock: 20
-    });
+    const producto = await crear.ejecutar(datosProducto(categoria.id_categoria, {
+      sku: 'ASE-ESC-10', nombre: 'Escoba', descripcion: 'Cerdas suaves', precio: 8000, stock: 20
+    }));
 
     // Simulamos que tiene historial de ventas
     repoProductos.marcarConHistorial(producto.id_producto);
