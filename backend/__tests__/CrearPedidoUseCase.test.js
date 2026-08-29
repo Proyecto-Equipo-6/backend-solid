@@ -117,4 +117,17 @@ describe('CrearPedidoUseCase', () => {
     subtotal: 500000,
   });
   });
+
+  it('CP-CU-012-03: maneja error de conexión o fallo de transacción', async () => {
+    const carritoRepository = crearCarritoConProducto(PRODUCTO, 1);
+    // Repositorio falso cuyo crearPedidoConTransaccion falla (simula error de BD / rollback)
+    const pedidoRepositoryFalso = {
+      crearPedidoConTransaccion: jest.fn().mockRejectedValue(new Error('Error de conexión')),
+    };
+    const casoUso = new CrearPedidoUseCase(carritoRepository, pedidoRepositoryFalso);
+
+    await expect(
+      casoUso.execute(CLIENTE, { direccionEntrega: 'Calle 10' })
+    ).rejects.toThrow('Error de conexión');
+  });
 });

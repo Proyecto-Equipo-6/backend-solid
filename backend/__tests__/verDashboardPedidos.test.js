@@ -134,4 +134,23 @@ describe('CU-015: Ver Dashboard pedidos', () => {
     expect(dashboard.pedidoActivo.id_pedido).toBe(1);
     expect(dashboard.pedidosEnCola).toHaveLength(0);
   });
+
+  test('CP-CU-015-04: maneja error de conexión con la BD', async () => {
+    const pedidoRepoFalso = {
+      obtenerPedidosDelDia: jest.fn().mockRejectedValue(new Error('Error de conexión')),
+    };
+    const useCase = new VerDashboardPedidosUseCase(pedidoRepoFalso);
+
+    await expect(useCase.ejecutar(10)).rejects.toThrow('Error de conexión');
+  });
+
+  test('CP-CU-015-05: maneja excepción por sesión expirada', async () => {
+    // Simula que el repartidor ya no tiene sesión válida (error de autenticación)
+    const pedidoRepoFalso = {
+      obtenerPedidosDelDia: jest.fn().mockRejectedValue(new Error('Su sesión ha expirado')),
+    };
+    const useCase = new VerDashboardPedidosUseCase(pedidoRepoFalso);
+
+    await expect(useCase.ejecutar(10)).rejects.toThrow('Su sesión ha expirado');
+  });
 });

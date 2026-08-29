@@ -80,4 +80,16 @@ describe('CU-014 Cancelar pedido (CancelarPedidoUseCase)', () => {
     expect(error.status).toBe(400);
     expect(error.message).toBe('El motivo de cancelación no puede superar los 200 caracteres');
   });
+
+  it('CP-CU-014-04: maneja error de conexión al cancelar', async () => {
+    // Repositorio falso cuyo obtenerPedidoPorId falla (simula error de BD)
+    const pedidoRepositoryFalso = {
+      obtenerPedidoPorId: jest.fn().mockRejectedValue(new Error('Error de conexión')),
+    };
+    const casoUso = new CancelarPedidoUseCase(pedidoRepositoryFalso);
+
+    await expect(
+      casoUso.execute(CLIENTE, { idPedido: 1, motivo: 'Ya no lo necesito' })
+    ).rejects.toThrow('Error de conexión');
+  });
 });

@@ -91,4 +91,13 @@ describe('CU-013 Ver pedidos (VerPedidosUseCase)', () => {
     const pagina2 = await casoUso.execute(CLIENTE, { pagina: 2, limite: 10 });
     expect(pagina2.pedidos).toHaveLength(5);
   });
+
+  it('CP-CU-013-08: maneja error de conexión al cargar los pedidos', async () => {
+    const pedidoRepositoryFalso = {
+      obtenerPedidosPorUsuario: jest.fn().mockRejectedValue(new Error('Error de conexión')),
+    };
+    const casoUso = new VerPedidosUseCase(pedidoRepositoryFalso);
+
+    await expect(casoUso.execute(CLIENTE)).rejects.toThrow('Error de conexión');
+  });
 });
