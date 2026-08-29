@@ -30,10 +30,13 @@ describe('CU-031 GenerarTicketPedidoUseCase', () => {
     { id_producto: 2, producto_nombre: 'Control remoto', cantidad: 1, precio_unitario: 50000, subtotal: 50000 },
   ];
 
-  it('CP-CU-031-01: genera el recibo con la información del establecimiento', async () => {
-    const casoUso = new GenerarTicketPedidoUseCase(crearRepositorio(PEDIDO, DETALLES));
+  async function generarTicket(pedido = PEDIDO, detalles = DETALLES) {
+    const casoUso = new GenerarTicketPedidoUseCase(crearRepositorio(pedido, detalles));
+    return casoUso.execute(pedido.id_pedido);
+  }
 
-    const resultado = await casoUso.execute(42);
+  it('CP-CU-031-01: genera el recibo con la información del establecimiento', async () => {
+    const resultado = await generarTicket();
 
     expect(resultado.nombreArchivo).toBe('Ticket_Pedido_42.pdf');
     expect(resultado.html).toContain('NEXBIT');
@@ -42,9 +45,7 @@ describe('CU-031 GenerarTicketPedidoUseCase', () => {
   });
 
   it('CP-CU-031-02: lista los artículos con cantidad, unitario y subtotal', async () => {
-    const casoUso = new GenerarTicketPedidoUseCase(crearRepositorio(PEDIDO, DETALLES));
-
-    const resultado = await casoUso.execute(42);
+    const resultado = await generarTicket();
 
     expect(resultado.html).toContain('Televisor 43"');
     expect(resultado.html).toContain('$200.000');
@@ -54,9 +55,7 @@ describe('CU-031 GenerarTicketPedidoUseCase', () => {
   });
 
   it('CP-CU-031-03: resume el pago con TOTAL, Efectivo y Cambio', async () => {
-    const casoUso = new GenerarTicketPedidoUseCase(crearRepositorio(PEDIDO, DETALLES));
-
-    const resultado = await casoUso.execute(42);
+    const resultado = await generarTicket();
 
     expect(resultado.html).toContain('TOTAL');
     expect(resultado.html).toContain('$250.000');
@@ -66,9 +65,7 @@ describe('CU-031 GenerarTicketPedidoUseCase', () => {
   });
 
   it('CP-CU-031-04: no incluye la sección bancaria (pago contraentrega)', async () => {
-    const casoUso = new GenerarTicketPedidoUseCase(crearRepositorio(PEDIDO, DETALLES));
-
-    const resultado = await casoUso.execute(42);
+    const resultado = await generarTicket();
 
     expect(resultado.html).not.toContain('Tarjeta bancaria');
     expect(resultado.html).not.toContain('Código de aprobación');
