@@ -44,7 +44,7 @@ describe('CU-013 Ver detalle pedido cliente (ObtenerDetallePedidoClienteUseCase)
     return { pedidoRepo, detallesRepo };
   }
 
-  it('CP-CU-013-09: devuelve el detalle del pedido propio con sus productos e imagen', async () => {
+  it('devuelve el detalle del pedido propio con sus productos e imagen', async () => {
     const { pedidoRepo, detallesRepo } = crearRepositorios();
     const casoUso = new ObtenerDetallePedidoClienteUseCase(pedidoRepo, detallesRepo);
 
@@ -60,14 +60,14 @@ describe('CU-013 Ver detalle pedido cliente (ObtenerDetallePedidoClienteUseCase)
     });
   });
 
-  it('CP-CU-013-10: lanza ErrorNoEncontrado si el pedido no existe', async () => {
+  it('lanza ErrorNoEncontrado si el pedido no existe', async () => {
     const { pedidoRepo, detallesRepo } = crearRepositorios();
     const casoUso = new ObtenerDetallePedidoClienteUseCase(pedidoRepo, detallesRepo);
 
     await expect(casoUso.execute(CLIENTE, 999)).rejects.toThrow('Pedido no encontrado');
   });
 
-  it('CP-CU-013-11: aislamiento por usuario, no ve pedidos ajenos (RN-049)', async () => {
+  it('aislamiento por usuario, no ve pedidos ajenos', async () => {
     const { pedidoRepo, detallesRepo } = crearRepositorios();
     const casoUso = new ObtenerDetallePedidoClienteUseCase(pedidoRepo, detallesRepo);
 

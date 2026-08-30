@@ -63,4 +63,13 @@ describe('CU-011 Ver carrito (VerCarritoUseCase)', () => {
     expect(segundaVista.items).toHaveLength(1);
     expect(segundaVista.items[0].idProducto).toBe(1);
   });
+
+  it('maneja error de conexión al cargar el carrito', async () => {
+    const carritoRepositoryFalso = {
+      obtenerCarrito: jest.fn().mockRejectedValue(new Error('Error de conexión')),
+    };
+    const casoUso = new VerCarritoUseCase(carritoRepositoryFalso);
+
+    await expect(casoUso.execute(CLIENTE)).rejects.toThrow('Error de conexión');
+  });
 });

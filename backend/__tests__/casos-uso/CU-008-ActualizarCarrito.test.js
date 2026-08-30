@@ -35,7 +35,7 @@ function crearCasoUso(carritoRepository, productoRepository) {
 }
 
 describe('CU-008 Actualizar producto añadido al carrito (ActualizarCarritoUseCase)', () => {
-  it('CP-CU-008-01 / CP-RF-004.3-01 / CP-HU-004.3-01: actualiza cantidad y recalcula total', async () => {
+  it('actualiza cantidad y recalcula total', async () => {
     // Arrange
     const { carritoRepository, productoRepository } = crearRepositorios(1);
     const casoUso = crearCasoUso(carritoRepository, productoRepository);
@@ -50,7 +50,7 @@ describe('CU-008 Actualizar producto añadido al carrito (ActualizarCarritoUseCa
     expect(resultado.carrito.vacio).toBe(false);
   });
 
-  it('CP-CU-008-03: rechaza cantidad 0 y sugiere eliminar', async () => {
+  it('rechaza cantidad 0 y sugiere eliminar', async () => {
     // Arrange
     const { carritoRepository, productoRepository } = crearRepositorios(1);
     const casoUso = crearCasoUso(carritoRepository, productoRepository);
@@ -64,7 +64,7 @@ describe('CU-008 Actualizar producto añadido al carrito (ActualizarCarritoUseCa
     ).rejects.toThrow(/La cantidad mínima es 1/);
   });
 
-  it('CP-CU-008-03 / CP-HU-004.3-03: rechaza negativos y decimales', async () => {
+  it('rechaza negativos y decimales', async () => {
     // Arrange
     const { carritoRepository, productoRepository } = crearRepositorios(1);
     const casoUso = crearCasoUso(carritoRepository, productoRepository);
@@ -94,7 +94,7 @@ describe('CU-008 Actualizar producto añadido al carrito (ActualizarCarritoUseCa
     ).rejects.toThrow('Producto no encontrado');
   });
 
-  it('CP-CU-008-02 / CP-RF-004.3-02: rechaza cantidad mayor al stock', async () => {
+  it('rechaza cantidad mayor al stock', async () => {
     // Arrange
     const { carritoRepository, productoRepository } = crearRepositorios(1);
     const casoUso = crearCasoUso(carritoRepository, productoRepository);
@@ -139,7 +139,7 @@ describe('CU-008 Actualizar producto añadido al carrito (ActualizarCarritoUseCa
     expect(carritoCliente.items).toHaveLength(0);
   });
 
-  it('CP-CU-008-05: maneja error de conexión al actualizar', async () => {
+  it('maneja error de conexión al actualizar', async () => {
     // Arrange
     const { productoRepository } = crearRepositorios(1);
     const carritoFalso = {

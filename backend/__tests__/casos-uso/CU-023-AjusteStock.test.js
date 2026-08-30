@@ -1,5 +1,5 @@
-import InMemoryProductoRepository from '../infraestructure/repositories/in-memory/InMemoryProductoRepository.js';
-import AjustarStockProductoUseCase from '../application/ajustarStockProductoUseCase.js';
+import InMemoryProductoRepository from '../../infraestructure/repositories/in-memory/InMemoryProductoRepository.js';
+import AjustarStockProductoUseCase from '../../application/ajustarStockProductoUseCase.js';
 
 describe('Módulo Ajuste de Stock (CU-023)', () => {
   const crearProducto = (id, stock) => ({
@@ -17,7 +17,7 @@ describe('Módulo Ajuste de Stock (CU-023)', () => {
     fecha_creacion: new Date().toISOString()
   });
 
-  test('CP-CU-023-01: Ajustar stock exitosamente', async () => {
+  test('Ajustar stock exitosamente', async () => {
     const repo = new InMemoryProductoRepository([crearProducto(1, 50)]);
     const useCase = new AjustarStockProductoUseCase(repo);
 
@@ -29,7 +29,7 @@ describe('Módulo Ajuste de Stock (CU-023)', () => {
     expect(resultado.motivo).toBe('Reposición de inventario');
   });
 
-  test('CP-CU-023-02: Rechazar si la cantidad no es un número', async () => {
+  test('Rechazar si la cantidad no es un número', async () => {
     const repo = new InMemoryProductoRepository([crearProducto(1, 50)]);
     const useCase = new AjustarStockProductoUseCase(repo);
 
@@ -38,7 +38,7 @@ describe('Módulo Ajuste de Stock (CU-023)', () => {
     ).rejects.toThrow('La cantidad nueva debe ser un número válido');
   });
 
-  test('CP-CU-023-03: Rechazar si falta el motivo', async () => {
+  test('Rechazar si falta el motivo', async () => {
     const repo = new InMemoryProductoRepository([crearProducto(1, 50)]);
     const useCase = new AjustarStockProductoUseCase(repo);
 
@@ -47,7 +47,7 @@ describe('Módulo Ajuste de Stock (CU-023)', () => {
     ).rejects.toThrow('El motivo del ajuste es obligatorio');
   });
 
-  test('CP-CU-023-04: Rechazar si el producto no existe', async () => {
+  test('Rechazar si el producto no existe', async () => {
     const repo = new InMemoryProductoRepository([crearProducto(1, 50)]);
     const useCase = new AjustarStockProductoUseCase(repo);
 
@@ -56,7 +56,7 @@ describe('Módulo Ajuste de Stock (CU-023)', () => {
     ).rejects.toThrow('Producto no encontrado');
   });
 
-  test('CP-CU-023-05: Permitir stock en 0 (producto agotado)', async () => {
+  test('Permitir stock en 0 (producto agotado)', async () => {
     const repo = new InMemoryProductoRepository([crearProducto(1, 50)]);
     const useCase = new AjustarStockProductoUseCase(repo);
 

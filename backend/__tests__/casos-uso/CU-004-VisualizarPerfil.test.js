@@ -1,37 +1,6 @@
 import bcrypt from 'bcrypt';
 import ObtenerPerfilUseCase from '../../application/ObtenerPerfilUseCase';
-import InMemoryUserRepository from '../../infraestructure/repositories/in-memory/InMemoryUserRepository';
-
-function crearRepositorio() {
-  return new InMemoryUserRepository();
-}
-
-async function crearUsuario(repositorio, {
-  id = 1,
-  id_rol = 2,
-  nombre_apellido = 'Ana Torres',
-  tipo_documento = 'CC',
-  numero_documento = '1000000001',
-  email = 'ana@example.com',
-  password = 'Abcd1234',
-  telefono = '3001234567',
-  direccion = 'Calle 10 # 5-20, Medellín',
-  activo = 1,
-} = {}) {
-  const usuario = {
-    id,
-    id_rol,
-    nombre_apellido,
-    tipo_documento,
-    numero_documento,
-    email,
-    password: await bcrypt.hash(password, 4),
-    telefono,
-    direccion,
-    activo,
-  };
-  return repositorio.save(usuario);
-}
+import { crearRepositorio, crearUsuario } from '../helpers/usuarios';
 
 function crearCasoUso(repositorio) {
   return new ObtenerPerfilUseCase(repositorio);
@@ -43,11 +12,11 @@ describe('CU-004 Visualizar perfil (ObtenerPerfilUseCase)', () => {
 
   beforeEach(async () => {
     repositorio = crearRepositorio();
-    await crearUsuario(repositorio);
+    await crearUsuario(repositorio, { email: 'ana@example.com', password: 'Abcd1234' });
     casoUso = crearCasoUso(repositorio);
   });
 
-  it('CP-CU-004-01 / CP-CU-004-02: devuelve los datos del perfil sin contraseña', async () => {
+  it('devuelve los datos del perfil sin contraseña', async () => {
     // Arrange
     const idUsuario = 1;
 
@@ -60,7 +29,7 @@ describe('CU-004 Visualizar perfil (ObtenerPerfilUseCase)', () => {
       id_rol: 2,
       nombre_apellido: 'Ana Torres',
       tipo_documento: 'CC',
-      numero_documento: '1000000001',
+      numero_documento: '100000000',
       email: 'ana@example.com',
       telefono: '3001234567',
       direccion: 'Calle 10 # 5-20, Medellín',
@@ -69,7 +38,7 @@ describe('CU-004 Visualizar perfil (ObtenerPerfilUseCase)', () => {
     expect(perfil.password).toBeUndefined();
   });
 
-  it('CP-CU-004-03: devuelve perfil sin datos opcionales (perfil incompleto)', async () => {
+  it('devuelve perfil sin datos opcionales (perfil incompleto)', async () => {
     // Arrange
     const repositorioIncompleto = crearRepositorio();
     await repositorioIncompleto.save({
@@ -95,7 +64,7 @@ describe('CU-004 Visualizar perfil (ObtenerPerfilUseCase)', () => {
     expect(perfil.nombre_apellido).toBe('Usuario Incompleto');
   });
 
-  it('CP-CU-004-04: lanza 401 si la sesión expiró (usuario no existe)', async () => {
+  it('lanza 401 si la sesión expiró (usuario no existe)', async () => {
     // Arrange
     const idUsuarioInexistente = 999;
 
@@ -108,7 +77,7 @@ describe('CU-004 Visualizar perfil (ObtenerPerfilUseCase)', () => {
     ).rejects.toThrow('Su sesión ha expirado. Inicie sesión nuevamente');
   });
 
-  it('CP-CU-004-05: maneja error de conexión con la BD', async () => {
+  it('maneja error de conexión con la BD', async () => {
     // Arrange
     const repositorioFalso = {
       findById: jest.fn().mockRejectedValue(new Error('Error de conexión')),

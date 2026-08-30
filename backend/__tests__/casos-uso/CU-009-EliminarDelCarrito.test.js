@@ -25,7 +25,7 @@ function crearCasoUso(carritoRepository) {
 }
 
 describe('CU-009 Eliminar producto del carrito (EliminarDelCarritoUseCase)', () => {
-  it('CP-CU-009-01 / CP-RF-004.4-01 / CP-HU-004.4-01: elimina un producto y recalcula total', async () => {
+  it('elimina un producto y recalcula total', async () => {
     // Arrange
     const carritoRepository = crearRepositorioConProducto(2);
     const casoUso = crearCasoUso(carritoRepository);
@@ -40,7 +40,7 @@ describe('CU-009 Eliminar producto del carrito (EliminarDelCarritoUseCase)', () 
     expect(resultado.carrito.vacio).toBe(true);
   });
 
-  it('CP-CU-009-02 / CP-HU-004.4-03: eliminar el último producto muestra carrito vacío', async () => {
+  it('eliminar el último producto muestra carrito vacío', async () => {
     // Arrange
     const carritoRepository = crearRepositorioConProducto(1);
     const casoUso = crearCasoUso(carritoRepository);
@@ -53,7 +53,7 @@ describe('CU-009 Eliminar producto del carrito (EliminarDelCarritoUseCase)', () 
     expect(resultado.carrito.items).toEqual([]);
   });
 
-  it('CP-CU-009-04: maneja error de conexión al eliminar', async () => {
+  it('maneja error de conexión al eliminar', async () => {
     // Arrange
     const carritoRepositoryFalso = {
       obtenerCantidad: jest.fn().mockResolvedValue(1),
@@ -67,7 +67,7 @@ describe('CU-009 Eliminar producto del carrito (EliminarDelCarritoUseCase)', () 
     ).rejects.toThrow('Error de conexión');
   });
 
-  it('CP-CU-009-05: rechaza eliminar un producto que no está en el carrito', async () => {
+  it('rechaza eliminar un producto que no está en el carrito', async () => {
     // Arrange
     const carritoRepository = crearRepositorioConProducto(1);
     const casoUso = crearCasoUso(carritoRepository);

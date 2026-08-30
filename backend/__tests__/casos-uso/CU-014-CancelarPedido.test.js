@@ -23,7 +23,7 @@ describe('CU-014 Cancelar pedido (CancelarPedidoUseCase)', () => {
     return repo;
   }
 
-  it('CP-CU-014-01: cancela un pedido PENDIENTE con motivo (RN-054, RN-056)', async () => {
+  it('cancela un pedido PENDIENTE con motivo (RN-054, RN-056)', async () => {
     const repo = crearRepositorio([crearPedido(1, 2)]);
     const casoUso = new CancelarPedidoUseCase(repo);
 
@@ -33,7 +33,7 @@ describe('CU-014 Cancelar pedido (CancelarPedidoUseCase)', () => {
     expect(resultado.pedido.motivo_cancelacion).toBe('Ya no lo necesito');
   });
 
-  it('CP-CU-014-02: exige motivo obligatorio (FA-001, RN-056)', async () => {
+  it('exige motivo obligatorio (FA-001, RN-056)', async () => {
     const repo = crearRepositorio([crearPedido(1, 2)]);
     const casoUso = new CancelarPedidoUseCase(repo);
 
@@ -45,7 +45,7 @@ describe('CU-014 Cancelar pedido (CancelarPedidoUseCase)', () => {
     expect(error.message).toBe('Debes indicar el motivo de la cancelación');
   });
 
-  it('CP-CU-014-03: impide cancelar un pedido que no está PENDIENTE (FE-001, RN-054)', async () => {
+  it('impide cancelar un pedido que no está PENDIENTE (FE-001, RN-054)', async () => {
     const repo = crearRepositorio([crearPedido(1, 2, 'CONFIRMADO')]);
     const casoUso = new CancelarPedidoUseCase(repo);
 
@@ -57,7 +57,7 @@ describe('CU-014 Cancelar pedido (CancelarPedidoUseCase)', () => {
     expect(error.message).toBe('No se puede cancelar un pedido que ya no está PENDIENTE');
   });
 
-  it('CP-CU-014-04: impide cancelar un pedido de otro usuario (RN-049)', async () => {
+  it('impide cancelar un pedido de otro usuario (RN-049)', async () => {
     const repo = crearRepositorio([crearPedido(1, 99)]);
     const casoUso = new CancelarPedidoUseCase(repo);
 
@@ -69,7 +69,7 @@ describe('CU-014 Cancelar pedido (CancelarPedidoUseCase)', () => {
     expect(error.message).toBe('Pedido no encontrado');
   });
 
-  it('CP-CU-014-05: rechaza motivo mayor a 200 caracteres (RN-057)', async () => {
+  it('rechaza motivo mayor a 200 caracteres (RN-057)', async () => {
     const repo = crearRepositorio([crearPedido(1, 2)]);
     const casoUso = new CancelarPedidoUseCase(repo);
 
@@ -79,5 +79,17 @@ describe('CU-014 Cancelar pedido (CancelarPedidoUseCase)', () => {
 
     expect(error.status).toBe(400);
     expect(error.message).toBe('El motivo de cancelación no puede superar los 200 caracteres');
+  });
+
+  it('maneja error de conexión al cancelar', async () => {
+    // Repositorio falso cuyo obtenerPedidoPorId falla (simula error de BD)
+    const pedidoRepositoryFalso = {
+      obtenerPedidoPorId: jest.fn().mockRejectedValue(new Error('Error de conexión')),
+    };
+    const casoUso = new CancelarPedidoUseCase(pedidoRepositoryFalso);
+
+    await expect(
+      casoUso.execute(CLIENTE, { idPedido: 1, motivo: 'Ya no lo necesito' })
+    ).rejects.toThrow('Error de conexión');
   });
 });

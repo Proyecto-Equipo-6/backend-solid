@@ -23,7 +23,7 @@ describe('CU-013 Ver pedidos (VerPedidosUseCase)', () => {
     return repo;
   }
 
-  it('CP-CU-013-01: lista los pedidos del cliente ordenados por fecha descendente (RN-051)', async () => {
+  it('lista los pedidos del cliente ordenados por fecha descendente (RN-051)', async () => {
     const repo = crearRepositorio([
       crearPedido(1, 2, 'PENDIENTE', '2026-08-10T10:00:00'),
       crearPedido(2, 2, 'ENTREGADO', '2026-08-15T10:00:00'),
@@ -39,7 +39,7 @@ describe('CU-013 Ver pedidos (VerPedidosUseCase)', () => {
     expect(resultado.vacio).toBe(false);
   });
 
-  it('CP-CU-013-02: muestra vista vacía cuando no hay pedidos (FA-001)', async () => {
+  it('muestra vista vacía cuando no hay pedidos (FA-001)', async () => {
     const repo = crearRepositorio([]);
     const casoUso = new VerPedidosUseCase(repo);
 
@@ -50,7 +50,7 @@ describe('CU-013 Ver pedidos (VerPedidosUseCase)', () => {
     expect(resultado.mensaje).toBe('No tienes pedidos aún');
   });
 
-  it('CP-CU-013-03: filtra la lista por estado (FA-002)', async () => {
+  it('filtra la lista por estado (FA-002)', async () => {
     const repo = crearRepositorio([
       crearPedido(1, 2, 'PENDIENTE', '2026-08-10T10:00:00'),
       crearPedido(2, 2, 'CANCELADO', '2026-08-15T10:00:00'),
@@ -63,7 +63,7 @@ describe('CU-013 Ver pedidos (VerPedidosUseCase)', () => {
     expect(resultado.pedidos[0].estado).toBe('CANCELADO');
   });
 
-  it('CP-CU-013-07: aislamiento por usuario, solo ve sus propios pedidos (RN-049)', async () => {
+  it('aislamiento por usuario, solo ve sus propios pedidos (RN-049)', async () => {
     const repo = crearRepositorio([
       crearPedido(1, 2, 'PENDIENTE', '2026-08-10T10:00:00'),
       crearPedido(2, 99, 'PENDIENTE', '2026-08-12T10:00:00'),
@@ -76,7 +76,7 @@ describe('CU-013 Ver pedidos (VerPedidosUseCase)', () => {
     expect(resultado.pedidos[0].id_pedido).toBe(1);
   });
 
-  it('CP-CU-013-08: aplica paginación server-side (RF-005.4)', async () => {
+  it('aplica paginación server-side (RF-005.4)', async () => {
     const pedidos = Array.from({ length: 15 }, (_, i) =>
       crearPedido(i + 1, 2, 'PENDIENTE', `2026-08-${String(i + 1).padStart(2, '0')}T10:00:00`)
     );
@@ -90,5 +90,14 @@ describe('CU-013 Ver pedidos (VerPedidosUseCase)', () => {
 
     const pagina2 = await casoUso.execute(CLIENTE, { pagina: 2, limite: 10 });
     expect(pagina2.pedidos).toHaveLength(5);
+  });
+
+  it('maneja error de conexión al cargar los pedidos', async () => {
+    const pedidoRepositoryFalso = {
+      obtenerPedidosPorUsuario: jest.fn().mockRejectedValue(new Error('Error de conexión')),
+    };
+    const casoUso = new VerPedidosUseCase(pedidoRepositoryFalso);
+
+    await expect(casoUso.execute(CLIENTE)).rejects.toThrow('Error de conexión');
   });
 });

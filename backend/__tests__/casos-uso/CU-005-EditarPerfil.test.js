@@ -1,6 +1,6 @@
 import bcrypt from 'bcrypt';
 import ActualizarPerfilUseCase from '../../application/ActualizarPerfilUseCase';
-import InMemoryUserRepository from '../../infraestructure/repositories/in-memory/InMemoryUserRepository';
+import { crearRepositorio } from '../helpers/usuarios';
 
 const datosValidos = {
   nombre_apellido: 'Ana María Torres',
@@ -8,10 +8,6 @@ const datosValidos = {
   telefono: '3109876543',
   direccion: 'Av. El Poblado # 1-10, Medellín',
 };
-
-function crearRepositorio() {
-  return new InMemoryUserRepository();
-}
 
 function crearCasoUso(repositorio) {
   return new ActualizarPerfilUseCase(repositorio);
@@ -73,7 +69,7 @@ describe('CU-005 Editar perfil (ActualizarPerfilUseCase)', () => {
     });
   });
 
-  it('CP-CU-005-01: actualiza los datos editables y retorna el perfil sin contraseña', async () => {
+  it('actualiza los datos editables y retorna el perfil sin contraseña', async () => {
     // Arrange
     const datos = { ...datosValidos };
 
@@ -91,7 +87,7 @@ describe('CU-005 Editar perfil (ActualizarPerfilUseCase)', () => {
     expect(resultado.perfil.numero_documento).toBe('1000000001');
   });
 
-  it('CP-CU-005-02: rechaza el cambio de correo a uno ya registrado por otro usuario', async () => {
+  it('rechaza el cambio de correo a uno ya registrado por otro usuario', async () => {
     // Arrange
     const datos = { ...datosValidos, email: 'luis@example.com' };
 
@@ -104,7 +100,7 @@ describe('CU-005 Editar perfil (ActualizarPerfilUseCase)', () => {
     ).rejects.toThrow('El correo electrónico ya se encuentra registrado');
   });
 
-  it('CP-CU-005-03: rechaza campos obligatorios vacíos al editar', async () => {
+  it('rechaza campos obligatorios vacíos al editar', async () => {
     // Arrange
     const camposObligatorios = ['nombre_apellido', 'email', 'telefono', 'direccion'];
 
@@ -130,7 +126,7 @@ describe('CU-005 Editar perfil (ActualizarPerfilUseCase)', () => {
     ).rejects.toThrow('El teléfono debe contener exactamente 10 dígitos');
   });
 
-  it('CP-CU-005-04: notifica cuando no hay cambios que guardar', async () => {
+  it('notifica cuando no hay cambios que guardar', async () => {
     // Arrange
     const datosSinCambios = {
       nombre_apellido: 'Ana Torres',
@@ -150,7 +146,7 @@ describe('CU-005 Editar perfil (ActualizarPerfilUseCase)', () => {
     expect(resultado.mensaje).toBe('No hay cambios para guardar');
   });
 
-  it('CP-CU-005-05: el documento de identidad no se modifica aunque se envíe un valor nuevo', async () => {
+  it('el documento de identidad no se modifica aunque se envíe un valor nuevo', async () => {
     // Arrange
     const datos = { ...datosValidos, numero_documento: '999999999' };
 

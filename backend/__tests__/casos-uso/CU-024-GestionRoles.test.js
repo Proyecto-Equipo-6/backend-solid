@@ -14,7 +14,7 @@ describe('CU-024 Gestión de roles (crearRol / UpdateRol / eliminarRol)', () => 
   });
 
   describe('CrearRolUseCase', () => {
-    it('CP-CU-024-01: crea un rol con nombre único (RN-104)', async () => {
+    it('crea un rol con nombre único (RN-104)', async () => {
       const casoUso = new CrearRolUseCase(rolesRepo);
 
       const rol = await casoUso.execute({ name: 'Vendedor', description: 'Ventas' });

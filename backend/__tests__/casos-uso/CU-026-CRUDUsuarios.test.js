@@ -24,7 +24,7 @@ describe('CU-026 CRUD usuarios (admin)', () => {
   };
 
   describe('CrearUsuarioAdminUseCase', () => {
-    it('CP-CU-026-01: crea un usuario con datos válidos (RF-009.1)', async () => {
+    it('crea un usuario con datos válidos (RF-009.1)', async () => {
       const casoUso = new CrearUsuarioAdminUseCase(repo);
 
       const resultado = await casoUso.execute(datosValidos);
@@ -34,7 +34,7 @@ describe('CU-026 CRUD usuarios (admin)', () => {
       expect(resultado.usuario.activo).toBe(1);
     });
 
-    it('CP-CU-026-04: rechaza email duplicado (RN-109)', async () => {
+    it('rechaza email duplicado (RN-109)', async () => {
       await repo.save({ ...datosValidos, id: 1 });
       const casoUso = new CrearUsuarioAdminUseCase(repo);
 
@@ -44,7 +44,7 @@ describe('CU-026 CRUD usuarios (admin)', () => {
       expect(error.message).toBe('El correo electrónico ya se encuentra registrado');
     });
 
-    it('CP-CU-026-04: rechaza documento duplicado (RN-109)', async () => {
+    it('rechaza documento duplicado (RN-109)', async () => {
       await repo.save({ ...datosValidos, id: 1, email: 'otro@example.com' });
       const casoUso = new CrearUsuarioAdminUseCase(repo);
 
@@ -131,7 +131,7 @@ describe('CU-026 CRUD usuarios (admin)', () => {
       expect(resultado.activo).toBe(0);
     });
 
-    it('CP-CU-026-03: impide desactivar la propia cuenta del admin (RN-111)', async () => {
+    it('impide desactivar la propia cuenta del admin (RN-111)', async () => {
       await repo.save({ ...datosValidos, id: 1 });
       const casoUso = new EliminarUsuarioAdminUseCase(repo);
 
@@ -143,7 +143,7 @@ describe('CU-026 CRUD usuarios (admin)', () => {
   });
 
   describe('ActualizarEstadoUsuarioUseCase', () => {
-    it('activa/desactiva un usuario (CP-CU-026-02)', async () => {
+    it('activa/desactiva un usuario', async () => {
       await repo.save({ ...datosValidos, id: 1 });
       const casoUso = new ActualizarEstadoUsuarioUseCase(repo);
 
@@ -154,7 +154,7 @@ describe('CU-026 CRUD usuarios (admin)', () => {
       expect(activado.activo).toBe(1);
     });
 
-    it('CP-CU-026-03: impide auto-desactivación (RN-111)', async () => {
+    it('impide auto-desactivación (RN-111)', async () => {
       await repo.save({ ...datosValidos, id: 1 });
       const casoUso = new ActualizarEstadoUsuarioUseCase(repo);
 

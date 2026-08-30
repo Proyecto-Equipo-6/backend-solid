@@ -11,6 +11,9 @@
     "test:selenium": "jest --config jest.selenium.config.js"
   },
   "jest": {
+    "testMatch": [
+      "**/*.test.js"
+    ],
     "testPathIgnorePatterns": [
       "/node_modules/",
       "/selenium/"

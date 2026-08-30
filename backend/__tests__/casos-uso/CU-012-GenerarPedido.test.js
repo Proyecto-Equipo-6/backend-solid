@@ -1,6 +1,6 @@
-const CrearPedidoUseCase = require('../application/CrearPedidoUseCase');
-const InMemoryCarritoRepository = require('../infraestructure/repositories/in-memory/InMemoryCarritoRepository');
-const InMemoryPedidoRepository = require('../infraestructure/repositories/in-memory/InMemoryPedidoRepository');
+const CrearPedidoUseCase = require('../../application/CrearPedidoUseCase');
+const InMemoryCarritoRepository = require('../../infraestructure/repositories/in-memory/InMemoryCarritoRepository');
+const InMemoryPedidoRepository = require('../../infraestructure/repositories/in-memory/InMemoryPedidoRepository');
 
 const CLIENTE = { id_usuario: 2, id_rol: 2, email: 'juan@email.com' };
 
@@ -93,7 +93,7 @@ describe('CrearPedidoUseCase', () => {
     expect(pedidoRepository.pedidos[0].id_metodo_pago).toBe(1);
   });
 
-  it('el pedido refleja exactamente los productos y cantidades del carrito (CP-CU-012-08)', async () => {
+  it('el pedido refleja exactamente los productos y cantidades del carrito', async () => {
   const carritoRepository = crearCarritoConProducto(PRODUCTO, 2); // 2 unidades
   const pedidoRepository = new InMemoryPedidoRepository();
   const casoUso = new CrearPedidoUseCase(carritoRepository, pedidoRepository);
@@ -116,5 +116,18 @@ describe('CrearPedidoUseCase', () => {
     precio: 250000,
     subtotal: 500000,
   });
+  });
+
+  it('maneja error de conexión o fallo de transacción', async () => {
+    const carritoRepository = crearCarritoConProducto(PRODUCTO, 1);
+    // Repositorio falso cuyo crearPedidoConTransaccion falla (simula error de BD / rollback)
+    const pedidoRepositoryFalso = {
+      crearPedidoConTransaccion: jest.fn().mockRejectedValue(new Error('Error de conexión')),
+    };
+    const casoUso = new CrearPedidoUseCase(carritoRepository, pedidoRepositoryFalso);
+
+    await expect(
+      casoUso.execute(CLIENTE, { direccionEntrega: 'Calle 10' })
+    ).rejects.toThrow('Error de conexión');
   });
 });
