@@ -93,7 +93,7 @@ describe('CrearPedidoUseCase', () => {
     expect(pedidoRepository.pedidos[0].id_metodo_pago).toBe(1);
   });
 
-  it('el pedido refleja exactamente los productos y cantidades del carrito (CP-CU-012-08)', async () => {
+  it('el pedido refleja exactamente los productos y cantidades del carrito', async () => {
   const carritoRepository = crearCarritoConProducto(PRODUCTO, 2); // 2 unidades
   const pedidoRepository = new InMemoryPedidoRepository();
   const casoUso = new CrearPedidoUseCase(carritoRepository, pedidoRepository);

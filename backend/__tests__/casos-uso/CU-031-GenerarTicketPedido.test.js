@@ -31,18 +31,17 @@ describe('CU-031 GenerarTicketPedidoUseCase', () => {
     return casoUso.execute(pedido.id_pedido);
   }
 
-  it('genera el recibo con la información del establecimiento', async () => {
-    const resultado = await generarTicket();
+  let resultado;
+  beforeEach(async () => { resultado = await generarTicket(); });
 
+  it('genera el recibo con la información del establecimiento', () => {
     expect(resultado.nombreArchivo).toBe('Ticket_Pedido_42.pdf');
     expect(resultado.html).toContain('NEXBIT');
     expect(resultado.html).toContain('Lorem Ipsum, 23-10');
     expect(resultado.html).toContain('Tel: 11223344');
   });
 
-  it('lista los artículos con cantidad, unitario y subtotal', async () => {
-    const resultado = await generarTicket();
-
+  it('lista los artículos con cantidad, unitario y subtotal', () => {
     expect(resultado.html).toContain('Televisor 43"');
     expect(resultado.html).toContain('$200.000');
     expect(resultado.html).toContain('2 x $100.000');
@@ -50,9 +49,7 @@ describe('CU-031 GenerarTicketPedidoUseCase', () => {
     expect(resultado.html).toContain('$50.000');
   });
 
-  it('resume el pago con TOTAL, Efectivo y Cambio', async () => {
-    const resultado = await generarTicket();
-
+  it('resume el pago con TOTAL, Efectivo y Cambio', () => {
     expect(resultado.html).toContain('TOTAL');
     expect(resultado.html).toContain('$250.000');
     expect(resultado.html).toContain('Efectivo');
@@ -60,9 +57,7 @@ describe('CU-031 GenerarTicketPedidoUseCase', () => {
     expect(resultado.html).toContain('>$0<');
   });
 
-  it('no incluye la sección bancaria (pago contraentrega)', async () => {
-    const resultado = await generarTicket();
-
+  it('no incluye la sección bancaria (pago contraentrega)', () => {
     expect(resultado.html).not.toContain('Tarjeta bancaria');
     expect(resultado.html).not.toContain('Código de aprobación');
   });

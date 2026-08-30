@@ -50,7 +50,7 @@ describe('CU-002 Registrar cuenta (CreateUserUseCase)', () => {
     );
   });
 
-  it('RF-001.1-03 / HU-001.1-03: rechaza número de documento duplicado', async () => {
+  it('rechaza número de documento duplicado', async () => {
     // Arrange
     await repositorio.save({
       ...datosValidos,

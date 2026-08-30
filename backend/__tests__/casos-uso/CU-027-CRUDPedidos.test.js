@@ -39,7 +39,7 @@ const crearDetallePedido = (id_pedido, id_producto, cantidad) => ({
 });
 
 describe('Módulo administración de pedidos (CU-019, CU-020, CU-027)', () => {
-  test('Filtrado multi-criterio de pedidos por estado y fecha - CP-CU-027-03', async () => {
+  test('Filtrado multi-criterio de pedidos por estado y fecha', async () => {
   const repo = new InMemoryPedidoRepartidorRepository([
     crearPedido({ id_pedido: 1, estado: 'PENDIENTE', id_usuario: 100, id_repartidor: null, fecha_pedido: '2026-08-15T08:00:00' }),
     crearPedido({ id_pedido: 2, estado: 'CONFIRMADO', id_usuario: 101, id_repartidor: null, fecha_pedido: '2026-08-15T09:00:00' }),
@@ -77,7 +77,7 @@ describe('Módulo administración de pedidos (CU-019, CU-020, CU-027)', () => {
     ).rejects.toThrow('No se pudo actualizar el estado del pedido. Transición inválida.');
   });
 
-  test('Asignación exitosa de un pedido CONFIRMADO - CP-CU-019-01 / CP-RF010.2-01', async () => {
+  test('Asignación exitosa de un pedido CONFIRMADO', async () => {
     const repoPedidos = new InMemoryPedidoRepartidorRepository([crearPedido({ id_pedido: 1, estado: 'CONFIRMADO', id_usuario: 100 })]);
     const repoRepartidores = crearRepoRepartidores();
     const useCase = new AsignarRepartidorUseCase(repoPedidos, repoRepartidores);
@@ -93,7 +93,7 @@ describe('Módulo administración de pedidos (CU-019, CU-020, CU-027)', () => {
     expect(disponible).toBe(false);
   });
 
-  test('Bloqueo si el repartidor no está disponible - CP-RF010.2-02', async () => {
+  test('Bloqueo si el repartidor no está disponible', async () => {
     const repoPedidos = new InMemoryPedidoRepartidorRepository([crearPedido({ id_pedido: 1, estado: 'CONFIRMADO', id_usuario: 100 })]);
     const repoRepartidores = new InMemoryRepartidorRepository([{ id_usuario: 10, estado: 'OCUPADO' }]);
     const useCase = new AsignarRepartidorUseCase(repoPedidos, repoRepartidores);
@@ -111,7 +111,7 @@ describe('Módulo administración de pedidos (CU-019, CU-020, CU-027)', () => {
     expect(pedidoReasignado.estado).toBe('ASIGNADO');
   });
 
-  test('Bloqueo si el repartidor alcanzó 3 pedidos diarios - CP-CU-019-05', async () => {
+  test('Bloqueo si el repartidor alcanzó 3 pedidos diarios', async () => {
     const repoPedidos = new InMemoryPedidoRepartidorRepository([
       crearPedido({ id_pedido: 1, estado: 'CONFIRMADO', id_usuario: 100 }),
       crearPedido({ id_pedido: 2, estado: 'CONFIRMADO', id_usuario: 101 }),
@@ -128,7 +128,7 @@ describe('Módulo administración de pedidos (CU-019, CU-020, CU-027)', () => {
     await expect(useCase.ejecutar(4, 10)).rejects.toThrow('El repartidor ha alcanzado el límite de pedidos diarios');
   });
 
-  test('Cancelación directa exitosa con motivo predefinido - CP-CU-020-01', async () => {
+  test('Cancelación directa exitosa con motivo predefinido', async () => {
     const repoPedidos = new InMemoryPedidoRepartidorRepository([crearPedido({ id_pedido: 1, estado: 'CONFIRMADO', id_usuario: 100 })]);
     const repoProductos = new InMemoryProductoRepository([crearProducto(1, 10)]);
     const repoRepartidores = crearRepoRepartidores();
@@ -139,7 +139,7 @@ describe('Módulo administración de pedidos (CU-019, CU-020, CU-027)', () => {
     expect(cancelado.motivo_cancelacion).toBe('Producto no disponible');
   });
 
-  test('Validación de observación obligatoria para motivo "Otro" - CP-CU-020-02', async () => {
+  test('Validación de observación obligatoria para motivo "Otro"', async () => {
     const repoPedidos = new InMemoryPedidoRepartidorRepository([crearPedido({ id_pedido: 1, estado: 'CONFIRMADO', id_usuario: 100 })]);
     const repoProductos = new InMemoryProductoRepository([crearProducto(1, 10)]);
     const repoRepartidores = crearRepoRepartidores();

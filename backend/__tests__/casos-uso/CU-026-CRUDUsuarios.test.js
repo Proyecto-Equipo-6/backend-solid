@@ -143,7 +143,7 @@ describe('CU-026 CRUD usuarios (admin)', () => {
   });
 
   describe('ActualizarEstadoUsuarioUseCase', () => {
-    it('activa/desactiva un usuario (CP-CU-026-02)', async () => {
+    it('activa/desactiva un usuario', async () => {
       await repo.save({ ...datosValidos, id: 1 });
       const casoUso = new ActualizarEstadoUsuarioUseCase(repo);
 

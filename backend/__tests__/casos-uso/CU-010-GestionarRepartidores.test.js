@@ -3,7 +3,7 @@ import InMemoryPedidoRepartidorRepository from '../../infraestructure/repositori
 import CambiarEstadoOperativoRepartidorUseCase from '../../application/cambiarEstadoOperativoRepartidorUseCase.js';
 const { crearPedido } = require('../helpers/pedidos');
 
-describe('HU-010.2: Gestión de Estado Operativo de Repartidor', () => {
+describe('Gestión de Estado Operativo de Repartidor', () => {
   test('Cambiar estado de Inactivo a Disponible', async () => {
     const repoRepartidores = new InMemoryRepartidorRepository([
       { id_usuario: 10, nombre: 'Juan', apellidos: 'Pérez', telefono: '3001234567', email: 'juan@example.com', estado: 'INACTIVO' }
