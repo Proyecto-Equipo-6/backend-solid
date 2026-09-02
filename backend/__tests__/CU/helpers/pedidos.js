@@ -8,7 +8,7 @@
  *   crearPedido({ estado: 'EN_CAMINO' });
  *   crearPedido({ id_pedido: 2, id_usuario: 101, total: 30000 });
  */
-const Pedido = require('../../domain/models/Pedido.js');
+const Pedido = require('../../../domain/models/Pedido.js');
 
 /**
  * Crea un Pedido con valores por defecto, sobrescribibles con `overrides`.

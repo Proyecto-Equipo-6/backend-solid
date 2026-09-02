@@ -1,7 +1,7 @@
-import InMemoryRepartidorRepository from '../../infraestructure/repositories/in-memory/InMemoryRepartidorRepository.js';
+﻿import InMemoryRepartidorRepository from '../../infraestructure/repositories/in-memory/InMemoryRepartidorRepository.js';
 import InMemoryPedidoRepartidorRepository from '../../infraestructure/repositories/in-memory/InMemoryPedidoRepartidorRepository.js';
 import CambiarEstadoOperativoRepartidorUseCase from '../../application/cambiarEstadoOperativoRepartidorUseCase.js';
-const { crearPedido } = require('../helpers/pedidos');
+const { crearPedido } = require('./helpers/pedidos');
 
 describe('Gestión de Estado Operativo de Repartidor', () => {
   test('Cambiar estado de Inactivo a Disponible', async () => {

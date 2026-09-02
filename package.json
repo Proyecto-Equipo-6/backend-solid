@@ -8,6 +8,7 @@
     "dev": "nodemon server.js",
     "test": "jest --passWithNoTests",
     "test:jest": "jest --passWithNoTests",
+    "test:rnf": "jest backend/__tests__/RNF --passWithNoTests --runInBand",
     "test:selenium": "jest --config jest.selenium.config.js"
   },
   "jest": {

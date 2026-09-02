@@ -1,6 +1,6 @@
-const InMemoryPedidoRepartidorRepository = require('../../infraestructure/repositories/in-memory/InMemoryPedidoRepartidorRepository.js');
+﻿const InMemoryPedidoRepartidorRepository = require('../../infraestructure/repositories/in-memory/InMemoryPedidoRepartidorRepository.js');
 const VerHistorialPedidosUseCase = require('../../application/verHistorialPedidosUseCase.js');
-const { crearPedido } = require('../helpers/pedidos');
+const { crearPedido } = require('./helpers/pedidos');
 
 // Inicio de la semana calendario (lunes), consistente con el repositorio.
 const inicioDeSemana = (fecha) => {

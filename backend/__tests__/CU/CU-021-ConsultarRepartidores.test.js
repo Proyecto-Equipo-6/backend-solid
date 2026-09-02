@@ -1,7 +1,7 @@
-const InMemoryRepartidorRepository = require('../../infraestructure/repositories/in-memory/InMemoryRepartidorRepository.js');
+﻿const InMemoryRepartidorRepository = require('../../infraestructure/repositories/in-memory/InMemoryRepartidorRepository.js');
 const InMemoryPedidoRepartidorRepository = require('../../infraestructure/repositories/in-memory/InMemoryPedidoRepartidorRepository.js');
 const ConsultarRepartidoresUseCase = require('../../application/consultarRepartidoresUseCase.js');
-const { crearPedido } = require('../helpers/pedidos');
+const { crearPedido } = require('./helpers/pedidos');
 
 describe('Módulo Consultar Repartidores (CU-021)', () => {
   test('Visualizar solo repartidores activos con métricas', async () => {

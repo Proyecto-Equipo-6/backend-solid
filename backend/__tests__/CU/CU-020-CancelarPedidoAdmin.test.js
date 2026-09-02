@@ -1,8 +1,8 @@
-import InMemoryPedidoRepartidorRepository from '../../infraestructure/repositories/in-memory/InMemoryPedidoRepartidorRepository.js';
+﻿import InMemoryPedidoRepartidorRepository from '../../infraestructure/repositories/in-memory/InMemoryPedidoRepartidorRepository.js';
 import InMemoryProductoRepository from '../../infraestructure/repositories/in-memory/InMemoryProductoRepository.js';
 import InMemoryRepartidorRepository from '../../infraestructure/repositories/in-memory/InMemoryRepartidorRepository.js';
 import CancelarPedidoAdminUseCase from '../../application/cancelarPedidoAdminUseCase.js';
-const { crearPedido } = require('../helpers/pedidos');
+const { crearPedido } = require('./helpers/pedidos');
 
 const crearRepoRepartidores = (ids = [10, 20, 30, 40]) => {
   return new InMemoryRepartidorRepository(

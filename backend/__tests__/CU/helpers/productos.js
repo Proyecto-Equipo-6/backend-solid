@@ -2,7 +2,7 @@
  * Helpers compartidos de Producto/Categoría/Proveedor para tests.
  * Extrae lo idéntico de CU-023 (CRUDProductos) para evitar duplicación.
  */
-const CrearCategoriaUseCase = require('../../application/crearCategoriaUseCase.js');
+const CrearCategoriaUseCase = require('../../../application/crearCategoriaUseCase.js');
 
 /**
  * Crea una categoría vía use case y la devuelve.

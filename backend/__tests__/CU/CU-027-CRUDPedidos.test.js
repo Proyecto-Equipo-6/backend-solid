@@ -1,8 +1,8 @@
-import InMemoryPedidoRepartidorRepository from '../../infraestructure/repositories/in-memory/InMemoryPedidoRepartidorRepository.js';
+﻿import InMemoryPedidoRepartidorRepository from '../../infraestructure/repositories/in-memory/InMemoryPedidoRepartidorRepository.js';
 import ObtenerTodosPedidosUseCase from '../../application/obtenerTodosPedidosUseCase.js';
 import ActualizarEstadoPedidoAdminUseCase from '../../application/actualizarEstadoPedidoAdminUseCase.js';
 import ObtenerDetallePedidoAdminUseCase from '../../application/obtenerDetallePedidoAdminUseCase.js';
-const { crearPedido } = require('../helpers/pedidos');
+const { crearPedido } = require('./helpers/pedidos');
 
 const crearDetallePedido = (id_pedido, id_producto, cantidad) => ({
   id_detalle_pedido: 1,

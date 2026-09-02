@@ -1,6 +1,6 @@
-import bcrypt from 'bcrypt';
+﻿import bcrypt from 'bcrypt';
 import ActualizarPerfilUseCase from '../../application/ActualizarPerfilUseCase';
-import { crearRepositorio } from '../helpers/usuarios';
+import { crearRepositorio } from './helpers/usuarios';
 
 const datosValidos = {
   nombre_apellido: 'Ana María Torres',

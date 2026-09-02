@@ -1,7 +1,7 @@
-import jwt from 'jsonwebtoken';
+﻿import jwt from 'jsonwebtoken';
 import LoginUseCase from '../../application/LoginUseCase';
-import { crearRepositorio, crearUsuario } from '../helpers/usuarios.js';
-import { configurarBcryptRounds } from '../helpers/bcryptSetup.js';
+import { crearRepositorio, crearUsuario } from './helpers/usuarios.js';
+import { configurarBcryptRounds } from './helpers/bcryptSetup.js';
 
 const JWT_SECRET_PRUEBA = 'secreto-de-prueba';
 

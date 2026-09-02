@@ -1,11 +1,11 @@
-import InMemoryProductoRepository from '../../infraestructure/repositories/in-memory/InMemoryProductoRepository.js';
+﻿import InMemoryProductoRepository from '../../infraestructure/repositories/in-memory/InMemoryProductoRepository.js';
 import InMemoryCategoriaRepository from '../../infraestructure/repositories/in-memory/InMemoryCategoriaRepository.js';
 import InMemoryProveedorRepository from '../../infraestructure/repositories/in-memory/InMemoryProveedorRepository.js';
 import CrearProductoUseCase from '../../application/crearProductoUseCase.js';
 import EditarProductoUseCase from '../../application/editarProductoUseCase.js';
 import EliminarProductoUseCase from '../../application/eliminarProductoUseCase.js';
 import AjustarStockProductoUseCase from '../../application/ajustarStockProductoUseCase.js';
-import { crearCategoria, crearProveedor } from '../helpers/productos.js';
+import { crearCategoria, crearProveedor } from './helpers/productos.js';
 
 async function crearRepositorios({ conCategoria = true, conProveedor = true } = {}) {
   const repoProductos = new InMemoryProductoRepository();

@@ -1,6 +1,6 @@
-const InMemoryPedidoRepartidorRepository = require('../../infraestructure/repositories/in-memory/InMemoryPedidoRepartidorRepository.js');
+﻿const InMemoryPedidoRepartidorRepository = require('../../infraestructure/repositories/in-memory/InMemoryPedidoRepartidorRepository.js');
 const VerDetallePedidoUseCase = require('../../application/verDetallePedidoUseCase.js');
-const { crearPedido } = require('../helpers/pedidos');
+const { crearPedido } = require('./helpers/pedidos');
 
 describe('CU-016: Ver detalles pedido', () => {
   test('Flujo feliz, el repartidor asignado ve todos los detalles excepto productos', async () => {

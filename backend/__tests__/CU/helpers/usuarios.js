@@ -7,7 +7,7 @@
  * (CreateUserUseCase vs LoginUseCase con JWT_SECRET_PRUEBA).
  */
 const bcrypt = require('bcrypt');
-const InMemoryUserRepository = require('../../infraestructure/repositories/in-memory/InMemoryUserRepository.js');
+const InMemoryUserRepository = require('../../../infraestructure/repositories/in-memory/InMemoryUserRepository.js');
 
 const datosValidos = {
   nombre_apellido: 'Ana Torres',

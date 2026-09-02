@@ -1,6 +1,6 @@
-import bcrypt from 'bcrypt';
+﻿import bcrypt from 'bcrypt';
 import ObtenerPerfilUseCase from '../../application/ObtenerPerfilUseCase';
-import { crearRepositorio, crearUsuario } from '../helpers/usuarios';
+import { crearRepositorio, crearUsuario } from './helpers/usuarios';
 
 function crearCasoUso(repositorio) {
   return new ObtenerPerfilUseCase(repositorio);

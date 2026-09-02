@@ -1,6 +1,6 @@
-const InMemoryPedidoRepartidorRepository = require('../../infraestructure/repositories/in-memory/InMemoryPedidoRepartidorRepository.js');
+﻿const InMemoryPedidoRepartidorRepository = require('../../infraestructure/repositories/in-memory/InMemoryPedidoRepartidorRepository.js');
 const VerDashboardPedidosUseCase = require('../../application/verDashboardPedidosUseCase.js');
-const { crearPedido } = require('../helpers/pedidos');
+const { crearPedido } = require('./helpers/pedidos');
 
 function crearHora(hora, minutos = 0) {
   const d = new Date();
