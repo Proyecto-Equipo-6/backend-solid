@@ -19,8 +19,14 @@ class InMemoryProductoRepository extends ProductoRepository {
       .toLowerCase();
   }
 
-  async findActivos() {
-    return this.productos.filter(p => p.estado === 1);
+  async findActivos(limite = null, offset = 0) {
+    const activos = this.productos.filter(p => p.estado === 1);
+    if (limite === null) return activos;
+    return activos.slice(offset, offset + limite);
+  }
+
+  async contarActivos() {
+    return this.productos.filter(p => p.estado === 1).length;
   }
 
   async contar() {

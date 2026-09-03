@@ -35,16 +35,25 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nombre_apellido\": \"Juan Pérez\",\n  \"tipo_documento\": \"CC\",\n  \"numero_documento\": \"1020304050\",\n  \"email\": \"juan@email.com\",\n  \"password\": \"12345678\",\n  \"telefono\": \"3001234567\",\n  \"direccion\": \"Calle 10 #5-20, Medellín\"\n}"
+              "raw": "{\n  \"nombre_apellido\": \"Juan Pérez\",\n  \"tipo_documento\": \"CC\",\n  \"numero_documento\": \"1020304050\",\n  \"email\": \"juan@email.com\",\n  \"password\": \"Admin123\",\n  \"telefono\": \"3001234567\",\n  \"direccion\": \"Calle 10 #5-20, Medellín\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/users",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "users"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users"
+              ]
             }
           }
         }
@@ -73,16 +82,26 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"juan@email.com\",\n  \"password\": \"12345678\"\n}"
+              "raw": "{\n  \"email\": \"juan@email.com\",\n  \"password\": \"Admin123\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/auth/login",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "auth", "login"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
             }
           }
         },
@@ -92,8 +111,15 @@
             "method": "POST",
             "url": {
               "raw": "{{baseUrl}}/api/v1/auth/logout",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "auth", "logout"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "logout"
+              ]
             }
           }
         }
@@ -108,8 +134,15 @@
             "method": "GET",
             "url": {
               "raw": "{{baseUrl}}/api/v1/users/perfil",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "users", "perfil"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "perfil"
+              ]
             }
           }
         }
@@ -123,7 +156,10 @@
           "request": {
             "method": "PUT",
             "header": [
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -131,8 +167,15 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/users/perfil",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "users", "perfil"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "perfil"
+              ]
             }
           }
         }
@@ -146,7 +189,10 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -154,8 +200,15 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/auth/recuperar",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "auth", "recuperar"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "recuperar"
+              ]
             }
           }
         },
@@ -164,16 +217,26 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"token\": \"TOKEN_DEL_EMAIL\",\n  \"nuevaPassword\": \"nueva12345\"\n}"
+              "raw": "{\n  \"token\": \"TOKEN_DEL_EMAIL\",\n  \"nueva_password\": \"nueva12345\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/auth/restablecer",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "auth", "restablecer"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "restablecer"
+              ]
             }
           }
         }
@@ -188,8 +251,15 @@
             "method": "POST",
             "url": {
               "raw": "{{baseUrl}}/api/v1/auth/logout",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "auth", "logout"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "logout"
+              ]
             }
           }
         }
@@ -204,8 +274,15 @@
             "method": "GET",
             "url": {
               "raw": "{{baseUrl}}/api/v1/productos/publico",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "productos", "publico"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "productos",
+                "publico"
+              ]
             }
           }
         },
@@ -215,8 +292,15 @@
             "method": "GET",
             "url": {
               "raw": "{{baseUrl}}/api/v1/productos/1",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "productos", "1"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "productos",
+                "1"
+              ]
             }
           }
         },
@@ -226,8 +310,14 @@
             "method": "GET",
             "url": {
               "raw": "{{baseUrl}}/api/v1/categorias",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "categorias"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "categorias"
+              ]
             }
           }
         }
@@ -242,8 +332,14 @@
             "method": "GET",
             "url": {
               "raw": "{{baseUrl}}/api/v1/carrito",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "carrito"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "carrito"
+              ]
             }
           }
         }
@@ -257,7 +353,10 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -265,8 +364,14 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/carrito",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "carrito"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "carrito"
+              ]
             }
           }
         },
@@ -275,7 +380,10 @@
           "request": {
             "method": "PUT",
             "header": [
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -283,8 +391,15 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/carrito/1",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "carrito", "1"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "carrito",
+                "1"
+              ]
             }
           }
         },
@@ -294,8 +409,15 @@
             "method": "DELETE",
             "url": {
               "raw": "{{baseUrl}}/api/v1/carrito/1",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "carrito", "1"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "carrito",
+                "1"
+              ]
             }
           }
         }
@@ -323,7 +445,10 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -331,8 +456,39 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/pedidos",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "pedidos"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "pedidos"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Generar ticket del pedido (cliente)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/pedidos/1/ticket",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "pedidos",
+                "1",
+                "ticket"
+              ]
             }
           }
         }
@@ -347,8 +503,14 @@
             "method": "GET",
             "url": {
               "raw": "{{baseUrl}}/api/v1/pedidos",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "pedidos"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "pedidos"
+              ]
             }
           }
         },
@@ -358,10 +520,43 @@
             "method": "GET",
             "url": {
               "raw": "{{baseUrl}}/api/v1/pedidos?estado=PENDIENTE",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "pedidos"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "pedidos"
+              ],
               "query": [
-                { "key": "estado", "value": "PENDIENTE" }
+                {
+                  "key": "estado",
+                  "value": "PENDIENTE"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Ver detalle de pedido",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/pedidos/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "pedidos",
+                "1"
               ]
             }
           }
@@ -376,7 +571,10 @@
           "request": {
             "method": "DELETE",
             "header": [
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -384,8 +582,15 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/pedidos/1",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "pedidos", "1"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "pedidos",
+                "1"
+              ]
             }
           }
         }
@@ -400,8 +605,14 @@
             "method": "GET",
             "url": {
               "raw": "{{baseUrl}}/api/v1/categorias",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "categorias"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "categorias"
+              ]
             }
           }
         },
@@ -410,7 +621,10 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -418,8 +632,14 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/categorias",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "categorias"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "categorias"
+              ]
             }
           }
         },
@@ -428,7 +648,10 @@
           "request": {
             "method": "PUT",
             "header": [
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -436,8 +659,15 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/categorias/1",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "categorias", "1"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "categorias",
+                "1"
+              ]
             }
           }
         },
@@ -447,8 +677,39 @@
             "method": "DELETE",
             "url": {
               "raw": "{{baseUrl}}/api/v1/categorias/1",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "categorias", "1"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "categorias",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Listar todas las categorías (incluye inactivas)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/categorias/todas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "categorias",
+                "todas"
+              ]
             }
           }
         }
@@ -462,7 +723,10 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -470,8 +734,14 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/productos",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "productos"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "productos"
+              ]
             }
           }
         },
@@ -480,7 +750,10 @@
           "request": {
             "method": "PUT",
             "header": [
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -488,8 +761,15 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/productos/1",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "productos", "1"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "productos",
+                "1"
+              ]
             }
           }
         },
@@ -499,8 +779,15 @@
             "method": "DELETE",
             "url": {
               "raw": "{{baseUrl}}/api/v1/productos/1",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "productos", "1"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "productos",
+                "1"
+              ]
             }
           }
         },
@@ -509,7 +796,10 @@
           "request": {
             "method": "PUT",
             "header": [
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -517,8 +807,63 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/productos/1/ajustar-stock",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "productos", "1", "ajustar-stock"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "productos",
+                "1",
+                "ajustar-stock"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Subir imagen de producto",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/productos/imagen",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "productos",
+                "imagen"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Listar todos los productos (admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/productos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "productos"
+              ]
             }
           }
         }
@@ -533,8 +878,14 @@
             "method": "GET",
             "url": {
               "raw": "{{baseUrl}}/api/v1/proveedores",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "proveedores"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "proveedores"
+              ]
             }
           }
         },
@@ -543,7 +894,10 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -551,8 +905,14 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/proveedores",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "proveedores"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "proveedores"
+              ]
             }
           }
         },
@@ -561,7 +921,10 @@
           "request": {
             "method": "PUT",
             "header": [
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -569,8 +932,15 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/proveedores/1",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "proveedores", "1"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "proveedores",
+                "1"
+              ]
             }
           }
         },
@@ -580,8 +950,39 @@
             "method": "DELETE",
             "url": {
               "raw": "{{baseUrl}}/api/v1/proveedores/1",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "proveedores", "1"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "proveedores",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Listar todos los proveedores (incluye inactivos)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/proveedores/todos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "proveedores",
+                "todos"
+              ]
             }
           }
         }
@@ -596,8 +997,15 @@
             "method": "GET",
             "url": {
               "raw": "{{baseUrl}}/api/v1/admin/repartidores",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "admin", "repartidores"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "repartidores"
+              ]
             }
           }
         },
@@ -606,16 +1014,102 @@
           "request": {
             "method": "PUT",
             "header": [
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"estado\": \"ACTIVO\"\n}"
+              "raw": "{\n  \"estado\": \"DISPONIBLE\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/admin/repartidores/1/estado",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "admin", "repartidores", "1", "estado"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "repartidores",
+                "1",
+                "estado"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Editar repartidor",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/repartidores/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "repartidores",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Crear repartidor",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/repartidores",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "repartidores"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Eliminar repartidor",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/repartidores/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "repartidores",
+                "1"
+              ]
             }
           }
         }
@@ -630,8 +1124,15 @@
             "method": "GET",
             "url": {
               "raw": "{{baseUrl}}/api/v1/admin/usuarios",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "admin", "usuarios"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "usuarios"
+              ]
             }
           }
         },
@@ -640,7 +1141,10 @@
           "request": {
             "method": "PUT",
             "header": [
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -648,8 +1152,91 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/admin/usuarios/1/estado",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "admin", "usuarios", "1", "estado"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "usuarios",
+                "1",
+                "estado"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Editar usuario (admin)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/usuarios/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "usuarios",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Crear usuario (admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/usuarios",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "usuarios"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Eliminar usuario (admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/usuarios/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "usuarios",
+                "1"
+              ]
             }
           }
         }
@@ -664,8 +1251,15 @@
             "method": "GET",
             "url": {
               "raw": "{{baseUrl}}/api/v1/admin/pedidos",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "admin", "pedidos"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "pedidos"
+              ]
             }
           }
         },
@@ -675,8 +1269,16 @@
             "method": "GET",
             "url": {
               "raw": "{{baseUrl}}/api/v1/admin/pedidos/1",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "admin", "pedidos", "1"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "pedidos",
+                "1"
+              ]
             }
           }
         },
@@ -685,7 +1287,10 @@
           "request": {
             "method": "PUT",
             "header": [
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -693,8 +1298,17 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/admin/pedidos/1/estado",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "admin", "pedidos", "1", "estado"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "pedidos",
+                "1",
+                "estado"
+              ]
             }
           }
         },
@@ -703,7 +1317,10 @@
           "request": {
             "method": "PUT",
             "header": [
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -711,8 +1328,17 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/admin/pedidos/1/asignar",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "admin", "pedidos", "1", "asignar"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "pedidos",
+                "1",
+                "asignar"
+              ]
             }
           }
         },
@@ -721,7 +1347,10 @@
           "request": {
             "method": "PUT",
             "header": [
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -729,8 +1358,17 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/admin/pedidos/1/cancelar",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "admin", "pedidos", "1", "cancelar"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "pedidos",
+                "1",
+                "cancelar"
+              ]
             }
           }
         },
@@ -740,8 +1378,69 @@
             "method": "GET",
             "url": {
               "raw": "{{baseUrl}}/api/v1/admin/pedidos/1/ticket",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "admin", "pedidos", "1", "ticket"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "pedidos",
+                "1",
+                "ticket"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Desasignar repartidor de pedido",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/pedidos/1/desasignar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "pedidos",
+                "1",
+                "desasignar"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Marcar pedido como entregado",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/pedidos/1/entregar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "pedidos",
+                "1",
+                "entregar"
+              ]
             }
           }
         }
@@ -756,8 +1455,15 @@
             "method": "GET",
             "url": {
               "raw": "{{baseUrl}}/api/v1/repartidor/dashboard",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "repartidor", "dashboard"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "repartidor",
+                "dashboard"
+              ]
             }
           }
         },
@@ -767,8 +1473,17 @@
             "method": "GET",
             "url": {
               "raw": "{{baseUrl}}/api/v1/repartidor/pedidos/1/detalle",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "repartidor", "pedidos", "1", "detalle"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "repartidor",
+                "pedidos",
+                "1",
+                "detalle"
+              ]
             }
           }
         },
@@ -777,7 +1492,10 @@
           "request": {
             "method": "PATCH",
             "header": [
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -785,8 +1503,17 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/repartidor/pedidos/1/estado",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "repartidor", "pedidos", "1", "estado"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "repartidor",
+                "pedidos",
+                "1",
+                "estado"
+              ]
             }
           }
         },
@@ -796,8 +1523,41 @@
             "method": "GET",
             "url": {
               "raw": "{{baseUrl}}/api/v1/repartidor/historial",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "repartidor", "historial"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "repartidor",
+                "historial"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Subir comprobante de entrega",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/repartidor/pedidos/1/comprobante",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "repartidor",
+                "pedidos",
+                "1",
+                "comprobante"
+              ]
             }
           }
         }
@@ -812,8 +1572,15 @@
             "method": "GET",
             "url": {
               "raw": "{{baseUrl}}/api/v1/analitica/resumen",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "analitica", "resumen"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "analitica",
+                "resumen"
+              ]
             }
           }
         }
@@ -828,8 +1595,14 @@
             "method": "GET",
             "url": {
               "raw": "{{baseUrl}}/api/v1/roles",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "roles"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "roles"
+              ]
             }
           }
         },
@@ -838,7 +1611,10 @@
           "request": {
             "method": "PUT",
             "header": [
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -846,8 +1622,61 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/roles",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "roles"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "roles"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Eliminar rol",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/roles/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "roles",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Crear rol",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/roles",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "roles"
+              ]
             }
           }
         }

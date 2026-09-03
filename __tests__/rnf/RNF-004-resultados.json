@@ -1,0 +1,106 @@
+{
+  "rnf": "RNF-004",
+  "titulo": "Seguridad — Middleware de contención",
+  "fecha": "2026-09-03T13:58:19.500Z",
+  "servidor": "http://localhost:3000",
+  "resultados": {
+    "fuerzaBruta": {
+      "prueba": "Fuerza bruta",
+      "totalIntentos": 50,
+      "bloqueado": true,
+      "primerBloqueo": 11,
+      "conteo": {
+        "401": 10,
+        "429": 1
+      }
+    },
+    "sqlInjection": {
+      "prueba": "SQL Injection",
+      "totalPayloads": 10,
+      "rechazados": 10,
+      "aceptados": 0,
+      "todosRechazados": true,
+      "detalles": [
+        {
+          "nombre": "OR bypass clásico",
+          "payload": "admin' OR '1'='1",
+          "statusCode": 429,
+          "tiempoMs": 2,
+          "aceptado": false
+        },
+        {
+          "nombre": "Comentario SQL",
+          "payload": "admin'--",
+          "statusCode": 429,
+          "tiempoMs": 2,
+          "aceptado": false
+        },
+        {
+          "nombre": "DROP TABLE",
+          "payload": "'; DROP TABLE usuarios;--",
+          "statusCode": 429,
+          "tiempoMs": 1,
+          "aceptado": false
+        },
+        {
+          "nombre": "UNION SELECT",
+          "payload": "' UNION SELECT * FROM usuarios--",
+          "statusCode": 429,
+          "tiempoMs": 1,
+          "aceptado": false
+        },
+        {
+          "nombre": "Time-based injection",
+          "payload": "admin' AND SLEEP(5)--",
+          "statusCode": 429,
+          "tiempoMs": 2,
+          "aceptado": false
+        },
+        {
+          "nombre": "Bypass con BETWEEN",
+          "payload": "admin' BETWEEN 'a' AND 'z'--",
+          "statusCode": 429,
+          "tiempoMs": 1,
+          "aceptado": false
+        },
+        {
+          "nombre": "Password injection",
+          "payload": "admin@remate.com",
+          "statusCode": 429,
+          "tiempoMs": 2,
+          "aceptado": false
+        },
+        {
+          "nombre": "Double quote escape",
+          "payload": "admin\\\" OR \\\"1\\\"=\\\"1",
+          "statusCode": 429,
+          "tiempoMs": 2,
+          "aceptado": false
+        },
+        {
+          "nombre": "UNION con hash",
+          "payload": "' UNION SELECT 1,'admin','hash','hash',1--",
+          "statusCode": 429,
+          "tiempoMs": 2,
+          "aceptado": false
+        },
+        {
+          "nombre": "Time-based en password",
+          "payload": "admin@remate.com",
+          "statusCode": 429,
+          "tiempoMs": 2,
+          "aceptado": false
+        }
+      ]
+    },
+    "preparedStatements": {
+      "prueba": "Prepared statements verification",
+      "tiempoMs": 1,
+      "sleepEjecutado": false
+    }
+  },
+  "veredicto": {
+    "fuerzaBruta": "PASS",
+    "sqlInjection": "PASS"
+  }
+}

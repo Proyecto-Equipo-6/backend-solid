@@ -1,0 +1,13 @@
+{
+  "rnf": "RNF-011",
+  "titulo": "Recuperabilidad — Backup/Restore",
+  "fecha": "2026-09-03T12:50:09.910Z",
+  "backup": "C:\\Users\\cuent\\Documents\\dumps\\sistema_comercial_0309.sql",
+  "tamanoMB": 0.04,
+  "rtoSegundos": 0.567,
+  "rtoCumple": true,
+  "tablasRestauradas": 13,
+  "triggersRestaurados": 5,
+  "registrosVerificados": 50,
+  "veredicto": "PASS"
+}

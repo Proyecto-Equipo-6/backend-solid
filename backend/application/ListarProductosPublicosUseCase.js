@@ -16,11 +16,13 @@ class ListarProductosPublicosUseCase {
   async execute({ pagina = 1, limite = LIMITE_POR_DEFECTO } = {}) {
     const paginaNumero = Math.max(1, Number(pagina) || 1);
     const limiteNumero = Math.max(1, Number(limite) || LIMITE_POR_DEFECTO);
-
-    const productos = await this.productoRepository.findActivos();
-    const total = productos.length;
     const inicio = (paginaNumero - 1) * limiteNumero;
-    const items = productos.slice(inicio, inicio + limiteNumero).map((producto) => {
+
+    // RNF-007: paginación en SQL (LIMIT/OFFSET) — ya NO carga todos los
+    // productos a memoria. El total se obtiene con COUNT(*) separado.
+    const productos = await this.productoRepository.findActivos(limiteNumero, inicio);
+    const total = await this.productoRepository.contarActivos();
+    const items = productos.map((producto) => {
       const instancia = producto instanceof Producto ? producto : new Producto(producto);
       return {
         id_producto: instancia.id_producto,

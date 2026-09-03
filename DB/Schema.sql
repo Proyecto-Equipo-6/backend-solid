@@ -210,5 +210,7 @@ CREATE TABLE pedido_detalles (
 -- =============================================================================
 CREATE INDEX idx_productos_busqueda ON productos (estado, id_categoria, precio);
 CREATE INDEX idx_productos_sku ON productos (sku);
+-- RNF-007: permite filtrar por estado y ordenar por id_producto sin filesort
+CREATE INDEX idx_productos_estado_id ON productos (estado, id_producto);
 CREATE INDEX idx_pedidos_usuario ON pedidos (id_usuario, estado);
 CREATE INDEX idx_tokens_expiracion ON tokens_recuperacion (token, expira_en, usado);

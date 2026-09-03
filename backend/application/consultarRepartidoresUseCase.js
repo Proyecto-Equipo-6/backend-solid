@@ -1,3 +1,5 @@
+const { LIMITE_PEDIDOS_DIARIOS_REPARTIDOR } = require('../constants');
+
 class ConsultarRepartidoresUseCase {
   constructor(repartidorRepo, pedidoRepo) {
     this.repartidorRepo = repartidorRepo;
@@ -71,8 +73,9 @@ class ConsultarRepartidoresUseCase {
     return resultado;
   }
 
-  // Deriva el estado operativo real: si la cuenta está activa pero el repartidor
-  // tiene pedidos en curso hoy, el estado es OCUPADO (no INACTIVO).
+  // Deriva el estado operativo real: si la cuenta está activa y el repartidor
+  // alcanzó el límite de pedidos del día, el estado es OCUPADO (bloqueado);
+  // con menos pedidos sigue DISPONIBLE para recibir más asignaciones.
   async derivarEstadoOperativo(repartidores) {
     const derivados = [];
     for (const repartidor of repartidores) {
@@ -81,7 +84,10 @@ class ConsultarRepartidoresUseCase {
         continue;
       }
       const pedidosHoy = await this.contarPedidosDelDia(repartidor.id_usuario);
-      derivados.push({ ...repartidor, estado: pedidosHoy > 0 ? 'OCUPADO' : 'DISPONIBLE' });
+      derivados.push({
+        ...repartidor,
+        estado: pedidosHoy >= LIMITE_PEDIDOS_DIARIOS_REPARTIDOR ? 'OCUPADO' : 'DISPONIBLE',
+      });
     }
     return derivados;
   }

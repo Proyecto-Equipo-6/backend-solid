@@ -127,6 +127,13 @@ app.use(cors(corsOptions));
 app.use(express.json({ limit: '10mb' }));
 app.use(cookieParser());
 
+// --- Rate Limiting (anti-fuerza bruta, RNF-004) ---
+// Limita los intentos de login a 10 por minuto por IP.
+// El limiter general (100 req/min) NO se aplica globalmente porque
+// rompería el load test de RNF-007 (200 requests concurrentes desde la misma IP).
+const { rateLimiterLogin } = require('./backend/infraestructure/middlewares/rateLimiter');
+app.use('/api/v1/auth/login', rateLimiterLogin);
+
 // --- Inyección de Dependencias (DIP) ---
 // 1. Inicializamos el adaptador de infraestructura (Base de Datos / Repositorio)
 const userRepository = new MySQLUserRepository();

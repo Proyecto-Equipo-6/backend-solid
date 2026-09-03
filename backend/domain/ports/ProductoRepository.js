@@ -4,8 +4,12 @@
  * Incluye métodos del catálogo público y del CRUD administrativo.
  */
 class ProductoRepository {
-  async findActivos() {
+  async findActivos(limite = null, offset = 0) {
     throw new Error("Método 'findActivos' no implementado");
+  }
+
+  async contarActivos() {
+    throw new Error("Método 'contarActivos' no implementado");
   }
 
   async findActivosPorCategoria(id_categoria) {

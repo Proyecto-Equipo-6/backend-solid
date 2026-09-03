@@ -1,3 +1,5 @@
+const { LIMITE_PEDIDOS_DIARIOS_REPARTIDOR } = require('../constants');
+
 class AsignarRepartidorUseCase {
   constructor(pedidoRepo, repartidorRepo) {
     this.pedidoRepo = pedidoRepo;
@@ -26,7 +28,7 @@ class AsignarRepartidorUseCase {
     }
 
     const pedidosHoy = await this.pedidoRepo.contarPedidosDelDia(id_usuario_repartidor);
-    if (pedidosHoy >= 3) {
+    if (pedidosHoy >= LIMITE_PEDIDOS_DIARIOS_REPARTIDOR) {
       throw new Error('El repartidor ha alcanzado el límite de pedidos diarios');
     }
 

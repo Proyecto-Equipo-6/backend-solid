@@ -12,7 +12,7 @@ const REGEX_TELEFONO = /^\d{10}$/;
  * Actualiza los datos editables del perfil del usuario autenticado (CU-005).
  * Soporta actualización parcial: solo se modifican los campos presentes en `datos`.
  * La contraseña actual solo se exige al modificar campos sensibles
- * (nombre, correo o teléfono); la dirección se actualiza sin contraseña.
+ * (nombre, correo, teléfono o dirección).
  * El documento de identidad no es modificable (RN-018).
  * El correo debe ser único (RN-016 / RN-017).
  * Nunca expone la contraseña (RN-015).
@@ -71,7 +71,7 @@ class ActualizarPerfilUseCase {
   }
 
   camposSensiblesCambiados(datos, usuario) {
-    return ['nombre_apellido', 'email', 'telefono'].filter((campo) => {
+    return ['nombre_apellido', 'email', 'telefono', 'direccion'].filter((campo) => {
       if (!Object.hasOwn(datos, campo)) return false;
       return String(datos[campo] ?? '').trim() !== String(usuario[campo] ?? '').trim();
     });

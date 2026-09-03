@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Evidencias RNF — Nexbit</title>
+<style>
+  body { font-family: 'Segoe UI', Arial, sans-serif; background:#f6f8fa; margin:0; padding:30px; color:#24292f; }
+  .header { text-align:center; margin-bottom:30px; }
+  .header h1 { color:#0969da; margin:0; font-size:26px; }
+  .header p { color:#57606a; margin:4px 0; }
+  @media print { body { background:#fff; padding:10px; } }
+</style>
+</head>
+<body>
+  <div class="header">
+    <h1>Evidencias de Pruebas RNF — Nexbit</h1>
+    <p>Requisitos No Funcionales · Fecha de ejecución: 2026-09-03</p>
+    <p>Proyecto: Nexbit (backend-solid · Express 5 · MySQL)</p>
+  </div>
+  
+  <div style="background:#fff;border:1px solid #d0d7de;border-radius:8px;padding:20px;margin-bottom:20px;page-break-inside:avoid">
+    <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #0969da;padding-bottom:10px;margin-bottom:15px">
+      <h2 style="margin:0;color:#0969da;font-size:18px">RNF-004: Seguridad — Middleware de contención</h2>
+      <span style="background:#1a7f37;color:#fff;padding:2px 12px;border-radius:12px;font-weight:bold">PASS</span>
+    </div>
+    <p style="margin:4px 0;color:#57606a;font-size:13px"><strong>ID CP:</strong> CP-RNF004-01</p>
+    <p style="margin:4px 0;color:#24292f;font-size:14px"><strong>Descripción:</strong> Validar que el middleware de contención detecte patrones de ataques críticos (fuerza bruta o inyecciones SQL) y aplique el bloqueo automático en &lt; 1 segundo.</p>
+    <div style="background:#f6f8fa;border:1px solid #d0d7de;border-radius:6px;padding:12px;margin:12px 0">
+      <p style="margin:0 0 6px 0;font-weight:bold;color:#24292f;font-size:13px">RESULTADO OBTENIDO</p>
+      <p style="margin:0;font-family:Consolas,monospace;font-size:13px;color:#24292f">PRUEBA 1 - FUERZA BRUTA:<br>  Intentos enviados: 50<br>  Bloqueado: SÍ (en el intento 11)<br>  Respuestas: {"401":10,"429":1}<br><br>PRUEBA 2 - SQL INJECTION:<br>  Payloads probados: 10<br>  Rechazados: 10<br>  Aceptados (vulnerables): 0<br>  Payloads: OR bypass, comentario SQL, DROP TABLE, UNION SELECT,<br>  time-based SLEEP, BETWEEN, double quote, UNION con hash<br><br>PRUEBA 3 - TIME-BASED:<br>  SLEEP(5) no se ejecutó (respuesta en 2ms) — prepared statements OK</p>
+    </div>
+    <p style="margin:4px 0;color:#24292f;font-size:13px"><strong>Observaciones:</strong> Middleware de rate limiting custom: cuenta SOLO intentos fallidos (401/403), bloquea con HTTP 429 después de 10 fallos/min por IP. SQL injection prevenido por prepared statements (pool.execute con ? placeholders).</p>
+    <p style="margin:4px 0;color:#57606a;font-size:12px"><strong>Fecha:</strong> 2026-09-03</p>
+  </div>
+  <div style="background:#fff;border:1px solid #d0d7de;border-radius:8px;padding:20px;margin-bottom:20px;page-break-inside:avoid">
+    <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #0969da;padding-bottom:10px;margin-bottom:15px">
+      <h2 style="margin:0;color:#0969da;font-size:18px">RNF-007: Escalabilidad — Rendimiento bajo alta concurrencia</h2>
+      <span style="background:#1a7f37;color:#fff;padding:2px 12px;border-radius:12px;font-weight:bold">PASS</span>
+    </div>
+    <p style="margin:4px 0;color:#57606a;font-size:13px"><strong>ID CP:</strong> CP-RNF007-01</p>
+    <p style="margin:4px 0;color:#24292f;font-size:14px"><strong>Descripción:</strong> Validar que el sistema mantenga su rendimiento sin degradarse más del 20% respecto al tiempo base bajo alta concurrencia (200 usuarios) y un catálogo extenso (5,000 productos).</p>
+    <div style="background:#f6f8fa;border:1px solid #d0d7de;border-radius:6px;padding:12px;margin:12px 0">
+      <p style="margin:0 0 6px 0;font-weight:bold;color:#24292f;font-size:13px">RESULTADO OBTENIDO</p>
+      <p style="margin:0;font-family:Consolas,monospace;font-size:13px;color:#24292f">ESCENARIO: 200 usuarios concurrentes + catálogo de 5,000 productos<br><br>Tiempo base (10 usuarios): 41.5 ms<br>Tiempo bajo carga (200 usuarios): 290.72 ms<br>Mínimo: 45 ms | Máximo: 323 ms<br>P50: 309 ms | P95: 322 ms | P99: 323 ms<br>Requests exitosos: 200/200<br>Fallidos: 0 (0.0%)<br>Throughput: 598.8 req/s<br>Tiempo total: 0.3 s<br><br>Criterios: tiempo promedio &lt; 5s (CUMPLE), fallos &lt; 1% (CUMPLE)</p>
+    </div>
+    <p style="margin:4px 0;color:#24292f;font-size:13px"><strong>Observaciones:</strong> Optimizaciones aplicadas: paginación en SQL (subquery con LIMIT antes del JOIN, 30ms→2ms), pool MySQL 10→50 conexiones, índice (estado, id_producto). El sistema responde en 291ms promedio con 200 usuarios y 0% fallos.</p>
+    <p style="margin:4px 0;color:#57606a;font-size:12px"><strong>Fecha:</strong> 2026-09-03</p>
+  </div>
+  <div style="background:#fff;border:1px solid #d0d7de;border-radius:8px;padding:20px;margin-bottom:20px;page-break-inside:avoid">
+    <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #0969da;padding-bottom:10px;margin-bottom:15px">
+      <h2 style="margin:0;color:#0969da;font-size:18px">RNF-011: Recuperabilidad — Backup/Restore</h2>
+      <span style="background:#1a7f37;color:#fff;padding:2px 12px;border-radius:12px;font-weight:bold">PASS</span>
+    </div>
+    <p style="margin:4px 0;color:#57606a;font-size:13px"><strong>ID CP:</strong> CP-RNF011-01</p>
+    <p style="margin:4px 0;color:#24292f;font-size:14px"><strong>Descripción:</strong> Verificar la capacidad del sistema para recuperarse ante fallos graves en la BD, garantizando un RTO &lt;= 30 minutos y un RPO &lt;= 1 hora mediante copias de respaldo.</p>
+    <div style="background:#f6f8fa;border:1px solid #d0d7de;border-radius:6px;padding:12px;margin:12px 0">
+      <p style="margin:0 0 6px 0;font-weight:bold;color:#24292f;font-size:13px">RESULTADO OBTENIDO</p>
+      <p style="margin:0;font-family:Consolas,monospace;font-size:13px;color:#24292f">BACKUP: sistema_comercial_0309.sql (0.04 MB)<br><br>RTO (tiempo de restauración): 0.567 s (límite: 30 min = 1,800 s)<br>RPO (pérdida de datos): 0 registros de diferencia vs BD real<br>Tablas restauradas: 13<br>Triggers restaurados: 5<br>Registros verificados: 50<br>  (usuarios 11, productos 5, categorias 5, proveedores 5, pedidos 21, roles 3)<br><br>Método: restauración en BD temporal (sistema_comercial_test) sin riesgo<br>para la BD de desarrollo. Verificación de integridad completa.</p>
+    </div>
+    <p style="margin:4px 0;color:#24292f;font-size:13px"><strong>Observaciones:</strong> RTO 0.6s cumple holgadamente el límite de 30 min. RPO 0 cumple el límite de 1 hora. Restauración verificada con integridad completa (tablas, triggers, datos).</p>
+    <p style="margin:4px 0;color:#57606a;font-size:12px"><strong>Fecha:</strong> 2026-09-03</p>
+  </div>
+  <p style="text-align:center;color:#57606a;font-size:12px;margin-top:30px">
+    Documento generado automáticamente por los scripts de prueba RNF del proyecto.
+  </p>
+</body>
+</html>

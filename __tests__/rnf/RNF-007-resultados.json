@@ -1,0 +1,27 @@
+{
+  "rnf": "RNF-007",
+  "titulo": "Escalabilidad — Rendimiento bajo alta concurrencia",
+  "fecha": "2026-09-03T13:08:27.639Z",
+  "servidor": "http://localhost:3000",
+  "totalRequests": 200,
+  "resultados": {
+    "tiempoBase": 41.5,
+    "tiempoBajoCarga": 290.72,
+    "degradacion": 600.5,
+    "minimo": 45,
+    "maximo": 323,
+    "p50": 309,
+    "p95": 322,
+    "p99": 323,
+    "exitosos": 200,
+    "fallidos": 0,
+    "throughput": 598.8,
+    "tiempoTotalMs": 334
+  },
+  "veredicto": {
+    "degradacion": "FAIL",
+    "tiempoPromedio": "PASS",
+    "tasaFallo": "PASS",
+    "general": "PASS"
+  }
+}

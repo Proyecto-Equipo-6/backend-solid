@@ -190,13 +190,22 @@ describe('CU-005 Editar perfil (ActualizarPerfilUseCase)', () => {
     expect(resultado.perfil.email).toBe('ana@example.com');
   });
 
-  it('actualiza solo la dirección sin exigir contraseña actual', async () => {
+  it('exige la contraseña actual para actualizar la dirección', async () => {
     // Arrange
     const datos = { direccion: 'Calle 80 # 45-10, Envigado' };
 
-    // Act
+    // Act & Assert: sin contraseña se rechaza
+    await expect(
+      casoUso.execute({ id_usuario: 1, datos })
+    ).rejects.toMatchObject({ status: 401 });
+    await expect(
+      casoUso.execute({ id_usuario: 1, datos })
+    ).rejects.toThrow('La contraseña actual es obligatoria');
+
+    // Con contraseña sí se actualiza
     const resultado = await casoUso.execute({
       id_usuario: 1,
+      password: 'Abcd1234',
       datos,
     });
 

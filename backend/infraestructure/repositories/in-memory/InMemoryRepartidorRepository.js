@@ -68,7 +68,7 @@ class InMemoryRepartidorRepository extends RepartidorRepository {
 
   async estaDisponible(idRepartidor) {
     const repartidor = await this.buscarPorId(idRepartidor);
-    return repartidor ? repartidor.estado === 'DISPONIBLE' : false;
+    return repartidor ? repartidor.estado !== 'INACTIVO' : false;
   }
 
   async marcarOcupado(idRepartidor) {
