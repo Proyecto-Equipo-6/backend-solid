@@ -32,6 +32,7 @@ class User {
       typeof this.password === 'string' &&
       this.password.length >= 8 &&
       /[A-Z]/.test(this.password) &&
+      /[a-z]/.test(this.password) &&
       /[0-9]/.test(this.password);
 
     return Boolean(
