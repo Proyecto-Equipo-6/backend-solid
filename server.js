@@ -114,10 +114,20 @@ const createUsuarioAdminRouter = require('./backend/infraestructure/routes/usuar
 
 const app = express();
 app.disable('x-powered-by');
+
+// Orígenes permitidos en desarrollo local (Expo web :8081, frontend :5173).
+// Siempre se aceptan aunque CORS_ORIGIN esté restringido en producción.
+const ORIGENES_LOCALES = ['http://localhost:8081', 'http://localhost:5173', 'http://127.0.0.1:8081', 'http://127.0.0.1:5173'];
+
+function origenPermitido(origen) {
+  if (!origen) return true;
+  if (ORIGENES_LOCALES.includes(origen)) return true;
+  if (!process.env.CORS_ORIGIN) return true;
+  return process.env.CORS_ORIGIN.split(',').includes(origen);
+}
+
 const corsOptions = {
-  // En desarrollo (sin CORS_ORIGIN en .env) refleja el origen dinámicamente.
-  // En producción usará el dominio exacto guardado en process.env.CORS_ORIGIN.
-  origin: process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : true,
+  origin: (origen, callback) => callback(null, origenPermitido(origen)),
   credentials: true,
   allowedHeaders: ['Content-Type', 'Authorization'],
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
