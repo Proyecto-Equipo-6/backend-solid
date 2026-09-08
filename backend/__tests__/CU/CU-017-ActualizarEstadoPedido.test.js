@@ -49,4 +49,15 @@ describe('ActualizarEstadoPedidoUseCase', () => {
     });
     expect(pedidoActualizado.estado).toBe('NO_ENTREGADO');
   });
+
+  test('Rechaza iniciar otra entrega si ya hay un pedido EN_CAMINO', async () => {
+    const repo = new InMemoryPedidoRepartidorRepository([
+      crearPedido({ id_pedido: 1, id_repartidor: 10, estado: 'EN_CAMINO' }),
+      crearPedido({ id_pedido: 2, id_repartidor: 10, estado: 'ASIGNADO' })
+    ]);
+    const useCase = new ActualizarEstadoPedidoUseCase(repo);
+    await expect(
+      useCase.ejecutar(2, 'EN_CAMINO', 'ASIGNADO')
+    ).rejects.toThrow('Tienes otro pedido pendiente. Finalízalo para poder iniciar otra entrega.');
+  });
 });

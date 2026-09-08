@@ -202,8 +202,8 @@ class MySQLProductoRepository extends ProductoRepository {
     const cantidad_anterior = producto.stock;
 
     await pool.execute(
-      'UPDATE productos SET stock = ? WHERE id_producto = ?',
-      [cantidad_nueva, id_producto]
+      'UPDATE productos SET stock = ?, estado = IF(? = 0, 0, estado) WHERE id_producto = ?',
+      [cantidad_nueva, cantidad_nueva, id_producto]
     );
 
     await pool.execute(

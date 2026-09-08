@@ -23,6 +23,13 @@ class ActualizarEstadoPedidoUseCase {
       this.validarObservacion(datosAdicionales.observacion);
     }
 
+    if (nuevoEstado === 'EN_CAMINO') {
+      const enCurso = await this.pedidoRepo.contarPedidosEnCamino(pedido.id_repartidor);
+      if (enCurso > 0) {
+        throw new Error('Tienes otro pedido pendiente. Finalízalo para poder iniciar otra entrega.');
+      }
+    }
+
     return await this.pedidoRepo.actualizarEstado(
       pedidoId,
       nuevoEstado,

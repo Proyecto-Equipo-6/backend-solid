@@ -29,10 +29,13 @@ class MySQLPedidoRepository extends PedidoRepository {
           [idPedido, item.idProducto, item.cantidad, item.precio, subtotal]
         );
 
-        // 3. Descontar stock (RN-041)
+        // 3. Descontar stock (RN-041); si llega a 0 el producto pasa a inactivo
         await conexion.execute(
-          'UPDATE productos SET stock = stock - ? WHERE id_producto = ? AND stock >= ?',
-          [item.cantidad, item.idProducto, item.cantidad]
+          `UPDATE productos
+           SET stock = stock - ?,
+               estado = IF(stock - ? <= 0, 0, estado)
+           WHERE id_producto = ? AND stock >= ?`,
+          [item.cantidad, item.cantidad, item.idProducto, item.cantidad]
         );
       }
 

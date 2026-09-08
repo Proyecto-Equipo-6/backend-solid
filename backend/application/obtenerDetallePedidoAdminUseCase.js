@@ -24,6 +24,7 @@ class ObtenerDetallePedidoAdminUseCase {
       comprobante_url: pedido.comprobante_url,
       productos: detalles.map(d => ({
         id_producto: d.id_producto,
+        nombre: d.producto_nombre || `Producto #${d.id_producto}`,
         cantidad: d.cantidad,
         precio_unitario: d.precio_unitario,
         subtotal: d.subtotal
